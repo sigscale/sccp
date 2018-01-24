@@ -1,0 +1,23 @@
+# sccp
+
+## Prerequisites
+	Install erlang(>17)
+	$ sudo apt install erlang
+
+## Building
+	$ mkdir ../sccp.build       (create build directory)
+	$ cd ../sccp.build          (change working directory for build)
+	$ ../sccp/configure         (creates Makefiles)
+	$ make                      (builds entire package)
+	$ make check                (run dialyzer and common_test)
+
+## Installing
+	$ sudo make install         (installs embedded application in system)
+
+## Cleaning
+	$ make clean                (removes files created with make)
+	$ make distclean            (removes files created with configure also)
+
+## Options
+	$ ../sccp/configure --enable-debug
+
