@@ -38,26 +38,26 @@
 -define(LongUnitDataService,       20).
 
 %% SCCP parameters - ITU-T Recommendation Q.713, section 3
--define(ENDOFOPTIONALPARAMETERS,    0).
--define(DESTINATIONLOCALREFERENCE,  1).
--define(SOURCELOCALREFERENCE,       2).
--define(CALLEDPARTYADDRESS,         3).
--define(CALLINGPARTYADDRESS,        4).
--define(PROTOCOLCLASS,              5).
--define(SEGMENTING,                 6).
--define(RECEIVESEQUENCENUMBER,      7).
--define(SEQUENCING,                 8).
--define(CREDIT,                     9).
--define(RELEASECAUSE,              10).
--define(RETURNCAUSE,               11).
--define(RESETCAUSE,                12).
--define(ERRORCAUSE,                13).
--define(REFUSALCAUSE,              14).
+-define(EndOfOptionalParameters,    0).
+-define(DestinationLocalRef,        1).
+-define(SourceLocalRef,             2).
+-define(CalledPartyAddress,         3).
+-define(CallingPartyAddress,        4).
+-define(ProtocolClass,              5).
+-define(Segmenting,                 6).
+-define(ReceiveSequenceNum,         7).
+-define(Sequencing,                 8).
+-define(Credit,                     9).
+-define(ReleaseCause,              10).
+-define(ReturnCause,               11).
+-define(ResetCause,                12).
+-define(ErrorCause,                13).
+-define(RefusalCause,              14).
 -define(DATA,                      15).
--define(SEGMENTATION,              16).
--define(HOPCOUNTER,                17).
--define(IMPORTANCE,                18).
--define(LONGDATA,                  19).
+-define(Segmentation,              16).
+-define(HopCounter,                17).
+-define(Importance,                18).
+-define(LongData,                  19).
 
 %% SCCP Parameters - ITU-T Recommendation Q.713, section 3.4, section 3.5
 -record(party_address,
