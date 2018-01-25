@@ -183,12 +183,12 @@
 
 -record(sccp_reset_confirmation,
 		{type = ?ResetConfirmation,
-		 dest_local_ref :: pos_integer(),
+		dest_local_ref :: pos_integer(),
 		src_local_ref :: pos_integer()}).
 
 -record(sccp_protocol_data_unit_error,
 		{type = ?ProtocolDataUnitError,
-		 dest_local_ref :: pos_integer(),
+		dest_local_ref :: pos_integer(),
 		error_cause}).
 		
 -record(sccp_inactivity_test,
@@ -224,7 +224,7 @@
 
 -record(sccp_long_unitdata,
 		{type = ?LongUnitData,
-		 class :: pos_integer(),
+		class :: pos_integer(),
 		hop_counter :: pos_integer(),
 		called_party :: #party_address{},
 		calling_party :: #party_address{},
