@@ -8,7 +8,7 @@
 AC_INIT([sccp], [0.1], [issues@sigscale.org])
 AC_COPYRIGHT([Copyright (c) 2018 SigScale Global Inc.])
 AC_PREREQ(2.63)
-AC_CONFIG_SRCDIR([src/sccp.erl])
+AC_CONFIG_SRCDIR([src/sccp_codec.erl])
 AC_CONFIG_HEADERS([config.h])
 AC_LANG([Erlang])
 AM_INIT_AUTOMAKE([-Wno-portability])

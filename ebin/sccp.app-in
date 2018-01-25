@@ -1,7 +1,8 @@
 {application, %APP_NAME%,
 	[{description, "SigScale Signalling Connection Control Part (SCCP)"},
 		{vsn, "%APP_VERSION%"},
-		{modules, [sccp]},
+		{modules,
+				[sccp_codec]},
 		{registered, []},
 		{applications, []},
 		{env, []}]}.
