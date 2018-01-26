@@ -489,7 +489,7 @@ encoding_scheme(spare) -> 16.
 routing_indicator(0) -> false;
 routing_indicator(1) -> true;
 routing_indicator(false) -> 0;
-routing_indicator(true) -> true.
+routing_indicator(true) -> 1.
 
 -spec get_option(K, Options) -> V
 	when
