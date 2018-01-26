@@ -314,7 +314,7 @@ party_address(#party_address{ri  = R, pc = P, ssn = S, gt = undefined}) ->
 	RI = routing_indicator(R),
 	PC = point_code(P),
 	SSN = ssn(S),
-	<<0:0, RI:1, 0:4, 1:1, 1:1, PC/binary, SSN/binary>>;
+	<<0:1, RI:1, 0:4, 1:1, 1:1, PC/binary, SSN/binary>>;
 party_address(#party_address{ri  = R, pc = P, ssn = S, nai = N , gt = G})
 		when N /= undefined, G /= undefined ->
 	RI = routing_indicator(R),
@@ -323,7 +323,7 @@ party_address(#party_address{ri  = R, pc = P, ssn = S, nai = N , gt = G})
 	NAI = nai(N),
 	OE = length(G) rem 2,
 	BCD = bcd(G),
-	<<0:0, RI:1, 0:4, 1:1, 1:1, PC/binary, SSN/binary, OE:1, NAI/integer, BCD/binary>>;
+	<<0:1, RI:1, 0:4, 1:1, 1:1, PC/binary, SSN/binary, OE:1, NAI/integer, BCD/binary>>;
 party_address(#party_address{ri  = R, pc = P, ssn = S, translation_type = T,  gt = G})
 		when T /= undefined, G /= undefined ->
 	RI = routing_indicator(R),
@@ -331,7 +331,7 @@ party_address(#party_address{ri  = R, pc = P, ssn = S, translation_type = T,  gt
 	SSN = ssn(S),
 	TT = tt(T),
 	BCD = bcd(G),
-	<<0:0, RI:1, 0:4, 1:1, 1:1, PC/binary, SSN/binary, TT:8, BCD/binary>>;
+	<<0:1, RI:1, 0:4, 1:1, 1:1, PC/binary, SSN/binary, TT:8, BCD/binary>>;
 party_address(#party_address{ri  = R, pc = P, ssn = S, translation_type = T,
 		numbering_plan = NP, encoding_scheme = E, gt = G}) when T /= undefined, NP /= undefined,
 		E /= undefined, G /= undefined ->
@@ -342,7 +342,7 @@ party_address(#party_address{ri  = R, pc = P, ssn = S, translation_type = T,
 	NPlan = numbering_plan(NP),
 	ES = encoding_scheme(E),
 	BCD = bcd(G),
-	<<0:0, RI:1, 0:4, 1:1, 1:1, PC/binary, SSN/binary, TT:8, NPlan:4, ES:4, BCD/binary>>;
+	<<0:1, RI:1, 0:4, 1:1, 1:1, PC/binary, SSN/binary, TT:8, NPlan:4, ES:4, BCD/binary>>;
 party_address(#party_address{ri  = R, pc = P, ssn = S, translation_type = T,
 		numbering_plan = NP, encoding_scheme = E, nai = N, gt = G}) when T /= undefined,
 		NP /= undefined, E /= undefined, G /= undefined, N /= undefined ->
@@ -354,7 +354,7 @@ party_address(#party_address{ri  = R, pc = P, ssn = S, translation_type = T,
 	ES = encoding_scheme(E),
 	NAI = nai(N),
 	BCD = bcd(G),
-	<<0:0, RI:1, 0:4, 1:1, 1:1, PC/binary, SSN/binary, TT:8, NPlan:4, ES:4, 0:0,
+	<<0:1, RI:1, 0:4, 1:1, 1:1, PC/binary, SSN/binary, TT:8, NPlan:4, ES:4, 0:0,
 			NAI:7, BCD/binary>>;
 party_address(undefined) ->
 	<<>>.
