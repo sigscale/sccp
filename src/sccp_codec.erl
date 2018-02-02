@@ -411,7 +411,7 @@ nai(0) -> unknown;
 nai(1) -> subscriber;
 nai(2) -> reserved;
 nai(3) -> national;
-nai(6) -> international;
+nai(4) -> international;
 nai(127) -> reserved;
 nai(unknown) -> 0;
 nai(subscriber) -> 1;
