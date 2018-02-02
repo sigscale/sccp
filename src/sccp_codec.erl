@@ -29,7 +29,7 @@
 %% SCCP options codec funcion
 -export([party_address/1, nai/1, tt/1, numbering_plan/1, encoding_scheme/1,
 		routing_indicator/1, importance/1, refusal_cause/1, release_cause/1,
-		segmenting/1, return_cause/1, segmentation/1, point_code/1]).
+		segmenting/1, return_cause/1, segmentation/1, point_code/1, bcd/1]).
 %% functions to deal with SCCP optional part
 -export([optional_part/1, get_option/2, set_option/2]).
 
@@ -722,14 +722,17 @@ bcd(Address) when is_list(Address) ->
 	bcd2(Address, <<>>).
 
 %% @hidden
-bcd1(<<A/integer, Rest/binary>>, Acc) when is_list(Acc) ->
-	bcd1(Rest, [A | Acc]);
+bcd1(<<X:4/integer, Y:4/integer, Rest/binary>>, Acc) when is_list(Acc) ->
+	bcd1(Rest, [X, Y | Acc]);
+bcd1(<<0:4/integer, Y:4/integer, Rest/binary>>, Acc) when is_list(Acc) ->
+	bcd1(Rest, [Y | Acc]);
 bcd1(<<>>, Acc) ->
-	Acc.
+	lists:reverse(Acc).
 
 %% @hidden
-bcd2([I | Rest], Acc) when is_binary(Acc) ->
-	bcd2(Rest, <<I/integer, Acc/binary>>);
+bcd2([X | [Y | Rest]], Acc) when is_binary(Acc) ->
+	I = <<Y:4/integer, X:4/integer>>,
+	bcd2(Rest, <<Acc/binary, I/binary>>);
 bcd2([], Acc) ->
 	Acc.
 
