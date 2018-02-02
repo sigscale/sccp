@@ -394,11 +394,11 @@ party_address2(<<_:1, RI:1, 4:4, _:2, _PC, _SSN, TT, NPlan:4, Enc:4, 0:1, NAI:7,
 		GT/binary>> = _B, P) -> % Translation type, numbering plan and encoding scheme, NAI
 	R = routing_indicator(RI),
 	T = tt(TT),
-	N = numbering_plan(NPlan),
+	NP = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
 	N = nai(NAI),
 	G = bcd(GT),
-	P#party_address{ri = R, translation_type = T, numbering_plan = N,
+	P#party_address{ri = R, translation_type = T, numbering_plan = NP,
 			encoding_scheme = E, nai = N, gt = G}.
 
 -spec nai(N1) -> N2
