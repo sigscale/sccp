@@ -361,7 +361,7 @@ party_address(undefined) ->
 
 %% @hidden
 %% @doc Evaluate SSN indicator
-party_address1(<<_:6, 1:1, _:1, SSN, _Rest/binary>> = B, #party_address{pc = undefined} = P) ->
+party_address1(<<_:6, 1:1, _:1, SSN, _Rest/binary>> = B, P) ->
 	party_address2(B, P#party_address{ssn = SSN});
 party_address1(<<_:6, 0:1, _:1, _Rest/binary>> = B, P) ->
 	party_address2(B, P).
