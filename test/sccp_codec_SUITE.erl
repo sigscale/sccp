@@ -112,8 +112,12 @@ translation_type(_Config) ->
 		(F, N) ->
 			TT = sccp_codec:tt(N),
 			true = is_atom(TT),
-			N = sccp_codec:tt(TT),
-			F(F, N+1)
+			case sccp_codec:tt(TT) of
+				M when TT == network_specific andalso ((N >= 2 andalso N =< 254)) ->
+					F(F, N+1);
+				N ->
+					F(F, N+1)
+			end
 	end,
 	ok = F(F, 0).
 

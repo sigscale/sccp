@@ -431,12 +431,13 @@ nai(reserved) -> 127.
 %% ITU-T Recommendation Q.713, section 3.4.2.3.2
 tt(0) -> not_used;
 tt(1) -> internetwork;
-tt(254) -> network_specific;
-tt(255) -> national;
+tt(N) when (is_integer(N)) andalso
+		(N >= 2 andalso N =< 254) -> network_specific;
+tt(255) -> reserved;
 tt(not_used) -> 0;
 tt(internetwork) -> 1;
-tt(network_specific) -> 254;
-tt(national) -> 255.
+tt(network_specific) -> 2;
+tt(reserved) -> 255.
 
 -spec numbering_plan(P) -> P
 	when
