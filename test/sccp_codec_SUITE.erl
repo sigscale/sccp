@@ -189,11 +189,17 @@ return_cause() ->
 return_cause(_Config) ->
 	F = fun(F, 256) ->
 				ok;
-		(F, N) ->
+		(F, N)  ->
 			RC = sccp_codec:return_cause(N),
 			true = is_atom(RC),
-			N = sccp_codec:return_cause(RC),
-			F(F, N+1)
+			case sccp_codec:return_cause(RC) of
+				M when RC == no_translation andalso (M == 0 orelse M == 1) ->
+					F(F, N+1);
+				M  when RC == reserved andalso (M >= 15 andalso M =< 255) ->
+					F(F, N+1);
+				N ->
+					F(F, N+1)
+			end
 	end,
 	ok = F(F, 0).
 

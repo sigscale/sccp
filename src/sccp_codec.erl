@@ -646,8 +646,7 @@ segmenting(true) -> 1.
 		C :: integer() | atom().
 %% @doc Values for return cause as defined in
 %% ITU-T Recommendation Q.713, section 3.12
-return_cause(0) -> no_translation;
-return_cause(1) -> no_translation;
+return_cause(N) when N == 0; N == 1 -> no_translation;
 return_cause(2) -> subsystem_congestion;
 return_cause(3) -> subsystem_failure;
 return_cause(4) -> unequipped_error;
@@ -661,7 +660,7 @@ return_cause(11) -> sccp_failure;
 return_cause(12) -> hcounter_violation;
 return_cause(13) -> seg_not_supported;
 return_cause(14) -> seg_failure;
-return_cause(C) when is_integer(C), C > 15 -> reserved;
+return_cause(C) when is_integer(C), C >= 15, C =< 255 -> reserved;
 return_cause(no_translation) -> 0;
 return_cause(subsystem_congestion) -> 2;
 return_cause(subsystem_failure) -> 3;
