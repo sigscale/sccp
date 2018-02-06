@@ -403,7 +403,7 @@ party_address2(<<_:1, RI:1, 4:4, _:2, _PC, _SSN, TT, NPlan:4, Enc:4, 0:1, NAI:7,
 
 -spec nai(N) -> N
 	when
-		N1 :: integer() | atom().
+		N :: integer() | atom().
 %% @doc Values for network address indicator as defined in
 %% ITU-T Recommendation Q.713, section 3.4.2.3.1  
 nai(0) -> unknown;
