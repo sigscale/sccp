@@ -75,12 +75,26 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[importance, refusal_cause, release_cause, return_cause, segmentation,
-		 point_code, ssn, bcd].
+	[encoding_scheme, importance, refusal_cause, release_cause, return_cause,
+		segmentation, point_code, ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+encoding_scheme() ->
+	[{userdata, [{doc, "encode and decode encoding_scheme parameter"}]}].
+
+encoding_scheme(_Config) ->
+	F = fun(_, 16) ->
+				ok;
+		(F, N) ->
+			Scheme = sccp_codec:encoding_scheme(N),
+			true = is_atom(Scheme),
+			N = sccp_codec:encoding_scheme(Scheme),
+			F(F, N+1)
+	end,
+	ok = F(F, 0).
 
 importance() ->
 	[{userdata, [{doc, "encode and decode importance parameter"}]}].
