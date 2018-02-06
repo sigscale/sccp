@@ -75,11 +75,26 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[ssn, bcd].
+	[point_code, ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+point_code() ->
+	[{userdata, [{doc, "encode and decode signalling point code"}]}].
+
+point_code(_Config) ->
+	F = fun(_, 256) ->
+				ok;
+		(F, N) ->
+			PC = sccp_codec:point_code(N),
+			2 = size(PC),
+			true = is_binary(PC),
+			N = sccp_codec:point_code(PC),
+			F(F, N+1)
+	end,
+	ok = F(F, 0).
 
 ssn() ->
 	[{userdata, [{doc, "encode and decode sub system number"}]}].
