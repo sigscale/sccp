@@ -75,12 +75,27 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[translation_type, numbering_plan, encoding_scheme, importance, refusal_cause,
-		release_cause, return_cause, segmentation, point_code, ssn, bcd].
+	[nai, translation_type, numbering_plan, encoding_scheme, importance,
+		refusal_cause, release_cause, return_cause, segmentation, point_code,
+		ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+nai() ->
+	[{userdata, [{doc, "encode and decode network address indicator"}]}].
+
+nai(_Config) ->
+	F = fun(_, 256) ->
+				ok;
+		(F, N) ->
+			NAI = sccp_codec:nai(N),
+			true = is_atom(NAI),
+			N = sccp_codec:nai(NAI),
+			F(F, N+1)
+	end,
+	ok = F(F, 0).
 
 translation_type() ->
 	[{userdata, [{doc, "encode and decode translation type"}]}].
