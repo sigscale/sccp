@@ -471,14 +471,15 @@ encoding_scheme(0) -> unknown;
 encoding_scheme(1) -> bcd_odd;
 encoding_scheme(2) -> bcd_even;
 encoding_scheme(3) -> national;
+encoding_scheme(N) when (is_integer(N)) andalso
+		(N >=4 andalso N =< 14 ) -> spare;
 encoding_scheme(15) -> reserved;
-encoding_scheme(N) when is_integer(N) -> spare;
 encoding_scheme(unknown) -> 0;
 encoding_scheme(bcd_odd) -> 1;
 encoding_scheme(bcd_even) -> 2;
 encoding_scheme(national) -> 3; 
 encoding_scheme(reserved) -> 15;
-encoding_scheme(spare) -> 16.
+encoding_scheme(_) -> 14.
 
 -spec routing_indicator(R) -> R
 	when
