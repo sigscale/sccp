@@ -105,7 +105,7 @@ release_cause(_Config) ->
 			RC = sccp_codec:release_cause(N),
 			true = is_atom(N),
 			N = sccp_codec:release_cause(RC),
-			F(F, N+1)1
+			F(F, N+1)
 	end,
 	ok = F(F, 0).
 
