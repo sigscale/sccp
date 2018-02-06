@@ -715,7 +715,10 @@ ssn(undefined) ->
 ssn(N) when is_integer(N) ->
 	<<N:8>>.
 
-%% @hidden
+-spec bcd(N) -> N
+	when
+		N :: binary() | [integer()].
+%% @doc Encode/decode binary coded decimal values
 bcd(Address) when is_binary(Address) ->
 	bcd1(Address, []);
 bcd(Address) when is_list(Address) ->
