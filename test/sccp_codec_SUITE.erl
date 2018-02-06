@@ -75,11 +75,25 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[return_cause, segmentation, point_code, ssn, bcd].
+	[release_cause, return_cause, segmentation, point_code, ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+release_cause() ->
+	[{userdata, [{doc, "encode and decode release cause parameter"}]}].
+
+release_cause(_Config) ->
+	F = fun(F, 256) ->
+				ok;
+		(F, N) ->
+			RC = sccp_codec:release_code(N),
+			true = is_atom(N),
+			N = sccp_codec:release_code(RC),
+			F(F, N+1)
+	end,
+	ok = F(F, 0).
 
 return_cause() ->
 	[{userdata, [{doc, "encode and decode return_cause parameter"}]}].
