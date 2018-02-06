@@ -408,17 +408,21 @@ party_address2(<<_:1, RI:1, 4:4, _:2, _PC, _SSN, TT, NPlan:4, Enc:4, 0:1, NAI:7,
 %% ITU-T Recommendation Q.713, section 3.4.2.3.1  
 nai(0) -> unknown;
 nai(1) -> subscriber;
-nai(2) -> reserved;
+nai(2) -> reserved_for_national;
 nai(3) -> national;
 nai(4) -> international;
+nai(N) when (is_integer(N))
+		andalso (N >= 5 andalso N =< 111) -> spare;
+nai(N) when (is_integer(N))
+		andalso (N >= 112 andalso N =< 126) -> reserved_for_national;
 nai(127) -> reserved;
 nai(unknown) -> 0;
 nai(subscriber) -> 1;
-nai(reserved) -> 2;
+nai(reserved_for_national) -> 2;
 nai(national) -> 3; 
-nai(international) -> 6;
-nai(spare) -> 127;
-nai(N) when is_integer(N) -> spare.
+nai(international) -> 4;
+nai(spare) -> 5;
+nai(reserved) -> 127.
 
 -spec tt(T) -> T
 	when

@@ -87,13 +87,19 @@ nai() ->
 	[{userdata, [{doc, "encode and decode network address indicator"}]}].
 
 nai(_Config) ->
-	F = fun(_, 256) ->
+	F = fun(_, 128) ->
 				ok;
 		(F, N) ->
 			NAI = sccp_codec:nai(N),
 			true = is_atom(NAI),
-			N = sccp_codec:nai(NAI),
-			F(F, N+1)
+			case sccp_codec:nai(NAI) of
+				M when NAI == spare andalso (N >= 5 andalso N =< 111) ->
+					F(F, N+1);
+				M when NAI == reserved_for_national  andalso (N >= 112 andalso N =< 126) ->
+					F(F, N+1);
+				N ->
+					F(F, N+1)
+			end
 	end,
 	ok = F(F, 0).
 
