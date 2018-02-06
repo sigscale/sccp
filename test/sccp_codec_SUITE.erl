@@ -75,11 +75,28 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd].
+	[importance, refusal_cause, release_cause, return_cause, segmentation,
+		 point_code, ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+importance() ->
+	[{userdata, [{doc, "encode and decode sub system number"}]}].
+
+importance(_Config) ->
+	F = fun(_, 8) ->
+				ok;
+		(F, N) ->
+			Importance = sccp_codec:importance(N),
+			1 = size(Importance),
+			true = is_binary(Importance),
+			<<_:5, N:3/integer>> = Importance,
+			F(F, N+1)
+	end,
+	ok = F(F, 0).
+
 
 refusal_cause() ->
 	[{userdata, [{doc, "encode and decode refusal cause parameter"}]}].
