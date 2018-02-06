@@ -549,7 +549,7 @@ importance(I) when I >= 0; I =< 7 ->
 	when
 		C :: integer() | atom().
 %% @doc Values for refusal cause  as defined in
-%% ITU-T Recommendation Q.713, section 3.19
+%% ITU-T Recommendation Q.713, section 3.15
 refusal_cause(0) -> enduser_orig;
 refusal_cause(1) -> enduser_congestion;
 refusal_cause(2) -> enduser_failure;
