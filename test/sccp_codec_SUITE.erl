@@ -75,11 +75,28 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[point_code, ssn, bcd].
+	[segmentation, point_code, ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+segmentation() ->
+	[{userdata, [{doc, "encode and decode segmentation parameter"}]}].
+
+segmentation(_Config) ->
+	First = case rand:uniform(2) of
+		2 ->
+			true;
+		1 ->
+			false
+	end,
+	C = rand:uniform(2) - 1,
+	RemSeg = rand:uniform(16) - 1,
+	S1 = #segmentation{first = First, class = C, remaning_seg = RemSeg},
+	S2 = sccp_codec:segmentation(S1),
+	true = is_binary(S2),
+	S2 = sccp_codec:segmentation(S1).
 
 point_code() ->
 	[{userdata, [{doc, "encode and decode signalling point code"}]}].
