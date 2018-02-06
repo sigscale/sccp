@@ -597,27 +597,28 @@ refusal_cause(_) -> 255.
 		C :: integer() | atom().
 %% @doc Values for release cause  as defined in
 %% ITU-T Recommendation Q.713, section 3.11
-release_cause(1) -> enduser_orig;
-release_cause(2) -> enduser_congestion;
-release_cause(3) -> enduser_failure;
-release_cause(4) -> sccp_failure;
-release_cause(5) -> rpc_error;
-release_cause(6) -> inconsistant_data;
-release_cause(7) -> access_failure;
-release_cause(8) -> access_congestion;
-release_cause(9) -> subsystem_failure;
-release_cause(10) -> subsystem_congestion;
-release_cause(11) -> mtp_failure;
-release_cause(12) -> network_congestion;
-release_cause(13) -> timer_expire;
-release_cause(14) -> reserved;
+release_cause(0) -> enduser_orig;
+release_cause(1) -> enduser_congestion;
+release_cause(2) -> enduser_failure;
+release_cause(3) -> sccp_user_originated;
+release_cause(4) -> rpc_error;
+release_cause(5) -> inconsistant_data;
+release_cause(6) -> access_failure;
+release_cause(7) -> access_congestion;
+release_cause(8) -> subsystem_failure;
+release_cause(9) -> subsystem_congestion;
+release_cause(10) -> mtp_failure;
+release_cause(11) -> network_congestion;
+release_cause(12) -> reset_timer_expire;
+release_cause(13) -> inactivity_timer_expire;
+release_cause(C) when (is_integer(C)) andalso
+		(C == 14 orelse (C > 16 andalso C =< 255)) -> reserved;
 release_cause(15) -> unqualified;
 release_cause(16) -> sccp_failure;
-release_cause(C) when is_integer(C), C > 16 -> reserved;
 release_cause(enduser_orig) -> 0;
 release_cause(enduser_congestion) -> 1;
 release_cause(enduser_failure) -> 2;
-release_cause(sccp_failure) -> 3;
+release_cause(sccp_user_originated) -> 3;
 release_cause(rpc_error) -> 4;
 release_cause(inconsistant_data) -> 5;
 release_cause(access_failure) -> 6;
@@ -626,9 +627,10 @@ release_cause(subsystem_failure) -> 8;
 release_cause(subsystem_congestion) -> 9;
 release_cause(mtp_failure) -> 10;
 release_cause(network_congestion) -> 11;
-release_cause(timer_expire) -> 12;
-release_cause(reserved) -> 13;
-release_cause(unqualified) -> 14;
+release_cause(reset_timer_expire) -> 12;
+release_cause(inactivity_timer_expire) -> 13;
+release_cause(unqualified) -> 15;
+release_cause(sccp_failure) -> 16;
 release_cause(_) -> 255.
 
 -spec segmenting(S) -> S
