@@ -88,9 +88,9 @@ refusal_cause(_Config) ->
 	F = fun(F, 256) ->
 				ok;
 		(F, N) ->
-			RC = sccp_codec:refusal_code(N),
+			RC = sccp_codec:refusal_cause(N),
 			true = is_atom(N),
-			N = sccp_codec:refusal_code(RC),
+			N = sccp_codec:refusal_cause(RC),
 			F(F, N+1)
 	end,
 	ok = F(F, 0).
@@ -102,10 +102,10 @@ release_cause(_Config) ->
 	F = fun(F, 256) ->
 				ok;
 		(F, N) ->
-			RC = sccp_codec:release_code(N),
+			RC = sccp_codec:release_cause(N),
 			true = is_atom(N),
-			N = sccp_codec:release_code(RC),
-			F(F, N+1)
+			N = sccp_codec:release_cause(RC),
+			F(F, N+1)1
 	end,
 	ok = F(F, 0).
 
@@ -116,9 +116,9 @@ return_cause(_Config) ->
 	F = fun(F, 256) ->
 				ok;
 		(F, N) ->
-			RC = sccp_codec:return_code(N),
+			RC = sccp_codec:return_cause(N),
 			true = is_atom(N),
-			N = sccp_codec:return_code(RC),
+			N = sccp_codec:return_cause(RC),
 			F(F, N+1)
 	end,
 	ok = F(F, 0).
