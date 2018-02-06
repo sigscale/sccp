@@ -134,8 +134,12 @@ encoding_scheme(_Config) ->
 		(F, N) ->
 			Scheme = sccp_codec:encoding_scheme(N),
 			true = is_atom(Scheme),
-			N = sccp_codec:encoding_scheme(Scheme),
-			F(F, N+1)
+			case sccp_codec:encoding_scheme(Scheme) of
+				M when Scheme == spare andalso (M >=4 andalso M =< 14) ->
+					F(F, N+1);
+				N ->
+					F(F, N+1)
+			end
 	end,
 	ok = F(F, 0).
 
