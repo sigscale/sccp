@@ -75,11 +75,25 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[segmentation, point_code, ssn, bcd].
+	[return_cause, segmentation, point_code, ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+return_cause() ->
+	[{userdata, [{doc, "encode and decode return_cause parameter"}]}].
+
+return_cause(_Config) ->
+	F = fun(F, 256) ->
+				ok;
+		(F, N) ->
+			RC = sccp_codec:return_code(N),
+			true = is_atom(N),
+			N = sccp_codec:return_code(RC),
+			F(F, N+1)
+	end,
+	ok = F(F, 0).
 
 segmentation() ->
 	[{userdata, [{doc, "encode and decode segmentation parameter"}]}].
