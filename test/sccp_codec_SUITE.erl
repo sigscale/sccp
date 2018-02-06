@@ -83,7 +83,7 @@ all() ->
 %%---------------------------------------------------------------------
 
 importance() ->
-	[{userdata, [{doc, "encode and decode sub system number"}]}].
+	[{userdata, [{doc, "encode and decode importance parameter"}]}].
 
 importance(_Config) ->
 	F = fun(_, 8) ->
