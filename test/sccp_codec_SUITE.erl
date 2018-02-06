@@ -75,17 +75,20 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[].
+	[bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
 
-encode() ->
-	[{userdata, [{doc, "Encode term to binary"}]}].
+bcd() ->
+	[{userdata, [{doc, "encode and decode binary coded decimals"}]}].
 
-encode(Config) ->
-	ok.
+bcd(Config) ->
+	Dec = [2,4,8,3,2,3,5,5,5,1,2,3,4,1],
+	Bin = sccp_codec:bcd(Dec),
+	true = is_binary(Bin),
+	Dec = sccp_codec:bcd(Bin).
 
 %%---------------------------------------------------------------------
 %%  Internal functions
