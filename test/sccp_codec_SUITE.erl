@@ -106,7 +106,7 @@ refusal_cause(_Config) ->
 				ok;
 		(F, N) ->
 			RC = sccp_codec:refusal_cause(N),
-			true = is_atom(N),
+			true = is_atom(RC),
 			N = sccp_codec:refusal_cause(RC),
 			F(F, N+1)
 	end,
@@ -120,7 +120,7 @@ release_cause(_Config) ->
 				ok;
 		(F, N) ->
 			RC = sccp_codec:release_cause(N),
-			true = is_atom(N),
+			true = is_atom(RC),
 			N = sccp_codec:release_cause(RC),
 			F(F, N+1)
 	end,
@@ -134,7 +134,7 @@ return_cause(_Config) ->
 				ok;
 		(F, N) ->
 			RC = sccp_codec:return_cause(N),
-			true = is_atom(N),
+			true = is_atom(RC),
 			N = sccp_codec:return_cause(RC),
 			F(F, N+1)
 	end,
