@@ -75,11 +75,26 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[bcd].
+	[ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+ssn() ->
+	[{userdata, [{doc, "encode and decode sub system number"}]}].
+
+ssn(_Config) ->
+	F = fun(_, 256) ->
+				ok;
+		(F, N) ->
+			SSN = sccp_codec:ssn(N),
+			1 = size(SSN),
+			true = is_binary(SSN),
+			N = sccp_codec:ssn(SSN),
+			F(F, N+1)
+	end,
+	ok = F(F, 0).
 
 bcd() ->
 	[{userdata, [{doc, "encode and decode binary coded decimals"}]}].
