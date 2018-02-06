@@ -75,12 +75,26 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[numbering_plan, encoding_scheme, importance, refusal_cause, release_cause,
-		return_cause, segmentation, point_code, ssn, bcd].
+	[translation_type, numbering_plan, encoding_scheme, importance, refusal_cause,
+		release_cause, return_cause, segmentation, point_code, ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+translation_type() ->
+	[{userdata, [{doc, "encode and decode translation type"}]}].
+
+translation_type(_Config) ->
+	F = fun(_, 256) ->
+				ok;
+		(F, N) ->
+			TT = sccp_codec:tt(N),
+			true = is_atom(TT),
+			N = sccp_codec:tt(TT),
+			F(F, N+1)
+	end,
+	ok = F(F, 0).
 
 numbering_plan() ->
 	[{userdata, [{doc, "encode and decode numbering plan"}]}].
