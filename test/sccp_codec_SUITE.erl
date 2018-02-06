@@ -178,8 +178,12 @@ release_cause(_Config) ->
 		(F, N) ->
 			RC = sccp_codec:release_cause(N),
 			true = is_atom(RC),
-			N = sccp_codec:release_cause(RC),
-			F(F, N+1)
+			case sccp_codec:release_cause(RC) of
+				M when RC == reserved andalso (M > 16 andalso 255 =< M) ->
+					F(F, N+1);
+				N ->
+					F(F, N+1)
+			end
 	end,
 	ok = F(F, 0).
 
