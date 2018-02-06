@@ -1,2 +1,2 @@
 {suites, ".",
-		[sccp_codec_suite]}.
+		[sccp_codec_SUITE]}.
