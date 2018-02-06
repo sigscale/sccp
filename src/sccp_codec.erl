@@ -447,9 +447,10 @@ numbering_plan(4) -> telex;
 numbering_plan(5) -> maritime;
 numbering_plan(6) -> land_mobile;
 numbering_plan(7) -> isdn_mobile;
+numbering_plan(N) when (is_integer(N)) andalso
+		(N >= 8 andalso N =< 13) -> spare;
 numbering_plan(14) -> private_net;
 numbering_plan(15) -> reserved; 
-numbering_plan(N) when is_integer(N)-> spare; 
 numbering_plan(unknown) -> 0;
 numbering_plan(isdn_tele) -> 1; 
 numbering_plan(generic) -> 2; 
@@ -460,7 +461,7 @@ numbering_plan(land_mobile) -> 6;
 numbering_plan(isdn_mobile) -> 7;
 numbering_plan(private_net) -> 14; 
 numbering_plan(reserved) -> 15;
-numbering_plan(spare) -> 16.
+numbering_plan(_) -> 13.
 
 -spec encoding_scheme(E) -> E
 	when

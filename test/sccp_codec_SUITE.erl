@@ -120,8 +120,12 @@ numbering_plan(_Config) ->
 		(F, N) ->
 			NP = sccp_codec:numbering_plan(N),
 			true = is_atom(NP),
-			N = sccp_codec:encoding_scheme(NP),
-			F(F, N+1)
+			case sccp_codec:numbering_plan(NP) of
+				M when NP == spare andalso (M >=8 andalso M =< 13) ->
+					F(F, N+1);
+				N ->
+					F(F, N+1)
+			end
 	end,
 	ok = F(F, 0).
 
