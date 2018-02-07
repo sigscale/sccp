@@ -79,7 +79,7 @@ all() ->
 		party_address_git_4, nai, translation_type, numbering_plan, encoding_scheme, importance,
 		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd,
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
-		sccp_release_complete, sccp_data_form1].
+		sccp_release_complete, sccp_data_form1, sccp_data_form2].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -481,6 +481,23 @@ sccp_data_form1(_Config) ->
 	end,
 	Data = <<123:24>>,
 	Rec = #sccp_data_form1{dest_local_ref = DestLocalRef, segmenting = Seg, data = Data},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
+
+sccp_data_form2() ->
+	[{userdata, [{doc, "encode and decode SCCP data form2 message"}]}].
+
+sccp_data_form2(_Config) ->
+	DestLocalRef = rand:uniform(256) - 1,
+	Seg = case rand:uniform(2) of
+		2 ->
+			true;
+		1 ->
+			false
+	end,
+	Data = <<123:24>>,
+	Rec = #sccp_data_form2{dest_local_ref = DestLocalRef, sequencing = Seg, data = Data},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
