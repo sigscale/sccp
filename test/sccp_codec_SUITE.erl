@@ -81,7 +81,7 @@ all() ->
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
 		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
 		sccp_unitdata_service, sccp_expedited_data, sccp_expedited_ack, sccp_reset_request,
-		sccp_reset_confirmation, sccp_protocol_data_unit_error].
+		sccp_reset_confirmation, sccp_protocol_data_unit_error, sccp_inactivity_test].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -597,6 +597,26 @@ sccp_protocol_data_unit_error(_Config) ->
 	DestLocalRef = rand:uniform(256) - 1,
 	Error = rand:uniform(256) - 1,
 	Rec = #sccp_protocol_data_unit_error{dest_local_ref = DestLocalRef, error_cause = Error},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
+
+sccp_inactivity_test() ->
+	[{userdata, [{doc, "encode and decode SCCP inactivity test message"}]}].
+
+sccp_inactivity_test(_Config) ->
+	DestLocalRef = rand:uniform(256) - 1,
+	SrcLocalRef = rand:uniform(256) - 1,
+	Class = rand:uniform(5) - 1,
+	Seq = case rand:uniform(2) of
+		2 ->
+			true;
+		1 ->
+			false
+	end,
+	Credit = <<123:24>>,
+	Rec = #sccp_inactivity_test{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef,
+			class = Class, sequencing = Seq, credit = Credit},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
