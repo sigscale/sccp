@@ -80,7 +80,7 @@ all() ->
 		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd,
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
 		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
-		sccp_unitdata_service].
+		sccp_unitdata_service, sccp_expedited_data].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -540,6 +540,17 @@ sccp_unitdata_service(_Config) ->
 	Data = <<123:24>>,
 	Rec = #sccp_unitdata_service{return_cause = Cause, called_party = CalledParty,
 			calling_party = CallingParty, data = Data},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
+
+sccp_expedited_data() ->
+	[{userdata, [{doc, "encode and decode SCCP expedited data message"}]}].
+
+sccp_expedited_data(_Config) ->
+	DestLocalRef = rand:uniform(256) - 1,
+	Data = <<123:24>>,
+	Rec = #sccp_expedited_data{dest_local_ref = DestLocalRef, data = Data},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
