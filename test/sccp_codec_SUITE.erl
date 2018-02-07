@@ -78,7 +78,7 @@ all() ->
 	[party_address_git_0, party_address_git_1, party_address_git_2, party_address_git_3,
 		party_address_git_4, nai, translation_type, numbering_plan, encoding_scheme,
 		importance, refusal_cause, release_cause, return_cause, segmentation,
-		point_code, ssn, bcd].
+		point_code, ssn, bcd, sccp_connection_req].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -389,7 +389,43 @@ bcd(Config) ->
 	true = is_binary(Bin),
 	Dec = sccp_codec:bcd(Bin).
 
+sccp_connection_req() ->
+	[{userdata, [{doc, "encode and decode SCCP connection request message"}]}].
+
+sccp_connection_req(_Config) ->
+	SrcLocalRef = rand:uniform(256) - 1,
+	Class = rand:uniform(5) - 1,
+	CalledParty = gen_party_address(),
+	Credit = <<123:24>>,
+	CallingParty = gen_party_address(),
+	Data = <<123:24>>,
+	Hops = rand:uniform(15),
+	Importance = rand:uniform(5) - 1,
+	Rec = #sccp_connection_req{src_local_ref = SrcLocalRef, class = Class,
+			called_party = CalledParty, credit = Credit, calling_party = CallingParty,
+			data = Data, hop_counter = Hops, importance = Importance},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
+
 %%---------------------------------------------------------------------
 %%  Internal functions
 %%---------------------------------------------------------------------
 
+%% @hidden
+gen_party_address() ->
+	RI = case rand:uniform(2) of
+		2 ->
+			true;
+		1 ->
+			false
+	end,
+	PC = rand:uniform(256) - 1,
+	SSN = rand:uniform(16384) - 1,
+	TT = sccp_codec:tt(rand:uniform(256) - 1),
+	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
+	ES = sccp_codec:encoding_scheme(rand:uniform(16) - 1),
+	NAI = sccp_codec:nai(rand:uniform(128) - 1),
+	GT = [9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7],
+	#party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT,
+			numbering_plan = NP, encoding_scheme = ES, nai = NAI, gt = GT}.
