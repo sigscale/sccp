@@ -266,7 +266,7 @@ point_code() ->
 	[{userdata, [{doc, "encode and decode signalling point code"}]}].
 
 point_code(_Config) ->
-	F = fun(_, 256) ->
+	F = fun(_, 16384) ->
 				ok;
 		(F, N) ->
 			PC = sccp_codec:point_code(N),
