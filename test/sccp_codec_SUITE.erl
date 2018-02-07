@@ -78,7 +78,7 @@ all() ->
 	[party_address_git_0, party_address_git_1, party_address_git_2, party_address_git_3,
 		party_address_git_4, nai, translation_type, numbering_plan, encoding_scheme,
 		importance, refusal_cause, release_cause, return_cause, segmentation,
-		point_code, ssn, bcd, sccp_connection_req].
+		point_code, ssn, bcd, sccp_connection_req, sccp_connection_confirm].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -406,6 +406,24 @@ sccp_connection_req(_Config) ->
 			data = Data, hop_counter = Hops, importance = Importance},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
+
+sccp_connection_confirm() ->
+	[{userdata, [{doc, "encode and decode SCCP connection confirm message"}]}].
+
+sccp_connection_confirm(_Config) ->
+	SrcLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(256) - 1,
+	Class = rand:uniform(5) - 1,
+	Credit = <<123:24>>,
+	CalledParty = gen_party_address(),
+	Data = <<123:24>>,
+	Importance = rand:uniform(5) - 1,
+	Rec = #sccp_connection_confirm{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef,
+			class = Class, called_party = CalledParty, credit = Credit, data = Data,
+			importance = Importance},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
 	Rec = sccp_codec:sccp(Bin).
 
 %%---------------------------------------------------------------------
