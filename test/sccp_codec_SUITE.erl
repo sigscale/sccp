@@ -79,7 +79,7 @@ all() ->
 		party_address_git_4, nai, translation_type, numbering_plan, encoding_scheme, importance,
 		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd,
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
-		sccp_release_complete, sccp_data_form1, sccp_data_form2].
+		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -502,6 +502,19 @@ sccp_data_form2(_Config) ->
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
 
+sccp_data_ack() ->
+	[{userdata, [{doc, "encode and decode SCCP data ack message"}]}].
+
+sccp_data_ack(_Config) ->
+	DestLocalRef = rand:uniform(256) - 1,
+	Num = rand:uniform(128) - 1,
+	Seq = <<Num:7, 0:1>>,
+	Credit = <<123:24>>,
+	Rec = #sccp_data_ack{dest_local_ref = DestLocalRef, receive_seq_num = Seq, credit = Credit},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
+
 %%---------------------------------------------------------------------
 %%  Internal functions
 %%---------------------------------------------------------------------
@@ -523,3 +536,4 @@ gen_party_address() ->
 	GT = [9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7],
 	#party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT,
 			numbering_plan = NP, encoding_scheme = ES, nai = NAI, gt = GT}.
+
