@@ -79,7 +79,8 @@ all() ->
 		party_address_git_4, nai, translation_type, numbering_plan, encoding_scheme, importance,
 		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd,
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
-		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack].
+		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
+		sccp_unitdata_service].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -511,6 +512,34 @@ sccp_data_ack(_Config) ->
 	Seq = <<Num:7, 0:1>>,
 	Credit = <<123:24>>,
 	Rec = #sccp_data_ack{dest_local_ref = DestLocalRef, receive_seq_num = Seq, credit = Credit},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
+
+sccp_unitdata() ->
+	[{userdata, [{doc, "encode and decode SCCP unit data message"}]}].
+
+sccp_unitdata(_Config) ->
+	Class = rand:uniform(5) - 1,
+	CalledParty = gen_party_address(),
+	CallingParty = gen_party_address(),
+	Data = <<123:24>>,
+	Rec = #sccp_unitdata{class = Class, called_party = CalledParty, calling_party = CallingParty,
+			data = Data},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
+
+sccp_unitdata_service() ->
+	[{userdata, [{doc, "encode and decode SCCP unit data service message"}]}].
+
+sccp_unitdata_service(_Config) ->
+	Cause = sccp_codec:return_cause(rand:uniform(256) - 1),
+	CalledParty = gen_party_address(),
+	CallingParty = gen_party_address(),
+	Data = <<123:24>>,
+	Rec = #sccp_unitdata_service{return_cause = Cause, called_party = CalledParty,
+			calling_party = CallingParty, data = Data},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
