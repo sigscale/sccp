@@ -738,10 +738,10 @@ bcd(Address) when is_list(Address) ->
 	bcd2(Address, <<>>).
 
 %% @hidden
-bcd1(<<X:4/integer, Y:4/integer, Rest/binary>>, Acc) when is_list(Acc) ->
-	bcd1(Rest, [X, Y | Acc]);
 bcd1(<<0:4/integer, Y:4/integer, Rest/binary>>, Acc) when is_list(Acc) ->
 	bcd1(Rest, [Y | Acc]);
+bcd1(<<X:4/integer, Y:4/integer, Rest/binary>>, Acc) when is_list(Acc) ->
+	bcd1(Rest, [X, Y | Acc]);
 bcd1(<<>>, Acc) ->
 	lists:reverse(Acc).
 
