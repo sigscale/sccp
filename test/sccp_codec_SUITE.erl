@@ -76,12 +76,37 @@ sequences() ->
 %%
 all() -> 
 	[party_address_git_0, party_address_git_1, party_address_git_2, party_address_git_3,
-		nai, translation_type, numbering_plan, encoding_scheme, importance, refusal_cause,
-		release_cause, return_cause, segmentation, point_code, ssn, bcd].
+		party_address_git_4, nai, translation_type, numbering_plan, encoding_scheme,
+		importance, refusal_cause, release_cause, return_cause, segmentation,
+		point_code, ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+party_address_git_4() ->
+	[{userdata, [{doc, "encode and decode called/calling party address
+		when global title indicator = 4"}]}].
+
+party_address_git_4(_Config) ->
+	RI = case rand:uniform(2) of
+		2 ->
+			true;
+		1 ->
+			false
+	end,
+	PC = rand:uniform(256) - 1,
+	SSN = rand:uniform(16384) - 1,
+	TT = sccp_codec:tt(rand:uniform(256) - 1),
+	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
+	ES = sccp_codec:encoding_scheme(rand:uniform(16) - 1),
+	NAI = sccp_codec:nai(rand:uniform(128) - 1),
+	GT = [9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7],
+	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT,
+			numbering_plan = NP, encoding_scheme = ES, nai = NAI, gt = GT},
+	P2 = sccp_codec:party_address(P1),
+	true = is_binary(P2),
+	P1 = sccp_codec:party_address(P2).
 
 party_address_git_3() ->
 	[{userdata, [{doc, "encode and decode called/calling party address
