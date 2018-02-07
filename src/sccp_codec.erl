@@ -702,9 +702,13 @@ segmentation(#segmentation{first = true, class = C, remaning_seg = R}) ->
 
 -spec point_code(P) -> P
 	when
-		P :: integer() | binary().
+		P :: undefined | integer() | binary().
 %% @doc Values for signalling point code as defined in
 %% ITU-T Recommendation Q.713, section 3.4.2.1
+point_code(undefined) ->
+	<<>>;
+point_code(<<>>) ->
+	undefined;
 point_code(<<0:2, P:14/integer>>) ->
 	P;
 point_code(P) when is_integer(P) ->
@@ -712,9 +716,13 @@ point_code(P) when is_integer(P) ->
 
 -spec ssn(N) -> N
 	when
-		N :: integer() | binary().
+		N :: undefined | integer() | binary().
 %% @doc Values for subsystem number as defined in
 %% ITU-T Recommendation Q.713, section 3.4.2.2
+ssn(undefined) ->
+	<<>>;
+ssn(<<>>) ->
+	undefined;
 ssn(<<N:8/integer>>) ->
 	N;
 ssn(N) when is_integer(N) ->
