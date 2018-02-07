@@ -93,9 +93,9 @@ nai(_Config) ->
 			NAI = sccp_codec:nai(N),
 			true = is_atom(NAI),
 			case sccp_codec:nai(NAI) of
-				M when NAI == spare andalso (N >= 5 andalso N =< 111) ->
+				_M when NAI == spare andalso (N >= 5 andalso N =< 111) ->
 					F(F, N+1);
-				M when NAI == reserved_for_national  andalso (N >= 112 andalso N =< 126) ->
+				_M when NAI == reserved_for_national  andalso (N >= 112 andalso N =< 126) ->
 					F(F, N+1);
 				N ->
 					F(F, N+1)
@@ -113,7 +113,7 @@ translation_type(_Config) ->
 			TT = sccp_codec:tt(N),
 			true = is_atom(TT),
 			case sccp_codec:tt(TT) of
-				M when TT == network_specific andalso ((N >= 2 andalso N =< 254)) ->
+				_M when TT == network_specific andalso ((N >= 2 andalso N =< 254)) ->
 					F(F, N+1);
 				N ->
 					F(F, N+1)
