@@ -81,7 +81,7 @@ all() ->
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
 		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
 		sccp_unitdata_service, sccp_expedited_data, sccp_expedited_ack, sccp_reset_request,
-		sccp_reset_confirmation].
+		sccp_reset_confirmation, sccp_protocol_data_unit_error].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -590,6 +590,16 @@ sccp_reset_confirmation(_Config) ->
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
 
+sccp_protocol_data_unit_error() ->
+	[{userdata, [{doc, "encode and decode SCCP protocol data unit error message"}]}].
+
+sccp_protocol_data_unit_error(_Config) ->
+	DestLocalRef = rand:uniform(256) - 1,
+	Error = rand:uniform(256) - 1,
+	Rec = #sccp_protocol_data_unit_error{dest_local_ref = DestLocalRef, error_cause = Error},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
 
 %%---------------------------------------------------------------------
 %%  Internal functions
