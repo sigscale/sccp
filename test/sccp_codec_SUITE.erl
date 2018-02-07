@@ -100,7 +100,7 @@ party_address_git_1(_Config) ->
 	GT = [9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7],
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, nai = NAI, gt = GT},
 	P2 = sccp_codec:party_address(P1),
-	is_binary(P2),
+	true = is_binary(P2),
 	P1 = sccp_codec:party_address(P2).
 
 party_address_git_0() ->
@@ -116,7 +116,7 @@ party_address_git_0(_Config) ->
 	end,
 	P1 = #party_address{ri = RI},
 	P2 = sccp_codec:party_address(P1),
-	is_binary(P2),
+	true = is_binary(P2),
 	P1 = sccp_codec:party_address(P2).
 
 nai() ->
