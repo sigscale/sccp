@@ -80,7 +80,7 @@ all() ->
 		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd,
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
 		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
-		sccp_unitdata_service, sccp_expedited_data, sccp_expedited_ack].
+		sccp_unitdata_service, sccp_expedited_data, sccp_expedited_ack, sccp_reset_request].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -565,6 +565,18 @@ sccp_expedited_ack(_Config) ->
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
 
+sccp_reset_request() ->
+	[{userdata, [{doc, "encode and decode SCCP reset request message"}]}].
+
+sccp_reset_request(_Config) ->
+	DestLocalRef = rand:uniform(256) - 1,
+	SrcLocalRef = rand:uniform(256) - 1,
+	Cause = sccp_codec:reset_cause(rand:uniform(256) - 1),
+	Rec = #sccp_reset_request{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef,
+			reset_cause = Cause},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
 
 %%---------------------------------------------------------------------
 %%  Internal functions
