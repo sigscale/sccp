@@ -81,7 +81,8 @@ all() ->
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
 		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
 		sccp_unitdata_service, sccp_expedited_data, sccp_expedited_ack, sccp_reset_request,
-		sccp_reset_confirmation, sccp_protocol_data_unit_error, sccp_inactivity_test].
+		sccp_reset_confirmation, sccp_protocol_data_unit_error, sccp_inactivity_test,
+		sccp_extended_unitdata].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -617,6 +618,24 @@ sccp_inactivity_test(_Config) ->
 	Credit = <<123:24>>,
 	Rec = #sccp_inactivity_test{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef,
 			class = Class, sequencing = Seq, credit = Credit},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
+
+sccp_extended_unitdata() ->
+	[{userdata, [{doc, "encode and decode SCCP extended unit data message"}]}].
+
+sccp_extended_unitdata(_Config) ->
+	Class = rand:uniform(5) - 1,
+	Hops = rand:uniform(15),
+	CalledParty = gen_party_address(),
+	CallingParty = gen_party_address(),
+	Data = <<123:24>>,
+	Seg = #segmentation{first = true, class = 0, remaning_seg = 4},	
+	Importance = rand:uniform(5) - 1,
+	Rec = #sccp_extended_unitdata{class = Class, hop_counter = Hops,
+			called_party = CalledParty, calling_party = CallingParty, data = Data,
+			segmentation = Seg, importance = Importance},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
