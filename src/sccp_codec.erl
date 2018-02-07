@@ -746,6 +746,9 @@ bcd1(<<>>, Acc) ->
 	lists:reverse(Acc).
 
 %% @hidden
+bcd2([X | []], Acc) when is_binary(Acc) ->
+	I = <<0:4/integer, X:4/integer>>,
+	bcd2([], <<Acc/binary, I/binary>>);
 bcd2([X | [Y | Rest]], Acc) when is_binary(Acc) ->
 	I = <<Y:4/integer, X:4/integer>>,
 	bcd2(Rest, <<Acc/binary, I/binary>>);
