@@ -189,7 +189,7 @@
 -record(sccp_protocol_data_unit_error,
 		{type = ?ProtocolDataUnitError,
 		dest_local_ref :: pos_integer(),
-		error_cause}).
+		error_cause :: integer()}).
 		
 -record(sccp_inactivity_test,
 		{type = ?InactivityTest,
