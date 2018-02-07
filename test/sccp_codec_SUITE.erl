@@ -75,13 +75,29 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[nai, translation_type, numbering_plan, encoding_scheme, importance,
+	[party_address_git_0, nai, translation_type, numbering_plan, encoding_scheme, importance,
 		refusal_cause, release_cause, return_cause, segmentation, point_code,
 		ssn, bcd].
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
+
+party_address_git_0() ->
+	[{userdata, [{doc, "encode and decode called/calling party address when global title indicator = 0"}]}].
+
+party_address_git_0(_Config) ->
+	RI = case rand:uniform(2) of
+		2 ->
+			true;
+		1 ->
+			false
+	end,
+	P1 = #party_address{ri = RI},
+	P2 = sccp_codec:party_address(P1),
+	is_binary(P2),
+	P1 = sccp_codec:party_address(P2).
+
 
 nai() ->
 	[{userdata, [{doc, "encode and decode network address indicator"}]}].
