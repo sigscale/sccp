@@ -449,7 +449,6 @@ sccp_released(_Config) ->
 	SrcLocalRef = rand:uniform(256) - 1,
 	DestLocalRef = rand:uniform(256) - 1,
 	Cause = sccp_codec:release_cause(rand:uniform(256) - 1),
-	CalledParty = gen_party_address(),
 	Data = <<123:24>>,
 	Importance = rand:uniform(5) - 1,
 	Rec = #sccp_released{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef,
