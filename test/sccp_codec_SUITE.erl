@@ -76,9 +76,9 @@ sequences() ->
 %%
 all() -> 
 	[party_address_git_0, party_address_git_1, party_address_git_2, party_address_git_3,
-		party_address_git_4, nai, translation_type, numbering_plan, encoding_scheme,
-		importance, refusal_cause, release_cause, return_cause, segmentation,
-		point_code, ssn, bcd, sccp_connection_req, sccp_connection_confirm, sccp_connection_refused].
+		party_address_git_4, nai, translation_type, numbering_plan, encoding_scheme, importance,
+		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd,
+		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released].
 
 %%---------------------------------------------------------------------
 %%  Test cases
@@ -440,6 +440,23 @@ sccp_connection_refused(_Config) ->
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
+
+sccp_released() ->
+	[{userdata, [{doc, "encode and decode SCCP released message"}]}].
+
+sccp_released(_Config) ->
+	SrcLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(256) - 1,
+	Cause = sccp_codec:release_cause(rand:uniform(256) - 1),
+	CalledParty = gen_party_address(),
+	Data = <<123:24>>,
+	Importance = rand:uniform(5) - 1,
+	Rec = #sccp_released{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef,
+			release_cause = Cause, data = Data, importance = Importance},
+	Bin = sccp_codec:sccp(Rec),
+	true = is_binary(Bin),
+	Rec = sccp_codec:sccp(Bin).
+
 
 %%---------------------------------------------------------------------
 %%  Internal functions
