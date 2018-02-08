@@ -75,8 +75,8 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[party_address_git_0, party_address_git_1, party_address_git_2, party_address_git_3,
-		party_address_git_4, nai, translation_type, numbering_plan, encoding_scheme, importance,
+	[party_address_gti_0, party_address_gti_1, party_address_gti_2, party_address_gti_3,
+		party_address_gti_4, nai, translation_type, numbering_plan, encoding_scheme, importance,
 		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd,
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
 		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
@@ -89,11 +89,11 @@ all() ->
 %%  Test cases
 %%---------------------------------------------------------------------
 
-party_address_git_4() ->
+party_address_gti_4() ->
 	[{userdata, [{doc, "encode and decode called/calling party address
 		when global title indicator = 4"}]}].
 
-party_address_git_4(_Config) ->
+party_address_gti_4(_Config) ->
 	RI = case rand:uniform(2) of
 		2 ->
 			true;
@@ -113,11 +113,11 @@ party_address_git_4(_Config) ->
 	true = is_binary(P2),
 	P1 = sccp_codec:party_address(P2).
 
-party_address_git_3() ->
+party_address_gti_3() ->
 	[{userdata, [{doc, "encode and decode called/calling party address
 		when global title indicator = 3"}]}].
 
-party_address_git_3(_Config) ->
+party_address_gti_3(_Config) ->
 	RI = case rand:uniform(2) of
 		2 ->
 			true;
@@ -136,11 +136,11 @@ party_address_git_3(_Config) ->
 	true = is_binary(P2),
 	P1 = sccp_codec:party_address(P2).
 
-party_address_git_2() ->
+party_address_gti_2() ->
 	[{userdata, [{doc, "encode and decode called/calling party address
 		when global title indicator = 2"}]}].
 
-party_address_git_2(_Config) ->
+party_address_gti_2(_Config) ->
 	RI = case rand:uniform(2) of
 		2 ->
 			true;
@@ -156,11 +156,11 @@ party_address_git_2(_Config) ->
 	true = is_binary(P2),
 	P1 = sccp_codec:party_address(P2).
 
-party_address_git_1() ->
+party_address_gti_1() ->
 	[{userdata, [{doc, "encode and decode called/calling party address
 		when global title indicator = 1"}]}].
 
-party_address_git_1(_Config) ->
+party_address_gti_1(_Config) ->
 	RI = case rand:uniform(2) of
 		2 ->
 			true;
@@ -176,11 +176,11 @@ party_address_git_1(_Config) ->
 	true = is_binary(P2),
 	P1 = sccp_codec:party_address(P2).
 
-party_address_git_0() ->
+party_address_gti_0() ->
 	[{userdata, [{doc, "encode and decode called/calling party address
 		when global title indicator = 0"}]}].
 
-party_address_git_0(_Config) ->
+party_address_gti_0(_Config) ->
 	RI = case rand:uniform(2) of
 		2 ->
 			true;
