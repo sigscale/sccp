@@ -253,7 +253,7 @@ sccp(#sccp_unitdata_service{return_cause = RC, called_party = CalledParty,
 sccp(#sccp_expedited_data{dest_local_ref  = Dest, data = Data}) ->
 	<<?ExpeditedData, Dest:24, Data/binary>>;
 sccp(#sccp_expedited_ack{dest_local_ref = Dest}) ->
-	<<?ExpeditedDataAck, Dest/integer>>;
+	<<?ExpeditedDataAck, Dest:24/integer>>;
 sccp(#sccp_reset_request{dest_local_ref = Dest, src_local_ref = Src, reset_cause = Cause}) ->
 	<<?ResetRequest, Dest:24, Src:24, Cause/binary>>;
 sccp(#sccp_reset_confirmation{dest_local_ref = Dest, src_local_ref = Src}) ->
