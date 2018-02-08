@@ -266,7 +266,7 @@ sccp(#sccp_protocol_data_unit_error{dest_local_ref = Dest, error_cause = Error})
 sccp(#sccp_inactivity_test{dest_local_ref = Dest, src_local_ref = Src, class = Class,
 		sequencing = S, credit = Credit}) ->
 	Seq = segmenting(S),
-	<<?InactivityTest, Dest:24, Src:24, Class, 0:15, Seq/integer, Credit/binary>>;
+	<<?InactivityTest, Dest:24, Src:24, Class, 0:15, Seq:1/integer, Credit/binary>>;
 sccp(#sccp_extended_unitdata{class = Class, hop_counter = Hops,
 		called_party = CalledParty, calling_party = CallingParty, data = Data} = S) ->
 	Segs = set_option(?Segmentation, S#sccp_extended_unitdata.segmentation),
