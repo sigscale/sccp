@@ -131,7 +131,7 @@ sccp(<<?ResetRequest, DestLocalRef:24, SrcLocalRef:24, Reset/integer>>) ->
 	Cause = reset_cause(Reset),
 	#sccp_reset_request{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef, reset_cause = Cause};
-sccp(<<?ResetConfirmation, DestLocalRef:24, SrcLocalRef/integer>>) ->
+sccp(<<?ResetConfirmation, DestLocalRef:24, SrcLocalRef:24/integer>>) ->
 	#sccp_reset_confirmation{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef};
 sccp(<<?ProtocolDataUnitError, DestLocalRef:24, Error/integer>>) ->
