@@ -683,6 +683,50 @@ optional_part(Part) ->
 	optional_part1(Part, []).
 
 %% @hidden
+optional_part1(<<?DestinationLocalRef, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?DestinationLocalRef, V} | Acc]);
+optional_part1(<<?SourceLocalRef, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?SourceLocalRef, V} | Acc]);
+optional_part1(<<?ProtocolClass, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?ProtocolClass, V} | Acc]);
+optional_part1(<<?ReceiveSequenceNum, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?ReceiveSequenceNum, V} | Acc]);
+optional_part1(<<?ReleaseCause, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?ReleaseCause, V} | Acc]);
+optional_part1(<<?ReturnCause, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?ReturnCause, V} | Acc]);
+optional_part1(<<?ResetCause, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?ResetCause, V} | Acc]);
+optional_part1(<<?ErrorCause, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?ErrorCause, V} | Acc]);
+optional_part1(<<?RefusalCause, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?RefusalCause, V} | Acc]);
+optional_part1(<<?HopCounter, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?HopCounter, V} | Acc]);
+optional_part1(<<?Importance, Len, Rest/binary>>, Acc) ->
+	L = Len*8,
+	<<V:L/integer, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?Importance, V} | Acc]);
 optional_part1(<<Name, Len, Rest/binary>>, Acc) ->
 	V = binary:part(Rest, 0, Len),
 	<<V:Len/binary, Rest1/binary>> = Rest,
