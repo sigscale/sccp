@@ -684,7 +684,7 @@ optional_part(Part) ->
 
 %% @hidden
 optional_part1(<<Name, Len, Rest/binary>>, Acc) ->
-	V = binary:part(Rest, 16, Len),
+	V = binary:part(Rest, 0, Len),
 	<<V:Len/binary, Rest1/binary>> = Rest,
 	optional_part1(Rest1, [{Name, V} | Acc]);
 optional_part1(<<>>, Acc) ->
