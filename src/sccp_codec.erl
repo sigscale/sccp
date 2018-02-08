@@ -83,7 +83,7 @@ sccp(<<?Released, DestLocalRef:24, SrcLocalRef:24, Release, Rest/binary>>) ->
 	#sccp_released{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef, release_cause = release_cause(Release),
 			data = get_option(?DATA, Opts), importance = get_option(?Importance, Opts)};
-sccp(<<?ReleaseComplete, DestLocalRef:24, SrcLocalRef/integer>>) ->
+sccp(<<?ReleaseComplete, DestLocalRef:24, SrcLocalRef:24/integer>>) ->
 	#sccp_release_complete{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef};
 sccp(<<?DataForm1, DestLocalRef:24, _:7, Seg:1, DataP, Rest/binary>>) ->
@@ -96,7 +96,7 @@ sccp(<<?DataForm2, DestLocalRef:24, _:7, Seq:1, DataP, Rest/binary>>) ->
 	Data = binary:part(Rest, DataP, DataL),
 	#sccp_data_form2{dest_local_ref = DestLocalRef,
 			sequencing = segmenting(Seq), data = Data};
-sccp(<<?DataAck, DestLocalRef:24, RecvSeq:8/binary, Credit:8/binary>>) ->
+sccp(<<?DataAck, DestLocalRef:24, RecvSeq:1/binary, Credit:1/binary>>) ->
 	#sccp_data_ack{dest_local_ref = DestLocalRef,
 			receive_seq_num = RecvSeq, credit = Credit};
 sccp(<<?UnitData, Class, CalledPartyP, CallingPartyP, DataP, Rest/binary>>) ->
