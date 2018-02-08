@@ -32,7 +32,7 @@
 		segmenting/1, return_cause/1, reset_cause/1, segmentation/1, point_code/1,
 		bcd/1, ssn/1]).
 %% functions to deal with SCCP optional part
--export([optional_part/1, get_option/2, set_option/2]).
+-export([optional_part/1, get_option/2]).
 
 -export_type([sccp_message/0]).
 
@@ -200,36 +200,48 @@ sccp(<<?LongUnitDataService, Class, Hops, CalledPartyP, CallingPartyP, LongDataP
 			long_data = LongData, segmentation = get_option(?Segmentation, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(#sccp_connection_req{src_local_ref = Src, class = Class,
-		called_party = CalledParty} = S) ->
+		called_party = CalledParty, credit = Credit, calling_party = CallingParty,
+		data = Data, hop_counter = HopCounter, importance = Importance}) ->
 	CalledPartyB = party_address(CalledParty),
-	Credit = set_option(?Credit, S#sccp_connection_req.credit),
-	CallingParty= set_option(?CallingPartyAddress, S#sccp_connection_req.calling_party),
-	Data = set_option(?DATA, S#sccp_connection_req.data),
-	Hops = set_option(?HopCounter, S#sccp_connection_req.hop_counter),
-	Importance = set_option(?Importance, importance(S#sccp_connection_req.importance)),
-	<<?ConnectRequest, Src:24, Class, CalledPartyB/binary, Credit/binary,
-			CallingParty/binary, Data/binary, Hops/binary, Importance/binary>>;
+	CallingPartyB = party_address(CallingParty),
+	CreditL = size(Credit), 
+	CallingPartyL = size(CallingPartyB),
+	DataL = size(Data),
+	<<?ConnectRequest, Src:24, Class, CalledPartyB/binary,
+			?Credit, CreditL, Credit/binary,
+			?CallingPartyAddress, CallingPartyL, CallingPartyB/binary,
+			?DATA, DataL, Data/binary,
+			?HopCounter, 1, HopCounter/integer,
+			?Importance, 1, Importance/integer>>;
 sccp(#sccp_connection_confirm{dest_local_ref = Dest, src_local_ref = Src,
-		class = Class} = S) ->
-	Credit = set_option(?Credit, S#sccp_connection_confirm.credit),
-	CalledParty= set_option(?CalledPartyAddress, S#sccp_connection_confirm.called_party),
-	Data = set_option(?DATA, S#sccp_connection_confirm.data),
-	Importance = set_option(?Importance, importance(S#sccp_connection_confirm.importance)),
-	<<?ConnectionConfirm, Dest:24, Src:24, Class/integer, Credit/binary,
-			CalledParty/binary, Data/binary, Importance/binary>>;
-sccp(#sccp_connection_refused{dest_local_ref = Dest, refusal_cause = RC} = S) ->
+		class = Class, credit = Credit, called_party = CalledParty, data = Data,
+		importance = Importance}) ->
+	CreditL = size(Credit),
+	CalledPartyB= party_address(CalledParty),
+	CalledPartyL = size(CalledPartyB),
+	DataL = size(Data),
+	<<?ConnectionConfirm, Dest:24, Src:24, Class/integer,
+			?Credit, CreditL, Credit/binary,
+			?CalledPartyAddress, CalledPartyL, CalledPartyB/binary,
+			?DATA, DataL, Data/binary,
+			?Importance, 1, Importance/integer>>;
+sccp(#sccp_connection_refused{dest_local_ref = Dest, refusal_cause = RC,
+		called_party = CalledParty, data = Data, importance = Importance}) ->
 	Refuse = refusal_cause(RC),
-	CalledParty= set_option(?CalledPartyAddress, S#sccp_connection_refused.called_party),
-	Data = set_option(?DATA, S#sccp_connection_refused.data),
-	Importance = set_option(?Importance, importance(S#sccp_connection_refused.importance)),
-	<<?ConnectionRefused, Dest:24, Refuse, CalledParty/binary, Data/binary,
-			Importance/binary>>;
-sccp(#sccp_released{dest_local_ref = Dest, src_local_ref = Src,
-		release_cause = RC} = S) ->
+	CalledPartyB = party_address(CalledParty),
+	CalledPartyL = size(CalledPartyB),
+	DataL = size(Data),
+	<<?ConnectionRefused, Dest:24, Refuse,
+			?CalledPartyAddress, CalledPartyL, CalledPartyB/binary,
+			?DATA, DataL, Data/binary,
+			?Importance, 1, Importance/integer>>;
+sccp(#sccp_released{dest_local_ref = Dest, src_local_ref = Src, release_cause = RC,
+		data = Data, importance = Importance}) ->
 	Release = release_cause(RC),
-	Data = set_option(?DATA, S#sccp_released.data),
-	Importance = set_option(?Importance, importance(S#sccp_released.importance)),
-	<<?Released, Dest:24, Src:24, Release, Data/binary, Importance/binary>>;
+	DataL = size(Data),
+	<<?Released, Dest:24, Src:24, Release,
+			?DATA, DataL, Data/binary,
+			?Importance, 1, Importance/integer>>;
 sccp(#sccp_release_complete{dest_local_ref = Dest, src_local_ref = Src} = _S) ->
 	<<?ReleaseComplete, Dest:24, Src:24>>;
 sccp(#sccp_data_form1{dest_local_ref = Dest, segmenting = S, data = Data}) ->
@@ -268,41 +280,47 @@ sccp(#sccp_inactivity_test{dest_local_ref = Dest, src_local_ref = Src, class = C
 	Seq = segmenting(S),
 	<<?InactivityTest, Dest:24, Src:24, Class, 0:15, Seq:1/integer, Credit/binary>>;
 sccp(#sccp_extended_unitdata{class = Class, hop_counter = Hops,
-		called_party = CalledParty, calling_party = CallingParty, data = Data} = S) ->
-	Segs = set_option(?Segmentation, S#sccp_extended_unitdata.segmentation),
-	Imp = set_option(?Importance, importance(S#sccp_extended_unitdata.importance)),
+		called_party = CalledParty, calling_party = CallingParty, data = Data,
+		segmentation = S, importance = Importance}) ->
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
-	<<?ExtendedUnitData, Class, Hops, CalledPartyB/binary, CallingPartyB/binary,
-			Data/binary, Segs:48/binary, Imp:24/binary >>;
+	Segs = segmentation(S),
+	SegsL = size(Segs),
+	<<?ExtendedUnitData, Class, Hops, CalledPartyB/binary, CallingPartyB/binary, Data/binary,
+			?Segmentation, SegsL, Segs/binary,
+			?Importance, 1, Importance/integer >>;
 sccp(#sccp_extended_unitdata_service{return_cause = RC, hop_counter = Hops,
-		called_party = CalledParty, calling_party = CallingParty, data = Data} = S) ->
+		called_party = CalledParty, calling_party = CallingParty, data = Data,
+		segmentation = S, importance = Importance}) ->
 	Cause = return_cause(RC),
-	Segs = set_option(?Segmentation, S#sccp_extended_unitdata_service.segmentation),
-	Imp = set_option(?Importance, importance(S#sccp_extended_unitdata_service.importance)),
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
-	<<?ExtendedUnitData, Cause/integer, Hops, CalledPartyB/binary, CallingPartyB/binary,
-			Data/binary, Segs:48/binary, Imp:24/binary >>;
+	Segs = segmentation(S),
+	SegsL = size(Segs),
+	<<?ExtendedUnitData, Cause/integer, Hops, CalledPartyB/binary, CallingPartyB/binary, Data/binary,
+			?Segmentation, SegsL, Segs/binary,
+			?Importance, 1, Importance/integer>>;
 sccp(#sccp_long_unitdata{class = Class, hop_counter = Hops, called_party = CalledParty,
-		calling_party = CallingParty, long_data = LongData} = S) ->
-	Segs = set_option(?Segmentation, S#sccp_long_unitdata.segmentation),
-	Importance = set_option(?Importance, importance(S#sccp_long_unitdata.importance)),
+		calling_party = CallingParty, long_data = LongData,
+		segmentation = S, importance = Importance}) ->
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
-	<<?LongUnitData, Class, Hops, CalledPartyB/binary, CallingPartyB/binary,
-		LongData/binary, Segs:48/binary, Importance:24/binary>>;
+	Segs = segmentation(S),
+	SegsL = size(Segs),
+	<<?LongUnitData, Class, Hops, CalledPartyB/binary, CallingPartyB/binary, LongData/binary,
+			?Segmentation, SegsL, Segs/binary,
+			?Importance, 1, Importance/integer>>;
 sccp(#sccp_long_unitdata_service{return_cause = RC, hop_counter = Hops,
-		called_party = CalledParty, calling_party = CallingParty,
-		long_data = LongData} = S) ->
+		called_party = CalledParty, calling_party = CallingParty, long_data = LongData,
+		segmentation = S, importance = Importance}) ->
 	Cause = return_cause(RC),
-	Segs = set_option(?Segmentation, S#sccp_long_unitdata_service.segmentation),
-	Importance = set_option(?Importance, importance(S#sccp_long_unitdata_service.importance)),
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
-	<<?LongUnitData, Cause/integer, Hops, CalledPartyB/binary, CallingPartyB/binary,
-			LongData/binary,
-		Segs:48/binary, Importance:24/binary>>.
+	Segs = segmentation(S),
+	SegsL = size(Segs),
+	<<?LongUnitData, Cause/integer, Hops, CalledPartyB/binary, CallingPartyB/binary, LongData/binary,
+		?Segmentation, SegsL, Segs/binary,
+		?Importance, 1, Importance/integer>>.
 
 -spec party_address(PA1) -> PA2
 	when
@@ -671,19 +689,6 @@ optional_part1(<<Name, Len, Rest/binary>>, Acc) ->
 	optional_part1(Rest1, [{Name, V} | Acc]);
 optional_part1(<<>>, Acc) ->
 	Acc.
-
--spec set_option(N, V) -> Option
-	when
-		N :: integer(),
-		V :: term(),
-		Option :: binary().
-%% @doc Return an AVP binary.
-set_option(_, undefined) ->
-	<<>>;
-set_option(N, V) ->
-		VBin = term_to_binary(V),
-		L = size(VBin),
-		<<N, L, VBin/binary>>.
 
 -spec importance(I) -> I
 	when
