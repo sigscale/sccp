@@ -29,7 +29,8 @@
 %% SCCP options codec funcion
 -export([party_address/1, nai/1, tt/1, numbering_plan/1, encoding_scheme/1,
 		routing_indicator/1, importance/1, refusal_cause/1, release_cause/1,
-		segmenting/1, return_cause/1, segmentation/1, point_code/1, bcd/1, ssn/1]).
+		segmenting/1, return_cause/1, reset_cause/1, segmentation/1, point_code/1,
+		bcd/1, ssn/1]).
 %% functions to deal with SCCP optional part
 -export([optional_part/1, get_option/2, set_option/2]).
 
@@ -127,8 +128,9 @@ sccp(<<?ExpeditedData, DestLocalRef:24, DataP, Rest/binary>>) ->
 sccp(<<?ExpeditedDataAck, DestLocalRef:24/integer>>) ->
 	#sccp_expedited_ack{dest_local_ref = DestLocalRef};
 sccp(<<?ResetRequest, DestLocalRef:24, SrcLocalRef:24, Reset/integer>>) ->
+	Cause = reset_cause(Reset),
 	#sccp_reset_request{dest_local_ref = DestLocalRef,
-			src_local_ref = SrcLocalRef, reset_cause = Reset};
+			src_local_ref = SrcLocalRef, reset_cause = Cause};
 sccp(<<?ResetConfirmation, DestLocalRef:24, SrcLocalRef/integer>>) ->
 	#sccp_reset_confirmation{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef};
@@ -255,7 +257,8 @@ sccp(#sccp_expedited_data{dest_local_ref  = Dest, data = Data}) ->
 sccp(#sccp_expedited_ack{dest_local_ref = Dest}) ->
 	<<?ExpeditedDataAck, Dest:24/integer>>;
 sccp(#sccp_reset_request{dest_local_ref = Dest, src_local_ref = Src, reset_cause = Cause}) ->
-	<<?ResetRequest, Dest:24, Src:24, Cause/binary>>;
+	Reset = reset_cause(Cause),
+	<<?ResetRequest, Dest:24, Src:24, Reset/integer>>;
 sccp(#sccp_reset_confirmation{dest_local_ref = Dest, src_local_ref = Src}) ->
 	<<?ResetConfirmation, Dest:24, Src:24/integer>>;
 sccp(#sccp_protocol_data_unit_error{dest_local_ref = Dest, error_cause = Error}) ->
@@ -779,6 +782,37 @@ release_cause(inactivity_timer_expire) -> 13;
 release_cause(unqualified) -> 15;
 release_cause(sccp_failure) -> 16;
 release_cause(_) -> 255.
+
+-spec reset_cause(C) -> C
+	when
+		C :: integer() | atom().
+%% @doc Values for reset cause  as defined in
+%% ITU-T Recommendation Q.713, section 3.13
+reset_cause(0) -> enduser_orig;
+reset_cause(1) -> sccp_user_oirg;
+reset_cause(2) -> incorrect_ps;
+reset_cause(3) -> incorrect_pr;
+reset_cause(4) -> rpc_error;
+reset_cause(5) -> rpc_error;
+reset_cause(6) -> rpc_error;
+reset_cause(7) -> remote_end_user_operational;
+reset_cause(8) -> network_operational;
+reset_cause(9) -> access_opertional;
+reset_cause(10) -> network_congestion;
+reset_cause(12) -> unqualified;
+reset_cause(C) when (is_integer(C)) andalso
+		(C == 11 orelse (C > 12 andalso C =< 255)) -> reserved;
+reset_cause(enduser_orig) -> 0;
+reset_cause(sccp_user_oirg) -> 1;
+reset_cause(incorrect_ps) -> 2;
+reset_cause(incorrect_pr) -> 3;
+reset_cause(rpc_error) -> 4;
+reset_cause(remote_end_user_operational) -> 7;
+reset_cause(network_operational) -> 8;
+reset_cause(access_opertional) -> 9;
+reset_cause(network_congestion) -> 10;
+reset_cause(unqualified) -> 12;
+reset_cause(_) -> 255.
 
 -spec segmenting(S) -> S
 	when

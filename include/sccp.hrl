@@ -179,7 +179,10 @@
 		{type = ?ResetRequest,
 		dest_local_ref :: pos_integer(),
 		src_local_ref :: pos_integer(),
-		reset_cause}).
+		reset_cause :: enduser_orig, sccp_user_oirg, incorrect_ps,
+				incorrect_pr, rpc_error, remote_end_user_operational,
+				network_operational, access_opertional, network_congestion,
+				reserved, unqualified}).
 
 -record(sccp_reset_confirmation,
 		{type = ?ResetConfirmation,
