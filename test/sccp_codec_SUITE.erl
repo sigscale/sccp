@@ -563,7 +563,7 @@ sccp_expedited_ack() ->
 
 sccp_expedited_ack(_Config) ->
 	DestLocalRef = rand:uniform(256) - 1,
-	Rec = #sccp_expedited_data{dest_local_ref = DestLocalRef},
+	Rec = #sccp_expedited_ack{dest_local_ref = DestLocalRef},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
