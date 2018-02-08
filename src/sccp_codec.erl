@@ -62,7 +62,7 @@ sccp(<<?ConnectRequest, SrcLocalRef:24, Class, CalledPartyP, Rest/binary>>) ->
 	#sccp_connection_req{src_local_ref = SrcLocalRef,
 			class = Class, called_party = Address,
 			credit = get_option(?Credit, Opts),
-			calling_party  = get_option(?CallingPartyAddress, Opts),
+			calling_party  = party_address(get_option(?CallingPartyAddress, Opts)),
 			data = get_option(?DATA, Opts), hop_counter = get_option(?HopCounter, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?ConnectionConfirm, DestLocalRef:24, SrcLocalRef:24, Class, Rest/binary>>) ->
@@ -70,14 +70,14 @@ sccp(<<?ConnectionConfirm, DestLocalRef:24, SrcLocalRef:24, Class, Rest/binary>>
 	#sccp_connection_confirm{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef, class = Class,
 			credit = get_option(?Credit, Opts),
-			called_party = get_option(?CalledPartyAddress, Opts),
+			called_party = party_address(get_option(?CalledPartyAddress, Opts)),
 			data = get_option(?DATA, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?ConnectionRefused, DestLocalRef:24, Refuse, Rest/binary>>) ->
 	Opts = optional_part(Rest),
 	#sccp_connection_refused{dest_local_ref = DestLocalRef,
 			refusal_cause = refusal_cause(Refuse),
-			called_party = get_option(?CalledPartyAddress, Opts),
+			called_party = party_address(get_option(?CalledPartyAddress, Opts)),
 			data = get_option(?DATA, Opts), importance = get_option(?Importance, Opts)};
 sccp(<<?Released, DestLocalRef:24, SrcLocalRef:24, Release, Rest/binary>>) ->
 	Opts = optional_part(Rest),
