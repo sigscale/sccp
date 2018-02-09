@@ -645,7 +645,7 @@ sccp_extended_unitdata_service() ->
 	[{userdata, [{doc, "encode and decode SCCP extended unit data service message"}]}].
 
 sccp_extended_unitdata_service(_Config) ->
-	Cause = rand:uniform(256) - 1,
+	Cause = sccp_codec:return_cause(rand:uniform(256) - 1),
 	Hops = rand:uniform(15),
 	CalledParty = gen_party_address(),
 	CallingParty = gen_party_address(),
