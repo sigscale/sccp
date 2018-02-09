@@ -1067,7 +1067,7 @@ sccp_extended_unitdata(#sccp_extended_unitdata{class = Class, hop_counter = Hops
 	CalledPartyP = 4,
 	CallingPartyP = CalledPartyP + CalledPartyL,
 	DataP = CallingPartyP + CallingPartyL,
-	OptionalP = DataP + DataL,
+	OptionalP = DataP + DataL -1,
 	B = <<?ExtendedUnitData, Class, Hops, CalledPartyP, CallingPartyP, DataP, OptionalP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			DataL, Data/binary>>,
@@ -1075,17 +1075,26 @@ sccp_extended_unitdata(#sccp_extended_unitdata{class = Class, hop_counter = Hops
 
 %% @hidden
 extended_unitdata1(#sccp_extended_unitdata{segmentation = undefined} = S, B) ->
-	extended_unitdata2(S, B);
+	extended_unitdata2(S, B, <<>>);
 extended_unitdata1(#sccp_extended_unitdata{segmentation = Seg} = S, B) ->
 	SegB = segmentation(Seg),
 	SegL = size(SegB),
-	extended_unitdata2(S, <<B/binary, ?Segmentation, SegL, SegB/binary>>).
+	extended_unitdata2(S, B, <<?Segmentation, SegL, SegB/binary>>).
 
 %% @hidden
-extended_unitdata2(#sccp_extended_unitdata{importance = undefined} = _S, B) ->
-	<<B/binary, 0>>;
-extended_unitdata2(#sccp_extended_unitdata{importance = I} = _S, B) ->
-	<<B/binary, ?Importance, 1, I/integer, 0>>.
+extended_unitdata2(#sccp_extended_unitdata{importance = undefined} = _S, B, O) ->
+	OL = size(O),
+	extended_unitdata3(<<B/binary, OL, O/binary>>, OL);
+extended_unitdata2(#sccp_extended_unitdata{importance = I} = _S, B, O) ->
+	Opt = <<O/binary, ?Importance, 1, I/integer>>,
+	OptL = size(Opt),
+	extended_unitdata3(<<B/binary, OptL, Opt/binary>>, OptL).
+
+%% @hidden
+extended_unitdata3(B, 0) ->
+	B;
+extended_unitdata3(B, _) ->
+	<<B/binary, 0>>.
 
 %% @hidden
 sccp_extended_unitdata_service(#sccp_extended_unitdata_service{return_cause = RC,
@@ -1100,24 +1109,34 @@ sccp_extended_unitdata_service(#sccp_extended_unitdata_service{return_cause = RC
 	CalledPartyP = 3,
 	CallingPartyP = CalledPartyP, CalledPartyL,
 	DataP = CallingPartyP + CallingPartyL,
-	B = <<?ExtendedUnitDataService, Cause/integer, Hops, CalledPartyP, CallingPartyP, DataP,
+	OptionalP = DataP + DataL -1,
+	B = <<?ExtendedUnitDataService, Cause/integer, Hops, CalledPartyP, CallingPartyP, DataP, OptionalP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			DataL, Data/binary>>,
 	extended_unitdata_service1(S, B).
 
 %% @hidden
 extended_unitdata_service1(#sccp_extended_unitdata_service{segmentation = undefined} = S, B) ->
-	extended_unitdata_service2(S, B);
+	extended_unitdata_service2(S, B, <<>>);
 extended_unitdata_service1(#sccp_extended_unitdata_service{segmentation = Seg} = S, B) ->
 	SegB = segmentation(Seg),
 	SegL = size(SegB),
-	extended_unitdata_service2(S, <<B/binary, ?Segmentation, SegL, SegB/binary>>).
+	extended_unitdata_service2(S, B, <<?Segmentation, SegL, SegB/binary>>).
 
 %% @hidden
-extended_unitdata_service2(#sccp_extended_unitdata_service{importance = undefined} = _S, B) ->
-	<<B/binary, 0>>;
-extended_unitdata_service2(#sccp_extended_unitdata_service{importance = I} = _S, B) ->
-	<<B/binary, ?Importance, 1, I/integer, 0>>.
+extended_unitdata_service2(#sccp_extended_unitdata_service{importance = undefined} = _S, B, O) ->
+	OL = size(O),
+	extended_unitdata_service3(<<B/binary, OL, O/binary>>, OL);
+extended_unitdata_service2(#sccp_extended_unitdata_service{importance = I} = _S, B, O) ->
+	Opt = <<O/binary, ?Importance, 1, I/integer>>,
+	OptL = size(Opt),
+	extended_unitdata_service3(<<B/binary, OptL, Opt/binary>>, OptL).
+
+%% @hidden
+extended_unitdata_service3(B, 0) ->
+	B;
+extended_unitdata_service3(B, _) ->
+	<<B/binary, 0>>.
 
 %% @hidden
 sccp_long_unitdata(#sccp_long_unitdata{class = Class, hop_counter = Hops, called_party = CalledParty,
@@ -1130,25 +1149,34 @@ sccp_long_unitdata(#sccp_long_unitdata{class = Class, hop_counter = Hops, called
 	CalledPartyP = 3,
 	CallingPartyP = CalledPartyP, CalledPartyL,
 	LongDataP = CallingPartyP + CallingPartyL,
-	B = <<?LongUnitData, Class, Hops, CalledPartyP, CallingPartyP, LongDataP,
+	OptionalP = LongDataP + LongDataL - 1,
+	B = <<?LongUnitData, Class, Hops, CalledPartyP, CallingPartyP, LongDataP, OptionalP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			LongDataL, LongData/binary>>,
 	long_unitdata1(S, B).
 
 %% @hidden
 long_unitdata1(#sccp_long_unitdata{segmentation = undefined} = S, B) ->
-	long_unitdata2(S, B);
+	long_unitdata2(S, B, <<>>);
 long_unitdata1(#sccp_long_unitdata{segmentation = Seg} = S, B) ->
 	SegB = segmentation(Seg),
 	SegL = size(SegB),
-	long_unitdata2(S, <<B/binary, ?Segmentation, SegL, SegB/binary>>).
+	long_unitdata2(S, B, <<?Segmentation, SegL, SegB/binary>>).
 
 %% @hidden
-long_unitdata2(#sccp_long_unitdata{importance = undefined} = _S, B) ->
-	<<B/binary, 0>>;
-long_unitdata2(#sccp_long_unitdata{importance = I} = _S, B) ->
-	<<B/binary, ?Importance, 1, I/integer, 0>>.
+long_unitdata2(#sccp_long_unitdata{importance = undefined} = _S, B, O) ->
+	OL = size(O),
+	long_unitdata3(<<B/binary, OL, O/binary>>, OL);
+long_unitdata2(#sccp_long_unitdata{importance = I} = _S, B, O) ->
+	Opt = <<O/binary, ?Importance, 1, I/integer>>,
+	OptL = size(Opt),
+	long_unitdata3(<<B/binary, OptL, Opt/binary>>, OptL).
 
+%% @hidden
+long_unitdata3(B, 0) ->
+	B;
+long_unitdata3(B, _) ->
+	<<B/binary, 0>>.
 
 %% @hidden
 sccp_long_unitdata_service(#sccp_long_unitdata_service{return_cause = RC, hop_counter = Hops,
@@ -1162,22 +1190,32 @@ sccp_long_unitdata_service(#sccp_long_unitdata_service{return_cause = RC, hop_co
 	CalledPartyP = 3,
 	CallingPartyP = CalledPartyP, CalledPartyL,
 	LongDataP = CallingPartyP + CallingPartyL,
-	B = <<?LongUnitDataService, Cause/integer, Hops, CalledPartyP, CallingPartyP, LongDataP,
+	OptionalP = LongDataP + LongDataL - 1,
+	B = <<?LongUnitDataService, Cause/integer, Hops, CalledPartyP, CallingPartyP, LongDataP, OptionalP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			LongDataL, LongData/binary>>,
 	long_unitdata_service1(S, B).
 
 %% @hidden
 long_unitdata_service1(#sccp_long_unitdata_service{segmentation = undefined} = S, B) ->
-	long_unitdata_service2(S, B);
+	long_unitdata_service2(S, B, <<>>);
 long_unitdata_service1(#sccp_long_unitdata_service{segmentation = Seg} = S, B) ->
 	SegB = segmentation(Seg),
 	SegL = size(SegB),
-	long_unitdata_service2(S, <<B/binary, ?Segmentation, SegL, SegB/binary>>).
+	long_unitdata_service2(S, B, <<?Segmentation, SegL, SegB/binary>>).
 
 %% @hidden
-long_unitdata_service2(#sccp_long_unitdata_service{importance = undefined} = _S, B) ->
-	<<B/binary, 0>>;
-long_unitdata_service2(#sccp_long_unitdata_service{importance = I} = _S, B) ->
-	<<B/binary, ?Importance, 1, I/integer, 0>>.
+long_unitdata_service2(#sccp_long_unitdata_service{importance = undefined} = _S, B, O) ->
+	OL = size(O),
+	long_unitdata_service3(<<B/binary, OL, O/binary>>, OL);
+long_unitdata_service2(#sccp_long_unitdata_service{importance = I} = _S, B, O) ->
+	Opt = <<O/binary, ?Importance, 1, I/integer>>,
+	OptL = size(Opt),
+	long_unitdata_service3(<<B/binary, OptL, Opt/binary>>, OptL).
+
+%% @hidden
+long_unitdata_service3(B, 0) ->
+	B;
+long_unitdata_service3(B, _) ->
+	<<B/binary, 0>>.
 
