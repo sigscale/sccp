@@ -55,12 +55,12 @@
 %% ITU-T Recommendation Q.713, SCCP formats and codes
 %%
 sccp(<<?ConnectRequest, SrcLocalRef:24, Class, CalledPartyP, Rest/binary>>) ->
-	CalledPartyL = binary:at(Rest, CalledPartyP - 1), 
+	CalledPartyL = binary:at(Rest, CalledPartyP - 1),
 	CalledPartyB = binary:part(Rest, CalledPartyP, CalledPartyL),
 	Address = party_address(CalledPartyB),
 	VarPart = CalledPartyL*8 + 8,
-	<<_:VarPart , O/binary>> = Rest,
-	Opts = optional_part(O), 
+	<<_:VarPart , Op/binary>> = Rest,
+	Opts = optional_part(binary:part(Op, 0, byte_size(Op) - 1)),
 	#sccp_connection_req{src_local_ref = SrcLocalRef,
 			class = Class, called_party = Address,
 			credit = get_option(?Credit, Opts),
@@ -68,7 +68,7 @@ sccp(<<?ConnectRequest, SrcLocalRef:24, Class, CalledPartyP, Rest/binary>>) ->
 			data = get_option(?DATA, Opts), hop_counter = get_option(?HopCounter, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?ConnectionConfirm, DestLocalRef:24, SrcLocalRef:24, Class, Rest/binary>>) ->
-	Opts = optional_part(Rest),
+	Opts = optional_part(binary:part(Rest, 0, byte_size(Rest) - 1)),
 	#sccp_connection_confirm{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef, class = Class,
 			credit = get_option(?Credit, Opts),
@@ -76,13 +76,13 @@ sccp(<<?ConnectionConfirm, DestLocalRef:24, SrcLocalRef:24, Class, Rest/binary>>
 			data = get_option(?DATA, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?ConnectionRefused, DestLocalRef:24, Refuse, Rest/binary>>) ->
-	Opts = optional_part(Rest),
+	Opts = optional_part(binary:part(Rest, 0, byte_size(Rest) - 1)),
 	#sccp_connection_refused{dest_local_ref = DestLocalRef,
 			refusal_cause = refusal_cause(Refuse),
 			called_party = party_address(get_option(?CalledPartyAddress, Opts)),
 			data = get_option(?DATA, Opts), importance = get_option(?Importance, Opts)};
 sccp(<<?Released, DestLocalRef:24, SrcLocalRef:24, Release, Rest/binary>>) ->
-	Opts = optional_part(Rest),
+	Opts = optional_part(binary:part(Rest, 0, byte_size(Rest) - 1)),
 	#sccp_released{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef, release_cause = release_cause(Release),
 			data = get_option(?DATA, Opts), importance = get_option(?Importance, Opts)};
