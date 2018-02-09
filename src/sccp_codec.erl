@@ -782,12 +782,12 @@ optional_part1(<<?Importance, Len, Rest/binary>>, Acc) ->
 	L = Len*8,
 	<<V:L/integer, Rest1/binary>> = Rest,
 	optional_part1(Rest1, [{?Importance, V} | Acc]);
+optional_part1(<<0>>, Acc) ->
+	Acc;
 optional_part1(<<Name, Len, Rest/binary>>, Acc) ->
 	V = binary:part(Rest, 0, Len),
 	<<V:Len/binary, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{Name, V} | Acc]);
-optional_part1(<<>>, Acc) ->
-	Acc.
+	optional_part1(Rest1, [{Name, V} | Acc]).
 
 -spec importance(I) -> I
 	when
