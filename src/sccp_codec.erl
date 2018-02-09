@@ -218,7 +218,7 @@ sccp(#sccp_connection_req{src_local_ref = Src, class = Class,
 			?CallingPartyAddress, CallingPartyL, CallingPartyB/binary,
 			?DATA, DataL, Data/binary,
 			?HopCounter, 1, HopCounter/integer,
-			?Importance, 1, Importance/integer>>;
+			?Importance, 1, Importance/integer, 0>>;
 sccp(#sccp_connection_confirm{dest_local_ref = Dest, src_local_ref = Src,
 		class = Class, credit = Credit, called_party = CalledParty, data = Data,
 		importance = Importance}) ->
@@ -230,7 +230,7 @@ sccp(#sccp_connection_confirm{dest_local_ref = Dest, src_local_ref = Src,
 			?Credit, CreditL, Credit/binary,
 			?CalledPartyAddress, CalledPartyL, CalledPartyB/binary,
 			?DATA, DataL, Data/binary,
-			?Importance, 1, Importance/integer>>;
+			?Importance, 1, Importance/integer, 0>>;
 sccp(#sccp_connection_refused{dest_local_ref = Dest, refusal_cause = RC,
 		called_party = CalledParty, data = Data, importance = Importance}) ->
 	Refuse = refusal_cause(RC),
@@ -240,14 +240,14 @@ sccp(#sccp_connection_refused{dest_local_ref = Dest, refusal_cause = RC,
 	<<?ConnectionRefused, Dest:24, Refuse,
 			?CalledPartyAddress, CalledPartyL, CalledPartyB/binary,
 			?DATA, DataL, Data/binary,
-			?Importance, 1, Importance/integer>>;
+			?Importance, 1, Importance/integer, 0>>;
 sccp(#sccp_released{dest_local_ref = Dest, src_local_ref = Src, release_cause = RC,
 		data = Data, importance = Importance}) ->
 	Release = release_cause(RC),
 	DataL = size(Data),
 	<<?Released, Dest:24, Src:24, Release,
 			?DATA, DataL, Data/binary,
-			?Importance, 1, Importance/integer>>;
+			?Importance, 1, Importance/integer, 0>>;
 sccp(#sccp_release_complete{dest_local_ref = Dest, src_local_ref = Src} = _S) ->
 	<<?ReleaseComplete, Dest:24, Src:24>>;
 sccp(#sccp_data_form1{dest_local_ref = Dest, segmenting = S, data = Data}) ->
@@ -313,8 +313,8 @@ sccp(#sccp_extended_unitdata{class = Class, hop_counter = Hops,
 	CalledPartyL = size(CalledPartyB),
 	CallingPartyL = size(CallingPartyB),
 	DataL = size(Data),
-	CalledPartyP = 3,
-	CallingPartyP = CalledPartyP, CalledPartyL,
+	CalledPartyP = 4,
+	CallingPartyP = CalledPartyP + CalledPartyL,
 	DataP = CallingPartyP + CallingPartyL,
 	OptionalP = DataP + DataL,
 	Segs = segmentation(S),
@@ -322,7 +322,7 @@ sccp(#sccp_extended_unitdata{class = Class, hop_counter = Hops,
 	<<?ExtendedUnitData, Class, Hops, CalledPartyP, CallingPartyP, DataP, OptionalP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			DataL, Data/binary, ?Segmentation, SegsL, Segs/binary,
-			?Importance, 1, Importance/integer >>;
+			?Importance, 1, Importance/integer, 0>>;
 sccp(#sccp_extended_unitdata_service{return_cause = RC, hop_counter = Hops,
 		called_party = CalledParty, calling_party = CallingParty, data = Data,
 		segmentation = S, importance = Importance}) ->
@@ -340,7 +340,7 @@ sccp(#sccp_extended_unitdata_service{return_cause = RC, hop_counter = Hops,
 	<<?ExtendedUnitDataService, Cause/integer, Hops, CalledPartyP, CallingPartyP, DataP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			DataL, Data/binary, ?Segmentation, SegsL, Segs/binary,
-			?Importance, 1, Importance/integer>>;
+			?Importance, 1, Importance/integer, 0>>;
 sccp(#sccp_long_unitdata{class = Class, hop_counter = Hops, called_party = CalledParty,
 		calling_party = CallingParty, long_data = LongData,
 		segmentation = S, importance = Importance}) ->
@@ -357,7 +357,7 @@ sccp(#sccp_long_unitdata{class = Class, hop_counter = Hops, called_party = Calle
 	<<?LongUnitData, Class, Hops, CalledPartyP, CallingPartyP, LongDataP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			LongDataL, LongData/binary, ?Segmentation, SegsL, Segs/binary,
-			?Importance, 1, Importance/integer>>;
+			?Importance, 1, Importance/integer, 0>>;
 sccp(#sccp_long_unitdata_service{return_cause = RC, hop_counter = Hops,
 		called_party = CalledParty, calling_party = CallingParty, long_data = LongData,
 		segmentation = S, importance = Importance}) ->
@@ -375,7 +375,7 @@ sccp(#sccp_long_unitdata_service{return_cause = RC, hop_counter = Hops,
 	<<?LongUnitDataService, Cause/integer, Hops, CalledPartyP, CallingPartyP, LongDataP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			LongDataL, LongData/binary, ?Segmentation, SegsL, Segs/binary,
-		?Importance, 1, Importance/integer>>.
+		?Importance, 1, Importance/integer, 0>>.
 
 -spec party_address(PA1) -> PA2
 	when
