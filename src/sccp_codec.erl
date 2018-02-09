@@ -372,7 +372,7 @@ sccp(#sccp_long_unitdata_service{return_cause = RC, hop_counter = Hops,
 	LongDataP = CallingPartyP + CallingPartyL,
 	Segs = segmentation(S),
 	SegsL = size(Segs),
-	<<?LongUnitData, Cause/integer, Hops, CalledPartyP, CallingPartyP, LongDataP,
+	<<?LongUnitDataService, Cause/integer, Hops, CalledPartyP, CallingPartyP, LongDataP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			LongDataL, LongData/binary, ?Segmentation, SegsL, Segs/binary,
 		?Importance, 1, Importance/integer>>.
