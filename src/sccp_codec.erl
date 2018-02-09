@@ -55,10 +55,12 @@
 %% ITU-T Recommendation Q.713, SCCP formats and codes
 %%
 sccp(<<?ConnectRequest, SrcLocalRef:24, Class, CalledPartyP, Rest/binary>>) ->
-	CalledPartyL = binary:at(Rest, CalledPartyP -1), 
+	CalledPartyL = binary:at(Rest, CalledPartyP - 1), 
 	CalledPartyB = binary:part(Rest, CalledPartyP, CalledPartyL),
 	Address = party_address(CalledPartyB),
-	Opts = optional_part(Rest), 
+	VarPart = CalledPartyL*8 + 8,
+	<<_:VarPart , O/binary>> = Rest,
+	Opts = optional_part(O), 
 	#sccp_connection_req{src_local_ref = SrcLocalRef,
 			class = Class, called_party = Address,
 			credit = get_option(?Credit, Opts),
