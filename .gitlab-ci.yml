@@ -96,9 +96,11 @@ pages:otp-18:
     - pwd
     - ls ${CI_PROJECT_DIR}
     - ls ${CI_PROJECT_DIR}/../
-    - mkdir public/doc public/tests
-    - mv .build/otp-18.*/sccp/test/log public/tests
-    - mv .build/otp-18.*/sccp/doc public/doc
+    - mkdir -p .public/doc public/tests
+    - cp -r .build/otp-18.*/sccp/test/log/* .public/tests
+    - cp -r .build/otp-18.*/sccp/doc/* .public/doc
+    - mv .public/tests public
+    - mv .public/doc public
   artifacts:
     when: always
     paths:
