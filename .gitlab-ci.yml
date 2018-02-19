@@ -96,7 +96,7 @@ pages:otp-18:
     - pwd
     - ls ${CI_PROJECT_DIR}
     - ls ${CI_PROJECT_DIR}/../
-    - mkdir -p .public/doc public/tests
+    - mkdir -p .public/doc .public/tests
     - cp -r .build/otp-18.*/sccp/test/log/* .public/tests
     - cp -r .build/otp-18.*/sccp/doc/* .public/doc
     - mv .public/tests public
