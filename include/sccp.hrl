@@ -82,14 +82,14 @@
 %% SCCP messages - ITU-T Recommendation Q.713, section 4
 -record(sccp_connection_req,
 		{type = ?ConnectRequest,
-		src_local_ref :: pos_integer(),
-		class :: pos_integer(),
-		called_party :: #party_address{},
-		credit :: binary(),
-		calling_party :: #party_address{},
-		data :: binary(),
-		hop_counter :: pos_integer(),
-		importance :: pos_integer()}).
+		src_local_ref :: undefined | pos_integer(),
+		class :: undefined | pos_integer(),
+		called_party :: undefined | #party_address{},
+		credit :: undefined | binary(),
+		calling_party :: undefined | #party_address{},
+		data :: undefined | binary(),
+		hop_counter :: undefined | pos_integer(),
+		importance :: undefined | pos_integer()}).
 
 -record(sccp_connection_confirm,
 		{type  = ?ConnectionConfirm,
