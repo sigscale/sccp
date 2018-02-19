@@ -92,7 +92,9 @@ check:otp-18:
 pages:otp-18:
   stage: deploy
   script:
-    - mv .build/otp-18.*/sccp/test/log public/
+    - mkdir public/doc public/tests
+    - mv .build/otp-18.*/sccp/test/log public/tests
+    - mv .build/otp-18.*/sccp/doc public/doc
   artifacts:
     when: always
     paths:
@@ -105,7 +107,9 @@ pages:otp-18:
 pages:otp-19:
   stage: deploy
   script:
-    - mv .build/otp-19.*/sccp/test/log public/
+    - mkdir public/doc public/tests
+    - mv .build/otp-19.*/sccp/test/log public/tests
+    - mv .build/otp-19.*/sccp/doc public/doc
   artifacts:
     when: always
     paths:
@@ -118,7 +122,9 @@ pages:otp-19:
 pages:otp-20:
   stage: deploy
   script:
-    - mv .build/otp-20.*/sccp/test/log public/
+    - mkdir public/doc public/tests
+    - mv .build/otp-20.*/sccp/test/log public/tests
+    - mv .build/otp-20.*/sccp/doc public/doc
   artifacts:
     when: always
     paths:
