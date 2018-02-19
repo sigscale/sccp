@@ -97,8 +97,12 @@ pages:otp-18:
     - ls ${CI_PROJECT_DIR}
     - ls ${CI_PROJECT_DIR}/../
     - mkdir -p .public/doc .public/tests
+    - ls .public
     - cp -r .build/otp-18.*/sccp/test/log/* .public/tests
     - cp -r .build/otp-18.*/sccp/doc/* .public/doc
+    - ls .public
+    - ls .public/tests
+    - ls .public/doc
     - mv .public/tests public
     - mv .public/doc public
   artifacts:
