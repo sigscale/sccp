@@ -61,17 +61,17 @@
 
 %% SCCP Parameters - ITU-T Recommendation Q.713, section 3.4, section 3.5
 -record(party_address,
-		{ri :: boolean(),
-		pc :: pos_integer(),
-		ssn :: pos_integer(),
-		translation_type :: not_used | internetwork | network_specific | reserved,
-		numbering_plan :: unknown | isdn_tele | generic
+		{ri :: undefined | boolean(),
+		pc :: undefined | pos_integer(),
+		ssn :: undefined | pos_integer(),
+		translation_type :: undefined | not_used | internetwork | network_specific | reserved,
+		numbering_plan :: undefined | unknown | isdn_tele | generic
 				| data | telex | maritime | land_mobile
 				| isdn_mobile | spare | private_net | reserved,
-		encoding_scheme :: unknown | bcd_odd | bcd_even
+		encoding_scheme :: undefined | unknown | bcd_odd | bcd_even
 				| national | spare | reserved,
-		nai :: unknown | subscriber | national | international | spare | reserved,
-		gt :: [integer()]}).
+		nai :: undefined | unknown | subscriber | national | international | spare | reserved,
+		gt :: undefined | [integer()]}).
 
 %% SCCP Parameters - ITU-T Recommendation Q.713, section 3.17
 -record(segmentation,
