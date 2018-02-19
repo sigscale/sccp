@@ -92,6 +92,10 @@ check:otp-18:
 pages:otp-18:
   stage: deploy
   script:
+    - ls
+    - pwd
+    - ls ${CI_PROJECT_DIR}
+    - ls ${CI_PROJECT_DIR}/../
     - mkdir public/doc public/tests
     - mv .build/otp-18.*/sccp/test/log public/tests
     - mv .build/otp-18.*/sccp/doc public/doc
