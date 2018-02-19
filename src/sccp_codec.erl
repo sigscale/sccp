@@ -290,10 +290,9 @@ sccp(#sccp_long_unitdata{} = S) ->
 sccp(#sccp_long_unitdata_service{} = S) ->
 	sccp_long_unitdata_service(S).
 
--spec party_address(PA1) -> PA2
+-spec party_address(PA) -> PA
 	when
-		PA1 :: binary() | undefined | #party_address{},
-		PA2 :: binary() | #party_address{}.
+		PA :: binary() | #party_address{}.
 %% @doc Check address indicator values and extract relevant information.
 party_address(<<_:7, 1:1, LSB, _:2, MSB:6, _/binary>> = B) ->
 	party_address1(B, #party_address{pc = (MSB bsl 8) + LSB});
@@ -426,9 +425,7 @@ party_address(#party_address{ri  = R, pc = P, ssn = S, translation_type = T,
 	NAI = nai(N),
 	BCD = bcd(G),
 	<<0:1, RI:1, 4:4, 1:1, 1:1, PC/binary, SSN/binary, TT:8, NPlan:4, ES:4, 0:1,
-			NAI:7, BCD/binary>>;
-party_address(undefined) ->
-	<<>>.
+			NAI:7, BCD/binary>>.
 
 %% @hidden
 %% @doc Evaluate SSN indicator
