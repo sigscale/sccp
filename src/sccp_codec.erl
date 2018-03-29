@@ -476,8 +476,6 @@ party_address2(<<_:1, RI:1, 3:4, 0:1, _:1, PC:16, TT, NPlan:4, Enc:4,
 	N = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
 	G = case E of
-				unknown ->
-					unknown;
 				bcd_odd ->
 					bcd(GT, 1);
 				bcd_even ->
@@ -494,8 +492,6 @@ party_address2(<<_:1, RI:1, 3:4, _:1, 0:1, SSN, TT, NPlan:4, Enc:4,
 	N = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
 	G = case E of
-				unknown ->
-					unknown;
 				bcd_odd ->
 					bcd(GT, 1);
 				bcd_even ->
@@ -512,8 +508,6 @@ party_address2(<<_:1, RI:1, 3:4, _:2, PC:16, SSN, TT, NPlan:4, Enc:4,
 	N = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
 	G = case E of
-				unknown ->
-					unknown;
 				bcd_odd ->
 					bcd(GT, 1);
 				bcd_even ->
@@ -529,8 +523,15 @@ party_address2(<<_:1, RI:1, 4:4, 0:1, _:1, PC:16, TT, NPlan:4, Enc:4, 0:1, NAI:7
 	T = tt(TT),
 	NP = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
+	G = case E of
+		bcd_odd ->
+			bcd(GT, 1);
+		bcd_even ->
+			bcd(GT, 0);
+		_ ->
+			bcd(GT, 0)
+	end,
 	N = nai(NAI),
-	G = bcd(GT, 0),
 	P#party_address{ri = R, ssn = undefined, pc = PC, translation_type = T, numbering_plan = NP,
 			encoding_scheme = E, nai = N, gt = G};
 party_address2(<<_:1, RI:1, 4:4, _:1, 0:1, SSN, TT, NPlan:4, Enc:4, 0:1, NAI:7,
@@ -539,8 +540,15 @@ party_address2(<<_:1, RI:1, 4:4, _:1, 0:1, SSN, TT, NPlan:4, Enc:4, 0:1, NAI:7,
 	T = tt(TT),
 	NP = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
+	G = case E of
+		bcd_odd ->
+			bcd(GT, 1);
+		bcd_even ->
+			bcd(GT, 0);
+		_ ->
+			bcd(GT, 0)
+	end,
 	N = nai(NAI),
-	G = bcd(GT, 0),
 	P#party_address{ri = R, ssn = SSN, pc = undefined, translation_type = T, numbering_plan = NP,
 			encoding_scheme = E, nai = N, gt = G};
 party_address2(<<_:1, RI:1, 4:4, _:2, PC:16, SSN, TT, NPlan:4, Enc:4, 0:1, NAI:7,
@@ -549,8 +557,15 @@ party_address2(<<_:1, RI:1, 4:4, _:2, PC:16, SSN, TT, NPlan:4, Enc:4, 0:1, NAI:7
 	T = tt(TT),
 	NP = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
+	G = case E of
+		bcd_odd ->
+			bcd(GT, 1);
+		bcd_even ->
+			bcd(GT, 0);
+		_ ->
+			bcd(GT, 0)
+	end,
 	N = nai(NAI),
-	G = bcd(GT, 0),
 	P#party_address{ri = R, ssn = SSN, pc = PC, translation_type = T, numbering_plan = NP,
 			encoding_scheme = E, nai = N, gt = G}.
 
