@@ -291,7 +291,7 @@ refusal_cause() ->
 	[{userdata, [{doc, "encode and decode refusal cause parameter"}]}].
 
 refusal_cause(_Config) ->
-	F = fun(F, 256) ->
+	F = fun(_F, 256) ->
 				ok;
 		(F, N) ->
 			RC = sccp_codec:refusal_cause(N),
@@ -309,7 +309,7 @@ release_cause() ->
 	[{userdata, [{doc, "encode and decode release cause parameter"}]}].
 
 release_cause(_Config) ->
-	F = fun(F, 256) ->
+	F = fun(_F, 256) ->
 				ok;
 		(F, N) ->
 			RC = sccp_codec:release_cause(N),
@@ -327,7 +327,7 @@ return_cause() ->
 	[{userdata, [{doc, "encode and decode return_cause parameter"}]}].
 
 return_cause(_Config) ->
-	F = fun(F, 256) ->
+	F = fun(_F, 256) ->
 				ok;
 		(F, N)  ->
 			RC = sccp_codec:return_cause(N),
@@ -393,7 +393,7 @@ ssn(_Config) ->
 bcd_even() ->
 	[{userdata, [{doc, "encode and decode binary coded decimals"}]}].
 
-bcd_even(Config) ->
+bcd_even(_Config) ->
 	Dec = [2,4,8,3,2,3,5,5,5,1,2,3,4,1],
 	Bin = sccp_codec:bcd(Dec),
 	true = is_binary(Bin),
@@ -402,7 +402,7 @@ bcd_even(Config) ->
 bcd_odd() ->
 	[{userdata, [{doc, "encode and decode odd binary coded decimals"}]}].
 
-bcd_odd(Config) ->
+bcd_odd(_Config) ->
 	Dec = [2,4,8,3,2,3,5,5,5,1,2,3,4],
 	Bin = sccp_codec:bcd(Dec),
 	true = is_binary(Bin),
