@@ -962,7 +962,7 @@ ssn(N) when is_integer(N) ->
 	when
 		Address :: [integer()],
 		Data :: binary().
-%% @doc Encode list of digit to a binary coded decimal value.
+%% @doc Encode list of digits to a binary coded decimal value.
 bcd(Address) when is_list(Address) ->
 	bcd2(Address, <<>>).
 
@@ -976,14 +976,14 @@ bcd(Address) when is_list(Address) ->
 %% in a global address information. 
 %% ITU-T Recommendation Q.713, section 3.4.2.3.1
 bcd(Data, OE) when is_binary(Data) ->
-	bcd1(OE, Data, []).
+	bcd1(Data, OE, []).
 
 %% @hidden
-bcd1(1, <<0:4/integer, Y:4/integer, Rest/binary>>, Acc) when Rest == <<>> ->
-	bcd1(1, Rest, [Y | Acc]);
-bcd1(OE, <<X:4/integer, Y:4/integer, Rest/binary>>, Acc) ->
-	bcd1(OE, Rest, [X, Y | Acc]);
-bcd1(_, <<>>, Acc) ->
+bcd1(<<0:4/integer, Y:4/integer, Rest/binary>>, 1, Acc) when Rest == <<>> ->
+	bcd1(Rest, 1, [Y | Acc]);
+bcd1(<<X:4/integer, Y:4/integer, Rest/binary>>, OE, Acc) ->
+	bcd1(Rest, OE, [X, Y | Acc]);
+bcd1(<<>>, _, Acc) ->
 	lists:reverse(Acc).
 
 %% @hidden
