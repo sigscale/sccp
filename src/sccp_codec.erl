@@ -457,17 +457,17 @@ party_address2(<<_:1, RI:1, 1:4, _:2, PC:16, SSN, OE:1, NAI:7, GT/binary>> = _B,
 party_address2(<<_:1, RI:1, 2:4, 0:1, _:1, PC:16, TT, GT/binary>> = _B, P) -> % GTI = 0010 (Translation type only)
 	R = routing_indicator(RI),
 	T = tt(TT),
-	G = bcd(GT, 0),
+	G = bcd(GT, 1),
 	P#party_address{ri = R, pc = PC, ssn = undefined, translation_type = T, gt = G};
 party_address2(<<_:1, RI:1, 2:4, _:1, 0:1, SSN, TT, GT/binary>> = _B, P) -> % GTI = 0010 (Translation type only)
 	R = routing_indicator(RI),
 	T = tt(TT),
-	G = bcd(GT, 0),
+	G = bcd(GT, 1),
 	P#party_address{ri = R, pc = undefined, ssn = SSN, translation_type = T, gt = G};
 party_address2(<<_:1, RI:1, 2:4, _:2, PC:16, SSN, TT, GT/binary>> = _B, P) -> % GTI = 0010 (Translation type only)
 	R = routing_indicator(RI),
 	T = tt(TT),
-	G = bcd(GT, 0),
+	G = bcd(GT, 1),
 	P#party_address{ri = R, pc = PC, ssn = SSN, translation_type = T, gt = G};
 party_address2(<<_:1, RI:1, 3:4, 0:1, _:1, PC:16, TT, NPlan:4, Enc:4,
 		GT/binary>> = _B, P) -> % GTI = 0011 (Translation type, numbering plan and encoding scheme)

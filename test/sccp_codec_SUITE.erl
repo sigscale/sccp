@@ -128,8 +128,13 @@ party_address_gti_3(_Config) ->
 	SSN = rand:uniform(256) - 1,
 	TT = sccp_codec:tt(rand:uniform(256) - 1),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
-	ES = sccp_codec:encoding_scheme(rand:uniform(16) - 1),
-	GT = [9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7],
+	ES = sccp_codec:encoding_scheme(rand:uniform(2)),
+	GT = case ES of
+		bcd_even ->
+			[9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7, 8];
+		bcd_odd ->
+			[9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7]
+	end,
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT,
 			numbering_plan = NP, encoding_scheme = ES, gt = GT},
 	P2 = sccp_codec:party_address(P1),
