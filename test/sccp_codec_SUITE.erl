@@ -77,7 +77,7 @@ sequences() ->
 all() -> 
 	[party_address_gti_0, party_address_gti_1, party_address_gti_2, party_address_gti_3,
 		party_address_gti_4, nai, translation_type, numbering_plan, encoding_scheme, importance,
-		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd,
+		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd_even,
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
 		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
 		sccp_unitdata_service, sccp_expedited_data, sccp_expedited_ack, sccp_reset_request,
@@ -385,14 +385,14 @@ ssn(_Config) ->
 	end,
 	ok = F(F, 0).
 
-bcd() ->
+bcd_even() ->
 	[{userdata, [{doc, "encode and decode binary coded decimals"}]}].
 
-bcd(Config) ->
+bcd_even(Config) ->
 	Dec = [2,4,8,3,2,3,5,5,5,1,2,3,4,1],
 	Bin = sccp_codec:bcd(Dec),
 	true = is_binary(Bin),
-	Dec = sccp_codec:bcd(Bin).
+	Dec = sccp_codec:bcd(Bin, 0).
 
 sccp_connection_req() ->
 	[{userdata, [{doc, "encode and decode SCCP connection request message"}]}].
