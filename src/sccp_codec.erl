@@ -30,7 +30,7 @@
 -export([party_address/1, nai/1, tt/1, numbering_plan/1, encoding_scheme/1,
 		routing_indicator/1, importance/1, refusal_cause/1, release_cause/1,
 		segmenting/1, return_cause/1, reset_cause/1, segmentation/1, point_code/1,
-		bcd/1, ssn/1]).
+		bcd/1, bcd/2, ssn/1]).
 %% functions to deal with SCCP optional part
 -export([optional_part/1, get_option/2]).
 
@@ -436,94 +436,121 @@ party_address1(<<_:6, 0:1, _:1, _Rest/binary>> = B, P) ->
 
 %% @hidden
 %% @doc Evaluate global Title indicator
-party_address2(<<_:1, RI:1, 0:4, _:2, _Rest/binary>> = _B, P) -> % No global title included
+party_address2(<<_:1, RI:1, 0:4, _:2, _Rest/binary>> = _B, P) -> % GTI = 0000 (No global title included)
 	R = routing_indicator(RI),
 	P#party_address{ri = R};
-party_address2(<<_:1, RI:1, 1:4, 0:1, _:1, PC:16, _OE:1, NAI:7, GT/binary>> = _B, P) -> % NAI only
+party_address2(<<_:1, RI:1, 1:4, 0:1, _:1, PC:16, OE:1, NAI:7, GT/binary>> = _B, P) -> % GTI = 0001 (NAI only)
 	R = routing_indicator(RI),
 	N = nai(NAI),
-	G = bcd(GT),
+	G = bcd(GT, OE),
 	P#party_address{ri = R, pc = PC, ssn = undefined, nai = N, gt = G};
-party_address2(<<_:1, RI:1, 1:4, _:1, 0:1, SSN, _OE:1, NAI:7, GT/binary>> = _B, P) -> % NAI only
+party_address2(<<_:1, RI:1, 1:4, _:1, 0:1, SSN, OE:1, NAI:7, GT/binary>> = _B, P) -> % GTI = 0001 (NAI only)
 	R = routing_indicator(RI),
 	N = nai(NAI),
-	G = bcd(GT),
+	G = bcd(GT, OE),
 	P#party_address{ri = R, pc = undefined, ssn = SSN, nai = N, gt = G};
-party_address2(<<_:1, RI:1, 1:4, _:2, PC:16, SSN, _OE:1, NAI:7, GT/binary>> = _B, P) -> % NAI only
+party_address2(<<_:1, RI:1, 1:4, _:2, PC:16, SSN, OE:1, NAI:7, GT/binary>> = _B, P) -> % GTI = 0001 (NAI only)
 	R = routing_indicator(RI),
 	N = nai(NAI),
-	G = bcd(GT),
+	G = bcd(GT, OE),
 	P#party_address{ri = R, pc = PC, ssn = SSN, nai = N, gt = G};
-party_address2(<<_:1, RI:1, 2:4, 0:1, _:1, PC:16, TT, GT/binary>> = _B, P) -> % Translation type only
+party_address2(<<_:1, RI:1, 2:4, 0:1, _:1, PC:16, TT, GT/binary>> = _B, P) -> % GTI = 0010 (Translation type only)
 	R = routing_indicator(RI),
 	T = tt(TT),
-	G = bcd(GT),
+	G = bcd(GT, 0),
 	P#party_address{ri = R, pc = PC, ssn = undefined, translation_type = T, gt = G};
-party_address2(<<_:1, RI:1, 2:4, _:1, 0:1, SSN, TT, GT/binary>> = _B, P) -> % Translation type only
+party_address2(<<_:1, RI:1, 2:4, _:1, 0:1, SSN, TT, GT/binary>> = _B, P) -> % GTI = 0010 (Translation type only)
 	R = routing_indicator(RI),
 	T = tt(TT),
-	G = bcd(GT),
+	G = bcd(GT, 0),
 	P#party_address{ri = R, pc = undefined, ssn = SSN, translation_type = T, gt = G};
-party_address2(<<_:1, RI:1, 2:4, _:2, PC:16, SSN, TT, GT/binary>> = _B, P) -> % Translation type only
+party_address2(<<_:1, RI:1, 2:4, _:2, PC:16, SSN, TT, GT/binary>> = _B, P) -> % GTI = 0010 (Translation type only)
 	R = routing_indicator(RI),
 	T = tt(TT),
-	G = bcd(GT),
+	G = bcd(GT, 0),
 	P#party_address{ri = R, pc = PC, ssn = SSN, translation_type = T, gt = G};
 party_address2(<<_:1, RI:1, 3:4, 0:1, _:1, PC:16, TT, NPlan:4, Enc:4,
-		GT/binary>> = _B, P) -> % Translation type, numbering plan and encoding scheme
+		GT/binary>> = _B, P) -> % GTI = 0011 (Translation type, numbering plan and encoding scheme)
 	R = routing_indicator(RI),
 	T = tt(TT),
 	N = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
-	G = bcd(GT),
+	G = case E of
+				unknown ->
+					unknown;
+				bcd_odd ->
+					bcd(GT, 1);
+				bcd_even ->
+					bcd(GT, 0);
+				_ ->
+					bcd(GT, 0)
+	end,
 	P#party_address{ri = R, ssn = undefined, pc = PC, translation_type = T, numbering_plan = N,
 			encoding_scheme = E, gt = G};
 party_address2(<<_:1, RI:1, 3:4, _:1, 0:1, SSN, TT, NPlan:4, Enc:4,
-		GT/binary>> = _B, P) -> % Translation type, numbering plan and encoding scheme
+		GT/binary>> = _B, P) -> % GTI = 0011 (Translation type, numbering plan and encoding scheme)
 	R = routing_indicator(RI),
 	T = tt(TT),
 	N = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
-	G = bcd(GT),
+	G = case E of
+				unknown ->
+					unknown;
+				bcd_odd ->
+					bcd(GT, 1);
+				bcd_even ->
+					bcd(GT, 0);
+				_ ->
+					bcd(GT, 0)
+	end,
 	P#party_address{ri = R, ssn = SSN, pc = undefined, translation_type = T, numbering_plan = N,
 			encoding_scheme = E, gt = G};
 party_address2(<<_:1, RI:1, 3:4, _:2, PC:16, SSN, TT, NPlan:4, Enc:4,
-		GT/binary>> = _B, P) -> % Translation type, numbering plan and encoding scheme
+		GT/binary>> = _B, P) -> % GTI = 0011 (Translation type, numbering plan and encoding scheme)
 	R = routing_indicator(RI),
 	T = tt(TT),
 	N = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
-	G = bcd(GT),
+	G = case E of
+				unknown ->
+					unknown;
+				bcd_odd ->
+					bcd(GT, 1);
+				bcd_even ->
+					bcd(GT, 0);
+				_ ->
+					bcd(GT, 0)
+	end,
 	P#party_address{ri = R, ssn = SSN, pc = PC, translation_type = T, numbering_plan = N,
 			encoding_scheme = E, gt = G};
 party_address2(<<_:1, RI:1, 4:4, 0:1, _:1, PC:16, TT, NPlan:4, Enc:4, 0:1, NAI:7,
-		GT/binary>> = _B, P) -> % Translation type, numbering plan and encoding scheme, NAI
+		GT/binary>> = _B, P) -> % GTI = 0100 (Translation type, numbering plan and encoding scheme, NAI)
 	R = routing_indicator(RI),
 	T = tt(TT),
 	NP = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
 	N = nai(NAI),
-	G = bcd(GT),
+	G = bcd(GT, 0),
 	P#party_address{ri = R, ssn = undefined, pc = PC, translation_type = T, numbering_plan = NP,
 			encoding_scheme = E, nai = N, gt = G};
 party_address2(<<_:1, RI:1, 4:4, _:1, 0:1, SSN, TT, NPlan:4, Enc:4, 0:1, NAI:7,
-		GT/binary>> = _B, P) -> % Translation type, numbering plan and encoding scheme, NAI
+		GT/binary>> = _B, P) -> % GTI = 0100 (Translation type, numbering plan and encoding scheme, NAI)
 	R = routing_indicator(RI),
 	T = tt(TT),
 	NP = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
 	N = nai(NAI),
-	G = bcd(GT),
+	G = bcd(GT, 0),
 	P#party_address{ri = R, ssn = SSN, pc = undefined, translation_type = T, numbering_plan = NP,
 			encoding_scheme = E, nai = N, gt = G};
 party_address2(<<_:1, RI:1, 4:4, _:2, PC:16, SSN, TT, NPlan:4, Enc:4, 0:1, NAI:7,
-		GT/binary>> = _B, P) -> % Translation type, numbering plan and encoding scheme, NAI
+		GT/binary>> = _B, P) -> % GTI = 0100 (Translation type, numbering plan and encoding scheme, NAI)
 	R = routing_indicator(RI),
 	T = tt(TT),
 	NP = numbering_plan(NPlan),
 	E = encoding_scheme(Enc),
 	N = nai(NAI),
-	G = bcd(GT),
+	G = bcd(GT, 0),
 	P#party_address{ri = R, ssn = SSN, pc = PC, translation_type = T, numbering_plan = NP,
 			encoding_scheme = E, nai = N, gt = G}.
 
@@ -916,21 +943,32 @@ ssn(<<N:8/integer>>) ->
 ssn(N) when is_integer(N) ->
 	<<N:8>>.
 
--spec bcd(N) -> N
+-spec bcd(Address) -> Data
 	when
-		N :: binary() | [integer()].
-%% @doc Encode/decode binary coded decimal values
-bcd(Address) when is_binary(Address) ->
-	bcd1(Address, []);
+		Address :: [integer()],
+		Data :: binary().
+%% @doc Encode list of digit to a binary coded decimal value.
 bcd(Address) when is_list(Address) ->
 	bcd2(Address, <<>>).
 
+-spec bcd(Data, OE) -> Address
+	when
+		Data :: binary(),
+		OE :: 0 | 1,
+		Address :: [integer()].
+%% @doc Decode binary coded decimal value to a list of digits.
+%% `OE' indicates odd/even number of address signals present 
+%% in a global address information. 
+%% ITU-T Recommendation Q.713, section 3.4.2.3.1
+bcd(Data, OE) when is_binary(Info) ->
+	bcd1(Data, Info, []).
+
 %% @hidden
-bcd1(<<0:4/integer, Y:4/integer, Rest/binary>>, Acc) when is_list(Acc) ->
-	bcd1(Rest, [Y | Acc]);
-bcd1(<<X:4/integer, Y:4/integer, Rest/binary>>, Acc) when is_list(Acc) ->
-	bcd1(Rest, [X, Y | Acc]);
-bcd1(<<>>, Acc) ->
+bcd1(1, <<0:4/integer, Y:4/integer, Rest/binary>>, Acc) when Rest == <<>> ->
+	bcd1(1, Rest, [Y | Acc]);
+bcd1(OE, <<X:4/integer, Y:4/integer, Rest/binary>>, Acc) ->
+	bcd1(OE, Rest, [X, Y | Acc]);
+bcd1(_, <<>>, Acc) ->
 	lists:reverse(Acc).
 
 %% @hidden
