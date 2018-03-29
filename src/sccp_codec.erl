@@ -960,8 +960,8 @@ bcd(Address) when is_list(Address) ->
 %% `OE' indicates odd/even number of address signals present 
 %% in a global address information. 
 %% ITU-T Recommendation Q.713, section 3.4.2.3.1
-bcd(Data, OE) when is_binary(Info) ->
-	bcd1(Data, Info, []).
+bcd(Data, OE) when is_binary(Data) ->
+	bcd1(OE, Data, []).
 
 %% @hidden
 bcd1(1, <<0:4/integer, Y:4/integer, Rest/binary>>, Acc) when Rest == <<>> ->
