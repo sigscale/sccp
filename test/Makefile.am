@@ -13,14 +13,10 @@ check_DATA = .dialyzer_ok .common_test_ok
 %.beam:$(top_srcdir)/test/%.erl $(top_srcdir)/include/sccp.hrl
 	$(ERLC) $(ERLCFLAGS) -I $(top_srcdir)/include $<
 
-test.spec:	$(top_srcdir)/test/test.spec
-	cp $< $@
-
-ct.cfg:	$(top_srcdir)/test/ct.cfg
-	cp $< $@
-
-.common_test_ok:	$(addsuffix .beam, $(testmods)) sys.config ct.cfg test.spec
+.common_test_ok:	$(addsuffix .beam, $(testmods)) sys.config
 	@if [ ! -d log ]; then mkdir log; fi
+	@if [ ! -f test.spec ]; then cp $(top_srcdir)/test/test.spec .; fi
+	@if [ ! -f ct.cfg ]; then cp $(top_srcdir)/test/ct.cfg .; fi
 	ct_run -no_auto_compile -pa $(top_builddir)/ebin -logdir log -config ct.cfg -spec test.spec -dir . -erl_args -noshell -config sys -sname $(LOGNAME)-ct
 
 sys.config:	$(top_srcdir)/test/sys.config-in
