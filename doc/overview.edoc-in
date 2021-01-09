@@ -1,4 +1,5 @@
-@copyright 2018 SigScale Global Inc.
+@copyright 2018 - 2021 SigScale Global Inc.
+@author Vance Shipley <vances@sigscale.org> [http://www.sigscale.org]
 @version %VERSION%
 @title %DESCRIPTION%
 @doc This application implements the Signalling Connection Control Part (SCCP)

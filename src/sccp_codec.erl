@@ -1,6 +1,7 @@
 %%% sccp.erl
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @copyright 2015-2018 SigScale Global Inc.
+%%% @copyright 2015-2021 SigScale Global Inc.
+%%% @author Vance Shipley <vances@sigscale.org> [http://www.sigscale.org]
 %%% @end
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -15,14 +16,15 @@
 %%% limitations under the License.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% @doc This library module implements encoding and decoding (CODEC)
-%%% 	functions for the M3UA protocol in the
-%%% 	{@link //sccp. sccp} application.
+%%% 	functions for the Signalling Connection Control Part (SCCP) protocol
+%%% 	in the {@link //sccp. sccp} application.
 %%%
 %%% @reference <a href="http://www.itu.int/rec/T-REC-Q.713-200103-I/en">
 %%%		ITU-T Recommendation Q.713 - SCCP formats and codes</a>
 %%%
-
 -module(sccp_codec).
+-copyright('Copyright (c) 2015-2021 SigScale Global Inc.').
+-author('vances@sigscale.org').
 
 %% SCCP message codec funcion
 -export([sccp/1]).
