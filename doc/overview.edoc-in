@@ -6,6 +6,6 @@
 
 ==Introduction==
 Currently only encoding and decoding (CODEC) from binary to Erlang terms
-is supported. Noone of the connection oriented procedure are implemented
+is supported. Noone of the connection oriented procedures are implemented
 and as such is a library application.
 
