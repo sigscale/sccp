@@ -67,8 +67,9 @@
 -spec sccp(Message) -> Message
 	when
 		Message :: binary() | sccp_message().
-%% @doc codec for SCCP messages
-%% ITU-T Recommendation Q.713, SCCP formats and codes
+%% @doc CODEC for SCCP messages.
+%%
+%% ITU-T Recommendation Q.713, SCCP formats and codes.
 %%
 sccp(<<?ConnectRequest, SrcLocalRef:24, Class, CalledPartyP, OptionalP, Rest/binary>> = _Message) ->
 	CalledPartyL = binary:at(Rest, CalledPartyP - 1),
@@ -309,7 +310,9 @@ sccp(#sccp_long_unitdata_service{} = S) ->
 -spec party_address(Address) -> Address
 	when
 		Address :: binary() | party_address().
-%% @doc Check address indicator values and extract relevant information.
+%% @doc CODEC for called party address.
+%%
+%% ITU-T Recommendation Q.713, section 3.4.
 party_address(<<_:7, 1:1, LSB, _:2, MSB:6, _/binary>> = Address) ->
 	party_address1(Address, #party_address{pc = (MSB bsl 8) + LSB});
 party_address(<<_:7, 0:1,  _/binary>> = Address) ->
@@ -444,14 +447,14 @@ party_address(#party_address{ri  = R, pc = P, ssn = S, translation_type = T,
 			NAI:7, BCD/binary>>.
 
 %% @hidden
-%% @doc Evaluate SSN indicator
+%% @doc Evaluate SSN indicator.
 party_address1(<<_:6, 1:1, _:1, SSN, _Rest/binary>> = B, P) ->
 	party_address2(B, P#party_address{ssn = SSN});
 party_address1(<<_:6, 0:1, _:1, _Rest/binary>> = B, P) ->
 	party_address2(B, P).
 
 %% @hidden
-%% @doc Evaluate global Title indicator
+%% @doc Evaluate global Title indicator.
 party_address2(<<_:1, RI:1, 0:4, _:2, _Rest/binary>> = _B, P) -> % GTI = 0000 (No global title included)
 	R = routing_indicator(RI),
 	P#party_address{ri = R};
@@ -590,8 +593,9 @@ party_address2(<<_:1, RI:1, 4:4, _:2, PC:16, SSN, TT, NPlan:4, Enc:4, 0:1, NAI:7
 		Indicator :: unknown | subscriber | reserved_for_national | national
 				| international | spare | reserved_for_national
 				| reserved | 0..127.
-%% @doc Values for network address indicator as defined in
-%% ITU-T Recommendation Q.713, section 3.4.2.3.1  
+%% @doc Values for network address indicator.
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.3.1.
 nai(0 = _Indicator) -> unknown;
 nai(1) -> subscriber;
 nai(2) -> reserved_for_national;
@@ -613,8 +617,9 @@ nai(reserved) -> 127.
 -spec tt(Type) -> Type
 	when
 		Type :: not_used | internetwork | network_specific | reserved | 0..255.
-%% @doc Values for translation type as defined in
-%% ITU-T Recommendation Q.713, section 3.4.2.3.2
+%% @doc Values for translation type.
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.3.2.
 tt(0 = _Type) -> not_used;
 tt(1) -> internetwork;
 tt(N) when (is_integer(N)) andalso
@@ -629,8 +634,9 @@ tt(reserved) -> 255.
 	when
 		Plan :: unknown | isdn_tele | generic | data | telex | maritime
 				| land_mobile | isdn_mobile | private_net | reserved | 0..15.
-%% @doc Values for numbering plan as defined in
-%% ITU-T Recommendation Q.713, section 3.4.2.3.3
+%% @doc Values for numbering plan.
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.3.3.
 numbering_plan(0 = _Plan) -> unknown;
 numbering_plan(1) -> isdn_tele;
 numbering_plan(2) -> generic;
@@ -658,8 +664,9 @@ numbering_plan(_) -> 13.
 -spec encoding_scheme(Scheme) -> Scheme
 	when
 		Scheme :: unknown | bcd_odd | bcd_even | national | reserved | 0..15.
-%% @doc Values for encoding scheme as defined in
-%% ITU-T Recommendation Q.713, section 3.4.2.3.3
+%% @doc Values for encoding scheme.
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.3.3.
 encoding_scheme(0 = _Scheme) -> unknown;
 encoding_scheme(1) -> bcd_odd;
 encoding_scheme(2) -> bcd_even;
@@ -677,8 +684,9 @@ encoding_scheme(_) -> 14.
 -spec routing_indicator(Indicator) -> Indicator
 	when
 		Indicator  :: false | true | 0..1.
-%% @doc Values for routing indicator as defined in
-%% ITU-T Recommendation Q.713, section 3.4.1
+%% @doc Values for routing indicator.
+%%
+%% ITU-T Recommendation Q.713, section 3.4.1.
 routing_indicator(0) -> false;
 routing_indicator(1) -> true;
 routing_indicator(false) -> 0;
@@ -689,7 +697,7 @@ routing_indicator(true) -> 1.
 		K :: integer(),
 		Options :: [{K, V}],
 		V :: term().
-%% @doc Get option `O' from SCCP optional parameters.
+%% @doc Get option `O' from SCCP optional parameters..
 get_option(K, Options) when is_integer(K) ->
 	case lists:keyfind(K, 1, Options) of
 		false ->
@@ -763,8 +771,9 @@ optional_part1(<<Name, Len, Rest/binary>>, Acc) ->
 -spec importance(Importance) -> Importance
 	when
 		Importance :: binary() | 0..7.
-%% @doc Values for importance as defined in
-%% ITU-T Recommendation Q.713, section 3.19
+%% @doc Values for importance.
+%%
+%% ITU-T Recommendation Q.713, section 3.19.
 importance(<<_:5, I/integer>> = _Importance) ->
 	I;
 importance(I) when I >= 0; I =< 7 ->
@@ -779,8 +788,9 @@ importance(I) when I >= 0; I =< 7 ->
 				| subsystem_congestion | connection_expire | incomp_userdata
 				| unqualified | hcounter_violation | sccp_failure
 				| no_translation_addr | unequipped_error | 0..255.
-%% @doc Values for refusal cause  as defined in
-%% ITU-T Recommendation Q.713, section 3.15
+%% @doc Values for refusal cause.
+%%
+%% ITU-T Recommendation Q.713, section 3.15.
 refusal_cause(0 = _Cause) -> enduser_orig;
 refusal_cause(1) -> enduser_congestion;
 refusal_cause(2) -> enduser_failure;
@@ -831,8 +841,9 @@ refusal_cause(_) -> 255.
 				| subsystem_congestion | mtp_failure | network_congestion
 				| reset_timer_expire | inactivity_timer_expire
 				| unqualified | sccp_failure | 0..255.
-%% @doc Values for release cause  as defined in
-%% ITU-T Recommendation Q.713, section 3.11
+%% @doc Values for release cause.
+%%
+%% ITU-T Recommendation Q.713, section 3.11.
 release_cause(0 = _Cause) -> enduser_orig;
 release_cause(1) -> enduser_congestion;
 release_cause(2) -> enduser_failure;
@@ -875,8 +886,9 @@ release_cause(_) -> 255.
 				| incorrect_pr | rpc_error | remote_end_user_operational
 				| network_operational | access_opertional | network_congestion
 				| unqualified | 0..255.
-%% @doc Values for reset cause  as defined in
-%% ITU-T Recommendation Q.713, section 3.13
+%% @doc Values for reset cause.
+%%
+%% ITU-T Recommendation Q.713, section 3.13.
 reset_cause(0 = _Cause) -> enduser_orig;
 reset_cause(1) -> sccp_user_oirg;
 reset_cause(2) -> incorrect_ps;
@@ -906,8 +918,9 @@ reset_cause(_) -> 255.
 -spec segmenting(Segmenting) -> Segmenting
 	when
 		Segmenting:: false | true | 0..1.
-%% @doc Values for segmenting/reassembling  as defined in
-%% ITU-T Recommendation Q.713, section 3.7
+%% @doc Values for segmenting/reassembling.
+%%
+%% ITU-T Recommendation Q.713, section 3.7.
 segmenting(0 = _Segmenting) -> false;
 segmenting(1) -> true;
 segmenting(false) -> 0;
@@ -920,8 +933,9 @@ segmenting(true) -> 1.
 				| unqualified | transport_error | processing_error
 				| reassembly_fail | sccp_failure | hcounter_violation
 				| seg_not_supported | seg_failure | 0..255.
-%% @doc Values for return cause as defined in
-%% ITU-T Recommendation Q.713, section 3.12
+%% @doc Values for return cause.
+%%
+%% ITU-T Recommendation Q.713, section 3.12.
 return_cause(N = _Cause) when N == 0; N == 1 -> no_translation;
 return_cause(2) -> subsystem_congestion;
 return_cause(3) -> subsystem_failure;
@@ -956,8 +970,9 @@ return_cause(_) -> 255.
 -spec segmentation(Segmenting) -> Segmenting
 	when
 		Segmenting :: #segmentation{} | binary().
-%% @doc Values for segmentation as defined in
-%% ITU-T Recommendation Q.713, section 3.17
+%% @doc Values for segmentation.
+%%
+%% ITU-T Recommendation Q.713, section 3.17.
 segmentation(<<0:1, C:1, _:2, RemSeg:4, _Rest/binary>> = _Segmenting) ->
 	#segmentation{first = false, class = C, remaning_seg = RemSeg};
 segmentation(<<1:1, C:1, _:2, RemSeg:4, _Rest/binary>>) ->
@@ -970,8 +985,9 @@ segmentation(#segmentation{first = true, class = C, remaning_seg = R}) ->
 -spec point_code(Code) -> Code
 	when
 		Code :: undefined | 0..16383 | binary().
-%% @doc Values for signalling point code as defined in
-%% ITU-T Recommendation Q.713, section 3.4.2.1
+%% @doc Values for signalling point code (PC).
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.1.
 point_code(undefined = _Code) ->
 	<<>>;
 point_code(<<>>) ->
@@ -984,8 +1000,9 @@ point_code(P) when is_integer(P) ->
 -spec ssn(SSN) -> SSN
 	when
 		SSN :: undefined | 0..255 | binary().
-%% @doc Values for subsystem number as defined in
-%% ITU-T Recommendation Q.713, section 3.4.2.2
+%% @doc Values for subsystem number (SSN).
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.2.
 ssn(undefined = _SSN) ->
 	<<>>;
 ssn(<<>>) ->
@@ -1009,9 +1026,11 @@ bcd(Address) when is_list(Address) ->
 		OE :: 0..1,
 		Address :: [integer()].
 %% @doc Decode binary coded decimal value to a list of digits.
+%%
 %% `OE' indicates odd/even number of address signals present 
 %% in a global address information. 
-%% ITU-T Recommendation Q.713, section 3.4.2.3.1
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.3.1.
 bcd(Data, OE) when is_binary(Data) ->
 	bcd1(Data, OE, []).
 
