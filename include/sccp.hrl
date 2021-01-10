@@ -16,6 +16,7 @@
 %%% limitations under the License.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%
+
 %% SCCP message type - ITU-T Recommendation Q.713, section 2.1
 -define(ConnectRequest,             1).
 -define(ConnectionConfirm,          2).
