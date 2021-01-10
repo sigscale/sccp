@@ -36,7 +36,7 @@
 %% functions to deal with SCCP optional part
 -export([optional_part/1, get_option/2]).
 
--export_type([sccp_message/0]).
+-export_type([sccp_message/0, party_address/0]).
 
 -include("sccp.hrl").
 
@@ -49,6 +49,20 @@
 			| #sccp_inactivity_test{} | #sccp_extended_unitdata{}
 			| #sccp_extended_unitdata_service{} | #sccp_long_unitdata{}
 			| #sccp_long_unitdata_service{}.
+-type party_address() :: #party_address{
+		ri :: boolean() | undefined,
+		pc :: pos_integer() | undefined,
+		ssn :: pos_integer() | undefined,
+		translation_type :: not_used | internetwork | network_specific
+				| reserved | undefined,
+		numbering_plan :: unknown | isdn_tele | generic
+				| data | telex | maritime | land_mobile
+				| isdn_mobile | spare | private_net | reserved  | undefined,
+		encoding_scheme :: unknown | bcd_odd | bcd_even | national
+				| spare | reserved | undefined,
+		nai :: unknown | subscriber | national | international
+				| spare | reserved | undefined,
+		gt :: [integer()] | undefined}.
 
 -spec sccp(Message) -> Message
 	when
@@ -294,7 +308,7 @@ sccp(#sccp_long_unitdata_service{} = S) ->
 
 -spec party_address(Address) -> Address
 	when
-		Address :: binary() | #party_address{}.
+		Address :: binary() | party_address().
 %% @doc Check address indicator values and extract relevant information.
 party_address(<<_:7, 1:1, LSB, _:2, MSB:6, _/binary>> = Address) ->
 	party_address1(Address, #party_address{pc = (MSB bsl 8) + LSB});
