@@ -102,7 +102,7 @@ party_address_gti_4(_Config) ->
 		1 ->
 			false
 	end,
-	PC = rand:uniform(256) - 1,
+	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(256) - 1,
 	TT = sccp_codec:tt(rand:uniform(256) - 1),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
@@ -126,7 +126,7 @@ party_address_gti_3(_Config) ->
 		1 ->
 			false
 	end,
-	PC = rand:uniform(256) - 1,
+	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(256) - 1,
 	TT = sccp_codec:tt(rand:uniform(256) - 1),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
@@ -154,7 +154,7 @@ party_address_gti_2(_Config) ->
 		1 ->
 			false
 	end,
-	PC = rand:uniform(256) - 1,
+	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(256) - 1,
 	TT = sccp_codec:tt(rand:uniform(256) - 1),
 	GT = [9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7],
@@ -174,7 +174,7 @@ party_address_gti_1(_Config) ->
 		1 ->
 			false
 	end,
-	PC = rand:uniform(256) - 1,
+	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(256) - 1,
 	NAI = sccp_codec:nai(rand:uniform(128) - 1),
 	GT = [9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7],
@@ -724,7 +724,7 @@ gen_party_address() ->
 		1 ->
 			false
 	end,
-	PC = rand:uniform(256) - 1,
+	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(256) - 1,
 	TT = sccp_codec:tt(rand:uniform(256) - 1),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
