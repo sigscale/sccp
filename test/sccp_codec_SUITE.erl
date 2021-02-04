@@ -184,11 +184,8 @@ party_address_gti_1(_Config) ->
 	NAI = sccp_codec:nai(rand:uniform(5) - 1),
 	GT = gen_title(),
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, nai = NAI, gt = GT},
-erlang:display({?MODULE, ?LINE, P1}),
 	P2 = sccp_codec:party_address(P1),
-erlang:display({?MODULE, ?LINE, P2}),
 	true = is_binary(P2),
-erlang:display({?MODULE, ?LINE, sccp_codec:party_address(P2)}),
 	P1 = sccp_codec:party_address(P2).
 
 party_address_gti_0() ->
@@ -202,7 +199,9 @@ party_address_gti_0(_Config) ->
 		1 ->
 			false
 	end,
-	P1 = #party_address{ri = RI},
+	PC = rand:uniform(16384) - 1,
+	SSN = rand:uniform(255) - 1,
+	P1 = #party_address{ri = RI, pc = PC, ssn = SSN},
 	P2 = sccp_codec:party_address(P1),
 	true = is_binary(P2),
 	P1 = sccp_codec:party_address(P2).
