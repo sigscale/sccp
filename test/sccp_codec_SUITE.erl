@@ -104,11 +104,16 @@ party_address_gti_4(_Config) ->
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
-	TT = sccp_codec:tt(rand:uniform(256) - 1),
+	TT = sccp_codec:tt(rand:uniform(255) - 1),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
-	ES = sccp_codec:encoding_scheme(rand:uniform(16) - 1),
 	NAI = sccp_codec:nai(rand:uniform(5) - 1),
-	GT = [9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7, 8],
+	GT = gen_title(),
+	ES = case (length(GT) rem 2) of
+		0 ->
+			bcd_even;
+		1 ->
+			bcd_odd
+	end,
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT,
 			numbering_plan = NP, encoding_scheme = ES, nai = NAI, gt = GT},
 	P2 = sccp_codec:party_address(P1),
@@ -128,14 +133,14 @@ party_address_gti_3(_Config) ->
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
-	TT = sccp_codec:tt(rand:uniform(256) - 1),
+	TT = sccp_codec:tt(rand:uniform(255) - 1),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
-	ES = sccp_codec:encoding_scheme(rand:uniform(2)),
-	GT = case ES of
-		bcd_even ->
-			[9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7, 8];
-		bcd_odd ->
-			[9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7]
+	GT = gen_title(),
+	ES = case (length(GT) rem 2) of
+		0 ->
+			bcd_even;
+		1 ->
+			bcd_odd
 	end,
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT,
 			numbering_plan = NP, encoding_scheme = ES, gt = GT},
@@ -156,8 +161,8 @@ party_address_gti_2(_Config) ->
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
-	TT = sccp_codec:tt(rand:uniform(256) - 1),
-	GT = [9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7],
+	TT = sccp_codec:tt(rand:uniform(255) - 1),
+	GT = gen_title(),
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT, gt = GT},
 	P2 = sccp_codec:party_address(P1),
 	true = is_binary(P2),
@@ -177,10 +182,13 @@ party_address_gti_1(_Config) ->
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
 	NAI = sccp_codec:nai(rand:uniform(5) - 1),
-	GT = [9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7],
+	GT = gen_title(),
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, nai = NAI, gt = GT},
+erlang:display({?MODULE, ?LINE, P1}),
 	P2 = sccp_codec:party_address(P1),
+erlang:display({?MODULE, ?LINE, P2}),
 	true = is_binary(P2),
+erlang:display({?MODULE, ?LINE, sccp_codec:party_address(P2)}),
 	P1 = sccp_codec:party_address(P2).
 
 party_address_gti_0() ->
@@ -726,16 +734,28 @@ gen_party_address() ->
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
-	TT = sccp_codec:tt(rand:uniform(256) - 1),
+	TT = sccp_codec:tt(rand:uniform(255) - 1),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
-	ES = sccp_codec:encoding_scheme(rand:uniform(2)),
-	GT = case ES of
-		bcd_odd ->
-			[9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7];
-		bcd_even ->
-			[9, 4, 7, 7, 1, 2, 3, 4, 5, 6, 7, 8]
+	GT = gen_title(),
+	ES = case (length(GT) rem 2) of
+		0 ->
+			bcd_even;
+		1 ->
+			bcd_odd
 	end,
 	NAI = sccp_codec:nai(rand:uniform(5) - 1),
 	#party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT,
 			numbering_plan = NP, encoding_scheme = ES, nai = NAI, gt = GT}.
+
+%% @hidden
+gen_title() ->
+	gen_title(rand:uniform(8) + 7).
+%% @hidden
+gen_title(N) ->
+	gen_title(N, []).
+%% @hidden
+gen_title(0, Acc) ->
+	Acc;
+gen_title(N, Acc) ->
+	gen_title(N - 1, [rand:uniform(10) - 1 | Acc]).
 
