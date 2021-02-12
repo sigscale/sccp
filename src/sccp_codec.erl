@@ -255,8 +255,10 @@ sccp(#sccp_data_form2{dest_local_ref = Dest, sequencing = S, data = Data}) ->
 	<<?DataForm2, Dest:24, Seq, DataP, DataL, Data/binary>>;
 sccp(#sccp_data_ack{dest_local_ref = Dest, receive_seq_num = Seq, credit = Credit}) ->
 	<<?DataAck, Dest:24, Seq/binary, Credit/binary>>;
-sccp(#sccp_unitdata{class = Class, called_party = CalledParty,
-		calling_party = CallingParty, data = Data}) ->
+sccp(#sccp_unitdata{class = Class, data = Data,
+		called_party = #party_address{} = CalledParty,
+		calling_party = #party_address{} = CallingParty})
+		when is_integer(Class), is_binary(Data) ->
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
 	CalledPartyL = size(CalledPartyB),
