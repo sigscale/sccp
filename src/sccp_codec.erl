@@ -317,19 +317,23 @@ sccp(#sccp_long_unitdata_service{} = S) ->
 %% ITU-T Recommendation Q.713, section 3.4.
 party_address(<<_:1, RI:1, GTI:4, SSNI:1, PCI:1, Address/binary>>) ->
 	party_address1(PCI, SSNI, RI, GTI, Address);
-party_address(#party_address{ri = true,
+party_address(#party_address{ri = RoutingIndicator,
 		pc = undefined, ssn = SubSystemNumber} = P)
-		when is_integer(SubSystemNumber) ->
+		when is_boolean(RoutingIndicator),
+		is_integer(SubSystemNumber) ->
+	RI = routing_indicator(RoutingIndicator),
 	SSN = ssn(SubSystemNumber),
-	party_address4(0, 1, 1, SSN, P);
-party_address(#party_address{ri = false,
+	party_address4(0, 1, RI, SSN, P);
+party_address(#party_address{ri = RoutingIndicator,
 		pc = PointCode, ssn = undefined} = P)
 		when is_integer(PointCode) ->
+	RI = routing_indicator(RoutingIndicator),
 	PC = point_code(PointCode),
-	party_address4(1, 0, 0, PC, P);
+	party_address4(1, 0, RI, PC, P);
 party_address(#party_address{ri = RoutingIndicator,
 		pc = PointCode, ssn = SubSystemNumber} = P)
-		when is_integer(SubSystemNumber), is_integer(PointCode) ->
+		when is_boolean(RoutingIndicator),
+		is_integer(SubSystemNumber), is_integer(PointCode) ->
 	RI = routing_indicator(RoutingIndicator),
 	PC = point_code(PointCode),
 	SSN = ssn(SubSystemNumber),
