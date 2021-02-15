@@ -49,20 +49,7 @@
 			| #sccp_inactivity_test{} | #sccp_extended_unitdata{}
 			| #sccp_extended_unitdata_service{} | #sccp_long_unitdata{}
 			| #sccp_long_unitdata_service{}.
--type party_address() :: #party_address{
-		ri :: boolean() | undefined,
-		pc :: pos_integer() | undefined,
-		ssn :: pos_integer() | undefined,
-		translation_type :: not_used | internetwork | network_specific
-				| reserved | undefined,
-		numbering_plan :: unknown | isdn_tele | generic
-				| data | telex | maritime | land_mobile
-				| isdn_mobile | spare | private_net | reserved  | undefined,
-		encoding_scheme :: unknown | bcd_odd | bcd_even | national
-				| spare | reserved | undefined,
-		nai :: unknown | subscriber | national | international
-				| spare | reserved | undefined,
-		gt :: [integer()] | undefined}.
+-type party_address() :: #party_address{}.
 
 -spec sccp(Message) -> Message
 	when

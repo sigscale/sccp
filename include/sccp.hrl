@@ -63,7 +63,7 @@
 
 %% SCCP Parameters - ITU-T Recommendation Q.713, section 3.4, section 3.5
 -record(party_address,
-		{ri :: undefined | boolean(),
+		{ri = false :: boolean(),
 		pc :: undefined | pos_integer(),
 		ssn :: undefined | pos_integer(),
 		translation_type :: undefined | not_used | internetwork | network_specific | reserved,
