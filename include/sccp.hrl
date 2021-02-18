@@ -85,7 +85,7 @@
 -record(sccp_connection_req,
 		{type = ?ConnectRequest,
 		src_local_ref :: undefined | pos_integer(),
-		class :: undefined | pos_integer(),
+		class :: undefined | 2..3,
 		called_party :: undefined | #party_address{},
 		credit :: undefined | binary(),
 		calling_party :: undefined | #party_address{},
@@ -97,7 +97,7 @@
 		{type  = ?ConnectionConfirm,
 		dest_local_ref :: undefined | pos_integer(),
 		src_local_ref :: undefined | pos_integer(),
-		class :: pos_integer(),
+		class :: undefined | 2..3,
 		credit :: undefined | binary(),
 		called_party :: undefined | #party_address{},
 		data :: undefined | binary(),
@@ -153,7 +153,7 @@
 
 -record(sccp_unitdata,
 		{type = ?UnitData,
-		class :: undefined | pos_integer(),
+		class :: undefined | 0..1,
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
 		data :: undefined | binary()}).
@@ -200,13 +200,13 @@
 		{type = ?InactivityTest,
 		dest_local_ref :: undefined | pos_integer(),
 		src_local_ref :: undefined | pos_integer(),
-		class :: undefined | pos_integer(),
+		class :: undefined | 2..3,
 		sequencing :: undefined | boolean(),
 		credit :: undefined | binary()}).
 
 -record(sccp_extended_unitdata,
 		{type = ?ExtendedUnitData,
-		class :: undefined | pos_integer(),
+		class :: undefined | 0..1,
 		hop_counter :: undefined | pos_integer(),
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
@@ -229,7 +229,7 @@
 
 -record(sccp_long_unitdata,
 		{type = ?LongUnitData,
-		class :: undefined | pos_integer(),
+		class :: undefined | 0..1,
 		hop_counter :: undefined | pos_integer(),
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
