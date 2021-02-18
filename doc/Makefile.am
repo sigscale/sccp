@@ -3,7 +3,7 @@
 ##
 ## Process this file with automake to produce Makefile.in
 
-modhtml = sccp_codec.html
+modhtml = sccp.html sccp_codec.html
 
 doc_DATA = overview.edoc $(modhtml) \
 		modules-frame.html overview-summary.html \

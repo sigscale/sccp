@@ -7,7 +7,7 @@ appdir = $(beamdir)
 app_DATA = sccp.app
 EXTRA_DIST = sccp.app
 
-beam_DATA = sccp_codec.beam
+beam_DATA = sccp.beam sccp_codec.beam
 
 %.beam:$(top_srcdir)/src/%.erl	$(top_srcdir)/include/sccp.hrl
 	$(ERLC) $(ERLCFLAGS) -I $(top_srcdir)/include $<

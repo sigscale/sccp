@@ -2,7 +2,7 @@
 	[{description, "SigScale Signalling Connection Control Part (SCCP)"},
 		{vsn, "%APP_VERSION%"},
 		{modules,
-				[sccp_codec]},
+				[sccp, sccp_codec]},
 		{registered, []},
 		{applications, []},
 		{env, []}]}.
