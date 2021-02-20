@@ -40,21 +40,31 @@ point_code(PC) ->
 %% @doc Conversion of common display format of point codes. 
 %%
 %% 	Formats or parses the representation of point codes
-%% 	using either the ITU (3-8-3) or ANSI (8-8-8) display
-%% 	format (e.g. ITU point code 2067 = "1-2-3").
+%% 	using either the ITU or ANSI display format,
+%%
+%% 	<dl>
+%% 		<dt>ANSI</dt>
+%% 			<dd>A 24 bit value: `<<Network, Cluster, Member>>'
+%% 			(e.g. 66051 = `"1-2-3"').</dd>
+%% 		<dt>ITU</dt>
+%% 			<dd>A 14 bit value: `<<Zone:3, Region:8, SP:3>>'
+%% 			(e.g. ITU point code 2067 = `"1-2-3"').</dd>
+%% 	</dl>
 %% 	
 point_code(itu = _Format, PC) when is_integer(PC) ->
-	<<0:2, A:3, B:8, C:3>> = <<PC:16>>,
-	lists:flatten(io_lib:fwrite("~b-~b-~b", [A, B, C]));
+	<<0:2, Zone:3, Region:8, SP:3>> = <<PC:16>>,
+	lists:flatten(io_lib:fwrite("~b-~b-~b", [Zone, Region, SP]));
 point_code(ansi, PC) when is_integer(PC) ->
-	<< A:8, B:8, C:3>> = <<PC:24>>,
-	lists:flatten(io_lib:fwrite("~b-~b-~b", [A, B, C]));
+	<<Network:8, Cluster:8, Member:8>> = <<PC:24>>,
+	lists:flatten(io_lib:fwrite("~b-~b-~b", [Network, Cluster, Member]));
 point_code(itu, PC) when is_list(PC) ->
-	[A, B, C] = [list_to_integer(C) || C <- string:tokens(PC, [$-])],
-	<<I:16>> = <<0:2, A:3, B:8, C:3>>,
+	[Zone, Region, SP] = [list_to_integer(C)
+			|| C <- string:tokens(PC, [$-])],
+	<<I:16>> = <<0:2, Zone:3, Region:8, SP:3>>,
 	I;
 point_code(ansi, PC) when is_list(PC) ->
-	[A, B, C] = [list_to_integer(C) || C <- string:tokens(PC, [$-])],
-	<<I:24>> = <<A:8, B:8, C:8>>,
+	[Network, Cluster, Member] = [list_to_integer(C)
+			|| C <- string:tokens(PC, [$-])],
+	<<I:24>> = <<Network:8, Cluster:8, Member:8>>,
 	I.
 
