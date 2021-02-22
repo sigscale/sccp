@@ -153,7 +153,7 @@
 
 -record(sccp_unitdata,
 		{type = ?UnitData,
-		class :: undefined | 0..1,
+		class :: undefined | 0..1 | 128..129,
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
 		data :: undefined | binary()}).
@@ -206,7 +206,7 @@
 
 -record(sccp_extended_unitdata,
 		{type = ?ExtendedUnitData,
-		class :: undefined | 0..1,
+		class :: undefined | 0..1 | 128..129,
 		hop_counter :: undefined | pos_integer(),
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
@@ -229,7 +229,7 @@
 
 -record(sccp_long_unitdata,
 		{type = ?LongUnitData,
-		class :: undefined | 0..1,
+		class :: undefined | 0..1 | 128..129,
 		hop_counter :: undefined | pos_integer(),
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
