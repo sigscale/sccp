@@ -4,5 +4,4 @@
 		{modules,
 				[sccp, sccp_codec]},
 		{registered, []},
-		{applications, []},
-		{env, []}]}.
+		{applications, [kernel, stdlib]}]}.
