@@ -64,8 +64,8 @@
 %% SCCP Parameters - ITU-T Recommendation Q.713, section 3.4, section 3.5
 -record(party_address,
 		{ri = false :: boolean(),
-		pc :: undefined | pos_integer(),
-		ssn :: undefined | pos_integer(),
+		pc :: undefined | 1..16383,
+		ssn :: undefined | 1..254,
 		translation_type :: undefined | not_used | internetwork | network_specific | reserved,
 		numbering_plan :: undefined | unknown | isdn_tele | generic
 				| data | telex | maritime | land_mobile
