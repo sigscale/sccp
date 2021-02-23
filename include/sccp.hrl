@@ -73,7 +73,7 @@
 		encoding_scheme :: undefined | unknown | bcd_odd | bcd_even
 				| national | spare | reserved,
 		nai :: undefined | unknown | subscriber | national | international | spare | reserved,
-		gt :: undefined | [integer()]}).
+		gt :: undefined | [byte()]}).
 
 %% SCCP Parameters - ITU-T Recommendation Q.713, section 3.17
 -record(segmentation,

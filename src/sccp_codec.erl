@@ -526,7 +526,7 @@ routing_indicator(true) -> 1.
 		K :: integer(),
 		Options :: [{K, V}],
 		V :: term().
-%% @doc Get option `O' from SCCP optional parameters..
+%% @doc Get option `O' from SCCP optional parameters.
 get_option(K, Options) when is_integer(K) ->
 	case lists:keyfind(K, 1, Options) of
 		false ->
@@ -845,7 +845,7 @@ ssn(N) when is_integer(N) ->
 
 -spec bcd(Address) -> Data
 	when
-		Address :: [integer()],
+		Address :: [byte()],
 		Data :: binary().
 %% @doc Encode list of digits to a binary coded decimal value.
 bcd(Address) when is_list(Address) ->
@@ -855,7 +855,7 @@ bcd(Address) when is_list(Address) ->
 	when
 		Data :: binary(),
 		OE :: 0..1,
-		Address :: [integer()].
+		Address :: [byte()].
 %% @doc Decode binary coded decimal value to a list of digits.
 %%
 %% `OE' indicates odd/even number of address signals present 
