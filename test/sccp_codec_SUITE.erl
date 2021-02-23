@@ -78,7 +78,7 @@ sequences() ->
 %%
 all() -> 
 	[party_address_gti_0, party_address_gti_1, party_address_gti_2, party_address_gti_3,
-		party_address_gti_4, nai, translation_type, numbering_plan, encoding_scheme, importance,
+		party_address_gti_4, nai, numbering_plan, encoding_scheme, importance,
 		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd_even, bcd_odd,
 		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
 		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
@@ -104,7 +104,7 @@ party_address_gti_4(_Config) ->
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
-	TT = sccp_codec:tt(rand:uniform(255) - 1),
+	TT = rand:uniform(254),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
 	NAI = sccp_codec:nai(rand:uniform(5) - 1),
 	GT = gen_title(),
@@ -133,7 +133,7 @@ party_address_gti_3(_Config) ->
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
-	TT = sccp_codec:tt(rand:uniform(255) - 1),
+	TT = rand:uniform(254),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
 	GT = gen_title(),
 	ES = case (length(GT) rem 2) of
@@ -161,7 +161,7 @@ party_address_gti_2(_Config) ->
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
-	TT = sccp_codec:tt(rand:uniform(255) - 1),
+	TT = rand:uniform(254),
 	GT = gen_title(),
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT, gt = GT},
 	P2 = sccp_codec:party_address(P1),
@@ -219,24 +219,6 @@ nai(_Config) ->
 				_M when NAI == spare andalso (N >= 5 andalso N =< 111) ->
 					F(F, N+1);
 				_M when NAI == reserved_for_national  andalso (N >= 112 andalso N =< 126) ->
-					F(F, N+1);
-				N ->
-					F(F, N+1)
-			end
-	end,
-	ok = F(F, 0).
-
-translation_type() ->
-	[{userdata, [{doc, "encode and decode translation type"}]}].
-
-translation_type(_Config) ->
-	F = fun(_, 256) ->
-				ok;
-		(F, N) ->
-			TT = sccp_codec:tt(N),
-			true = is_atom(TT),
-			case sccp_codec:tt(TT) of
-				_M when TT == network_specific andalso ((N >= 2 andalso N =< 254)) ->
 					F(F, N+1);
 				N ->
 					F(F, N+1)
@@ -733,7 +715,7 @@ gen_party_address() ->
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
-	TT = sccp_codec:tt(rand:uniform(255) - 1),
+	TT = rand:uniform(254),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
 	GT = gen_title(),
 	ES = case (length(GT) rem 2) of

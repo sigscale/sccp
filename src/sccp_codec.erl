@@ -29,7 +29,7 @@
 %% SCCP message codec funcion
 -export([sccp/1]).
 %% SCCP options codec funcion
--export([party_address/1, nai/1, tt/1, numbering_plan/1, encoding_scheme/1,
+-export([party_address/1, nai/1, numbering_plan/1, encoding_scheme/1,
 		routing_indicator/1, importance/1, refusal_cause/1, release_cause/1,
 		segmenting/1, return_cause/1, reset_cause/1, segmentation/1, point_code/1,
 		bcd/1, bcd/2, ssn/1]).
@@ -343,7 +343,7 @@ party_address3(RI, 1, <<OE:1, NAI:7, GT/binary>>, P) ->
 			nai = nai(NAI), gt = bcd(GT, OE)};
 party_address3(RI, 2, <<TT, GT/binary>>, P) ->
 	P#party_address{ri = routing_indicator(RI),
-			translation_type = tt(TT), gt = bcd(GT, 1)};
+			translation_type = TT, gt = bcd(GT, 1)};
 party_address3(RI, 3, <<TT, NP:4, ENC:4, GT/binary>>, P) ->
 	Scheme  = encoding_scheme(ENC),
 	Title = case Scheme of
@@ -353,7 +353,7 @@ party_address3(RI, 3, <<TT, NP:4, ENC:4, GT/binary>>, P) ->
 			bcd(GT, 0)
 	end,
 	P#party_address{ri = routing_indicator(RI),
-			translation_type = tt(TT),
+			translation_type = TT,
 			numbering_plan = numbering_plan(NP),
 			encoding_scheme = Scheme, gt = Title};
 party_address3(RI, 4, <<TT, NP:4, ENC:4, _:1, NAI:7, GT/binary>>, P) ->
@@ -365,7 +365,7 @@ party_address3(RI, 4, <<TT, NP:4, ENC:4, _:1, NAI:7, GT/binary>>, P) ->
 			bcd(GT, 0)
 	end,
 	P#party_address{ri = routing_indicator(RI),
-			translation_type = tt(TT),
+			translation_type = TT,
 			numbering_plan = numbering_plan(NP),
 			nai = nai(NAI), encoding_scheme = Scheme, gt = Title}.
 %% @hidden
@@ -384,32 +384,28 @@ party_address4(PCI, SSNI, RI,  Address,
 	GT = bcd(GlobalTitle),
 	<<0:1, RI:1, 1:4, SSNI:1, PCI:1, Address/binary, OE:1, NAI:7, GT/binary>>;
 party_address4(PCI, SSNI, RI, Address,
-		#party_address{gt = GlobalTitle, translation_type = TranslationType,
+		#party_address{gt = GlobalTitle, translation_type = TT,
 		numbering_plan = undefined, encoding_scheme = undefined,
-		nai = undefined}) when TranslationType /= undefined,
-		is_list(GlobalTitle) ->
-	TT = tt(TranslationType),
+		nai = undefined}) when TT /= undefined, is_list(GlobalTitle) ->
 	GT = bcd(GlobalTitle),
 	<<0:1, RI:1, 2:4, SSNI:1, PCI:1, Address/binary, TT, GT/binary>>;
 party_address4(PCI, SSNI, RI, Address,
-		#party_address{gt = GlobalTitle, translation_type = TranslationType,
+		#party_address{gt = GlobalTitle, translation_type = TT,
 		numbering_plan = NumberingPlan, encoding_scheme = EncodingScheme,
 		nai = undefined}) when NumberingPlan /= undefined,
-		TranslationType /= undefined, EncodingScheme /= undefined,
+		TT /= undefined, EncodingScheme /= undefined,
 		is_list(GlobalTitle) ->
-	TT = tt(TranslationType),
 	NP = numbering_plan(NumberingPlan),
 	ES = encoding_scheme(EncodingScheme),
 	GT = bcd(GlobalTitle),
 	<<0:1, RI:1, 3:4, SSNI:1, PCI:1, Address/binary,
 			TT, NP:4, ES:4, GT/binary>>;
 party_address4(PCI, SSNI, RI, Address,
-		#party_address{gt = GlobalTitle, translation_type = TranslationType,
+		#party_address{gt = GlobalTitle, translation_type = TT,
 		numbering_plan = NumberingPlan, encoding_scheme = EncodingScheme,
-		nai = NatureOfAddress}) when TranslationType /= undefined,
+		nai = NatureOfAddress}) when TT /= undefined,
 		NumberingPlan /= undefined, EncodingScheme /= undefined,
 		NatureOfAddress /= undefined, is_list(GlobalTitle) ->
-	TT = tt(TranslationType),
 	NP = numbering_plan(NumberingPlan),
 	ES = encoding_scheme(EncodingScheme),
 	NAI = nai(NatureOfAddress),
@@ -442,22 +438,6 @@ nai(national) -> 3;
 nai(international) -> 4;
 nai(spare) -> 5;
 nai(reserved) -> 127.
-
--spec tt(Type) -> Type
-	when
-		Type :: not_used | internetwork | network_specific | reserved | 0..255.
-%% @doc Values for translation type.
-%%
-%% ITU-T Recommendation Q.713, section 3.4.2.3.2.
-tt(0 = _Type) -> not_used;
-tt(1) -> internetwork;
-tt(N) when (is_integer(N)) andalso
-		(N >= 2 andalso N =< 254) -> network_specific;
-tt(255) -> reserved;
-tt(not_used) -> 0;
-tt(internetwork) -> 1;
-tt(network_specific) -> 2;
-tt(reserved) -> 255.
 
 -spec numbering_plan(Plan) -> Plan
 	when

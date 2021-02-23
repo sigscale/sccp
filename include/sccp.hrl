@@ -66,7 +66,7 @@
 		{ri = false :: boolean(),
 		pc :: undefined | 1..16383,
 		ssn :: undefined | 1..254,
-		translation_type :: undefined | not_used | internetwork | network_specific | reserved,
+		translation_type :: undefined | 0..254,
 		numbering_plan :: undefined | unknown | isdn_tele | generic
 				| data | telex | maritime | land_mobile
 				| isdn_mobile | spare | private_net | reserved,
