@@ -87,22 +87,18 @@ party_address() ->
 	[{userdata, [{doc, "Pretty print party address test"}]}].
 
 party_address(_Config) ->
-erlang:display({?MODULE, ?LINE, _Config}),
 	Address = #party_address{pc = 4, ssn = 4, gt = [1,2,3]},
 	sccp:party_address(Address).	
 
 party_address_1(_Config) ->
-erlang:display({?MODULE, ?LINE, _Config}),
    Address = #party_address{pc = undefined, ssn = undefined, gt = [1,2,3]},
    sccp:party_address(Address).
 
 party_address_2(_Config) ->
-erlang:display({?MODULE, ?LINE, _Config}),
    Address = #party_address{pc = 42, ssn = 51, gt = undefined},
    sccp:party_address(Address).
 
 party_address_3(_Config) ->
-erlang:display({?MODULE, ?LINE, _Config}),
    Address = #party_address{pc = undefined, ssn = 322, gt = undefined},
    sccp:party_address(Address).
 
