@@ -90,8 +90,10 @@ party_address(#party_address{pc = PC, ssn = SSN, gt = GT})
 		when is_integer(PC), is_integer(SSN), is_list(GT) ->
 	"PC: " ++ point_code(PC) ++ ", " ++"SSN: " ++ integer_to_list(SSN)
 		 ++ ", " ++ "GT: " ++ gt_to_string(GT);
-party_address(#party_address{pc = undefined, ssn = SSN, gt = undefined}) ->
+party_address(#party_address{pc = undefined, ssn = SSN, gt = undefined})
+		when is_integer(SSN) ->
 	"SSN: " ++ integer_to_list(SSN);
-party_address(#party_address{pc = undefined, ssn = undefined, gt = GT}) ->
+party_address(#party_address{pc = undefined, ssn = undefined, gt = GT})
+		when is_list(GT) ->
 	"GT: " ++ gt_to_string(GT).
 
