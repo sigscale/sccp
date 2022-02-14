@@ -23,6 +23,8 @@
 -author('vances@sigscale.org').
 
 -export([point_code/1, point_code/2]).
+%% to be removed after debugging
+-export([party_address/1]).
 
 -include("sccp.hrl").
 
@@ -67,4 +69,29 @@ point_code(ansi, PC) when is_list(PC) ->
 			|| C <- string:tokens(PC, [$-])],
 	<<I:24>> = <<Network:8, Cluster:8, Member:8>>,
 	I.
+
+gt_to_string(String) ->
+	gt_to_string1(String,[]).
+%%hidden
+gt_to_string1([H | T], Acc) ->
+	gt_to_string1(T, integer_to_list(H) ++ Acc);
+gt_to_string1([], Acc) ->
+	lists:reverse(Acc).
+
+-spec party_address(Address) -> String
+  when
+      Address :: sccp_codec:party_address(),
+		String :: string().
+%% @doc Pretty print sccp party address.
+party_address(#party_address{pc = PC, ssn = SSN, gt = undefined})
+		when is_integer(PC), is_integer(SSN) ->
+	"PC: " ++ point_code(PC) ++ ", " ++ "SSN: " ++ integer_to_list(SSN);
+party_address(#party_address{pc = PC, ssn = SSN, gt = GT})
+		when is_integer(PC), is_integer(SSN), is_list(GT) ->
+	"PC: " ++ point_code(PC) ++ ", " ++"SSN: " ++ integer_to_list(SSN)
+		 ++ ", " ++ "GT: " ++ gt_to_string(GT);
+party_address(#party_address{pc = undefined, ssn = SSN, gt = undefined}) ->
+	"SSN: " ++ integer_to_list(SSN);
+party_address(#party_address{pc = undefined, ssn = undefined, gt = GT}) ->
+	"GT: " ++ gt_to_string(GT).
 
