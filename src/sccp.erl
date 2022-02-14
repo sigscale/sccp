@@ -23,7 +23,6 @@
 -author('vances@sigscale.org').
 
 -export([point_code/1, point_code/2]).
-%% to be removed after debugging
 -export([party_address/1]).
 
 -include("sccp.hrl").
@@ -70,6 +69,7 @@ point_code(ansi, PC) when is_list(PC) ->
 	<<I:24>> = <<Network:8, Cluster:8, Member:8>>,
 	I.
 
+%% @doc parse GT to string
 gt_to_string(String) ->
 	gt_to_string1(String,[]).
 %%hidden
