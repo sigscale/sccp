@@ -15,7 +15,7 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%  @doc Test suite for public API of the {@link //ocs. ocs} application.
+%%%  @doc Test suite for public API of the {@link //sccp. sccp} application.
 %%%
 -module(sccp_api_SUITE).
 -copyright('Copyright 2022 SigScale Global Inc.').
@@ -76,31 +76,40 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[party_address, party_address_1, party_address_2, party_address_3].
+	[party_address_pc_ssn_gt, party_address_gt, party_address_pc_ssn, party_address_ssn].
 
 
 %%---------------------------------------------------------------------
 %%  Test cases
 %%---------------------------------------------------------------------
 
-party_address() ->
-	[{userdata, [{doc, "Pretty print party address test"}]}].
+party_address_pc_ssn_gt() ->
+	[{userdata, [{doc, "Pretty print party address with PC, SSN and GT"}]}].
 
-party_address(_Config) ->
+party_address_pc_ssn_gt(_Config) ->
 	Address = #party_address{pc = 4, ssn = 4, gt = [1,2,3]},
-	sccp:party_address(Address).	
+	"PC: 0-0-4, SSN: 4, GT: 123" = sccp:party_address(Address).
 
-party_address_1(_Config) ->
-   Address = #party_address{pc = undefined, ssn = undefined, gt = [1,2,3]},
-   sccp:party_address(Address).
+party_address_gt() ->
+	[{userdata, [{doc, "Pretty print party address with GT"}]}].
 
-party_address_2(_Config) ->
-   Address = #party_address{pc = 42, ssn = 51, gt = undefined},
-   sccp:party_address(Address).
+party_address_gt(_Config) ->
+	Address = #party_address{pc = undefined, ssn = undefined, gt = [1,2,3]},
+	"GT: 123" = sccp:party_address(Address).
 
-party_address_3(_Config) ->
-   Address = #party_address{pc = undefined, ssn = 322, gt = undefined},
-   sccp:party_address(Address).
+party_address_pc_ssn() ->
+	[{userdata, [{doc, "Pretty print party address with PC and SSN"}]}].
+
+party_address_pc_ssn(_Config) ->
+	Address = #party_address{pc = 42, ssn = 51, gt = undefined},
+	"PC: 0-5-2, SSN: 51" = sccp:party_address(Address).
+
+party_address_ssn() ->
+	[{userdata, [{doc, "Pretty print party address with SSN"}]}].
+
+party_address_ssn(_Config) ->
+	Address = #party_address{pc = undefined, ssn = 322, gt = undefined},
+	"SSN: 322" = sccp:party_address(Address).
 
 %%---------------------------------------------------------------------
 %%  Internal functions
