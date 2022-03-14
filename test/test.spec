@@ -1,2 +1,3 @@
 {suites, ".",
-		[sccp_codec_SUITE]}.
+		[sccp_api_SUITE,
+		sccp_codec_SUITE]}.

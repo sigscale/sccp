@@ -3,7 +3,8 @@
 ##
 ## Process this file with automake to produce Makefile.in
 
-testmods = sccp_codec_SUITE
+testmods = sccp_api_SUITE \
+		sccp_codec_SUITE
 
 check_DATA = .dialyzer_ok .common_test_ok
 
