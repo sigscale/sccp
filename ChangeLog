@@ -1,3 +1,11 @@
+2022-03-14  Vance Shipley <vances@sigscale.org>
+
+	* pretty print party address type validation
+	* test:test cases related to pretty print party address (in-85)
+	* pretty print party address(in-77)
+	* include debug information in beam
+	* include edoc-info in installed doc
+
 2021-02-23  Vance Shipley <vances@sigscale.org>
 
 	* refactor party address translation type as integer
