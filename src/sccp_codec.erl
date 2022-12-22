@@ -343,7 +343,7 @@ party_address3(RI, 1, <<OE:1, NAI:7, GT/binary>>, P) ->
 			nai = nai(NAI), gt = bcd(GT, OE)};
 party_address3(RI, 2, <<TT, GT/binary>>, P) ->
 	P#party_address{ri = routing_indicator(RI),
-			translation_type = TT, gt = bcd(GT, 1)};
+			translation_type = TT, gt = bcd(GT, 0)};
 party_address3(RI, 3, <<TT, NP:4, ENC:4, GT/binary>>, P) ->
 	Scheme  = encoding_scheme(ENC),
 	Title = case Scheme of

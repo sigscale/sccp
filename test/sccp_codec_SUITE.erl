@@ -162,7 +162,7 @@ party_address_gti_2(_Config) ->
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
 	TT = rand:uniform(254),
-	GT = gen_title(),
+	GT = gen_title(12),
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT, gt = GT},
 	P2 = sccp_codec:party_address(P1),
 	true = is_binary(P2),
