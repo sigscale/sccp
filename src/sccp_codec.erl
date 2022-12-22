@@ -165,10 +165,16 @@ sccp(<<?ExtendedUnitData, Class, Hops, CalledPartyP, CallingPartyP, DataP, Optio
 	Data = binary:part(Rest, DataP - 1, DataL),
 	OB = binary:part(Rest, OptionalP + 1, OptL),
 	Opts = optional_part(OB), 
+	Segmentation = case get_option(?Segmentation, Opts) of
+		Seg when is_binary(Seg) ->
+			segmentation(Seg);
+		undefined ->
+			undefined
+	end,
 	#sccp_extended_unitdata{class = Class, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB), data = Data,
-			segmentation = segmentation(get_option(?Segmentation, Opts)),
+			segmentation = Segmentation,
 			importance = get_option(?Importance, Opts)};
 sccp(<<?ExtendedUnitDataService, RC, Hops, CalledPartyP, CallingPartyP, DataP, OptionalP,
 		Rest/binary>>) ->
@@ -182,10 +188,16 @@ sccp(<<?ExtendedUnitDataService, RC, Hops, CalledPartyP, CallingPartyP, DataP, O
 	Data = binary:part(Rest, DataP - 1, DataL),
 	OB = binary:part(Rest, OptionalP + 1, OptL),
 	Opts = optional_part(OB),
+	Segmentation = case get_option(?Segmentation, Opts) of
+		Seg when is_binary(Seg) ->
+			segmentation(Seg);
+		undefined ->
+			undefined
+	end,
 	#sccp_extended_unitdata_service{return_cause = Return, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB), data = Data,
-			segmentation = segmentation(get_option(?Segmentation, Opts)),
+			segmentation = Segmentation,
 			importance = get_option(?Importance, Opts)};
 sccp(<<?LongUnitData, Class, Hops, CalledPartyP, CallingPartyP, LongDataP, OptionalP,
 		Rest/binary>>) ->
@@ -198,10 +210,17 @@ sccp(<<?LongUnitData, Class, Hops, CalledPartyP, CallingPartyP, LongDataP, Optio
 	LongData = binary:part(Rest, LongDataP - 1, LongDataL),
 	OB = binary:part(Rest, OptionalP + 1, OptL),
 	Opts = optional_part(OB),
+	Segmentation = case get_option(?Segmentation, Opts) of
+		Seg when is_binary(Seg) ->
+			segmentation(Seg);
+		undefined ->
+			undefined
+	end,
 	#sccp_long_unitdata{class = Class, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB), 
-			long_data = LongData, segmentation = segmentation(get_option(?Segmentation, Opts)),
+			long_data = LongData,
+			segmentation = Segmentation,
 			importance = get_option(?Importance, Opts)};
 sccp(<<?LongUnitDataService, RC, Hops, CalledPartyP, CallingPartyP, LongDataP, OptionalP, 
 		Rest/binary>>) ->
@@ -215,10 +234,17 @@ sccp(<<?LongUnitDataService, RC, Hops, CalledPartyP, CallingPartyP, LongDataP, O
 	LongData = binary:part(Rest, LongDataP - 1, LongDataL),
 	OB = binary:part(Rest, OptionalP + 1, OptL),
 	Opts = optional_part(OB),
+	Segmentation = case get_option(?Segmentation, Opts) of
+		Seg when is_binary(Seg) ->
+			segmentation(Seg);
+		undefined ->
+			undefined
+	end,
 	#sccp_long_unitdata_service{return_cause = Return, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB), 
-			long_data = LongData, segmentation = segmentation(get_option(?Segmentation, Opts)),
+			long_data = LongData,
+			segmentation = Segmentation,
 			importance = get_option(?Importance, Opts)};
 sccp(#sccp_connection_req{} = S) ->
 	sccp_connection_req(S);
@@ -838,8 +864,8 @@ bcd(Address) when is_list(Address) ->
 		Address :: [byte()].
 %% @doc Decode binary coded decimal value to a list of digits.
 %%
-%% `OE' indicates odd/even number of address signals present 
-%%      in a global address information.
+%% `OE' indicates odd (1) or even (0) number of address
+%%%     signals present in a global address information.
 %%
 %% ITU-T Recommendation Q.713, section 3.4.2.3.1.
 bcd(Data, OE) when is_binary(Data) ->
