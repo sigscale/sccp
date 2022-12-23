@@ -33,8 +33,6 @@
 		routing_indicator/1, importance/1, refusal_cause/1, release_cause/1,
 		segmenting/1, return_cause/1, reset_cause/1, segmentation/1, point_code/1,
 		bcd/1, bcd/2, ssn/1]).
-%% functions to deal with SCCP optional part
--export([optional_part/1, get_option/2]).
 
 -export_type([sccp_message/0, party_address/0]).
 
@@ -62,9 +60,7 @@ sccp(<<?ConnectRequest, SrcLocalRef:24, Class, CalledPartyP, OptionalP, Rest/bin
 	CalledPartyL = binary:at(Rest, CalledPartyP - 1),
 	CalledPartyB = binary:part(Rest, CalledPartyP, CalledPartyL),
 	Address = party_address(CalledPartyB),
-	OptL = binary:at(Rest, OptionalP),
-	OB = binary:part(Rest, OptionalP + 1, OptL),
-	Opts = optional_part(OB),
+	Opts = optional_part(OptionalP, Rest),
 	#sccp_connection_req{src_local_ref = SrcLocalRef,
 			class = Class, called_party = Address,
 			credit = get_option(?Credit, Opts),
@@ -73,9 +69,7 @@ sccp(<<?ConnectRequest, SrcLocalRef:24, Class, CalledPartyP, OptionalP, Rest/bin
 			hop_counter = get_option(?HopCounter, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?ConnectionConfirm, DestLocalRef:24, SrcLocalRef:24, Class, OptionalP, Rest/binary>>) ->
-	OptL = binary:at(Rest, OptionalP - 1),
-	OB = binary:part(Rest, OptionalP, OptL),
-	Opts = optional_part(OB),
+	Opts = optional_part(OptionalP, Rest),
 	#sccp_connection_confirm{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef, class = Class,
 			credit = get_option(?Credit, Opts),
@@ -83,18 +77,14 @@ sccp(<<?ConnectionConfirm, DestLocalRef:24, SrcLocalRef:24, Class, OptionalP, Re
 			data = get_option(?DATA, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?ConnectionRefused, DestLocalRef:24, Refuse, OptionalP, Rest/binary>>) ->
-	OptL = binary:at(Rest, OptionalP - 1),
-	OB = binary:part(Rest, OptionalP, OptL),
-	Opts = optional_part(OB),
+	Opts = optional_part(OptionalP, Rest),
 	#sccp_connection_refused{dest_local_ref = DestLocalRef,
 			refusal_cause = refusal_cause(Refuse),
 			called_party = get_option(?CalledPartyAddress, Opts),
 			data = get_option(?DATA, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?Released, DestLocalRef:24, SrcLocalRef:24, Release, OptionalP, Rest/binary>>) ->
-	OptL = binary:at(Rest, OptionalP - 1),
-	OB = binary:part(Rest, OptionalP, OptL),
-	Opts = optional_part(OB),
+	Opts = optional_part(OptionalP, Rest),
 	#sccp_released{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef,
 			release_cause = release_cause(Release),
@@ -164,12 +154,10 @@ sccp(<<?ExtendedUnitData, Class, Hops, CalledPartyP, CallingPartyP, DataP, Optio
 	CalledPartyL = binary:at(Rest, CalledPartyP - 4),
 	CallingPartyL = binary:at(Rest, CallingPartyP - 3),
 	DataL = binary:at(Rest, DataP - 2),
-	OptL = binary:at(Rest, OptionalP),
 	CalledPartyB = binary:part(Rest, CalledPartyP - 3, CalledPartyL),
 	CallingPartyB = binary:part(Rest, CallingPartyP - 2, CallingPartyL),
 	Data = binary:part(Rest, DataP - 1, DataL),
-	OB = binary:part(Rest, OptionalP + 1, OptL),
-	Opts = optional_part(OB), 
+	Opts = optional_part(OptionalP, Rest), 
 	#sccp_extended_unitdata{class = Class, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB), data = Data,
@@ -181,12 +169,10 @@ sccp(<<?ExtendedUnitDataService, RC, Hops, CalledPartyP, CallingPartyP, DataP, O
 	CalledPartyL = binary:at(Rest, CalledPartyP - 4),
 	CallingPartyL = binary:at(Rest, CallingPartyP - 3),
 	DataL = binary:at(Rest, DataP - 2),
-	OptL = binary:at(Rest, OptionalP),
 	CalledPartyB = binary:part(Rest, CalledPartyP - 3, CalledPartyL),
 	CallingPartyB = binary:part(Rest, CallingPartyP - 2, CallingPartyL),
 	Data = binary:part(Rest, DataP - 1, DataL),
-	OB = binary:part(Rest, OptionalP + 1, OptL),
-	Opts = optional_part(OB),
+	Opts = optional_part(OptionalP, Rest),
 	#sccp_extended_unitdata_service{return_cause = Return, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB), data = Data,
@@ -197,12 +183,10 @@ sccp(<<?LongUnitData, Class, Hops, CalledPartyP, CallingPartyP, LongDataP, Optio
 	CalledPartyL = binary:at(Rest, CalledPartyP - 4),
 	CallingPartyL = binary:at(Rest, CallingPartyP - 3),
 	LongDataL = binary:at(Rest, LongDataP - 2),
-	OptL = binary:at(Rest, OptionalP),
 	CalledPartyB = binary:part(Rest, CalledPartyP - 3, CalledPartyL),
 	CallingPartyB = binary:part(Rest, CallingPartyP - 2, CallingPartyL),
 	LongData = binary:part(Rest, LongDataP - 1, LongDataL),
-	OB = binary:part(Rest, OptionalP + 1, OptL),
-	Opts = optional_part(OB),
+	Opts = optional_part(OptionalP, Rest),
 	#sccp_long_unitdata{class = Class, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB), 
@@ -215,12 +199,10 @@ sccp(<<?LongUnitDataService, RC, Hops, CalledPartyP, CallingPartyP, LongDataP, O
 	CalledPartyL = binary:at(Rest, CalledPartyP - 4),
 	CallingPartyL = binary:at(Rest, CallingPartyP - 3),
 	LongDataL = binary:at(Rest, LongDataP - 2),
-	OptL = binary:at(Rest, OptionalP),
 	CalledPartyB = binary:part(Rest, CalledPartyP - 3, CalledPartyL),
 	CallingPartyB = binary:part(Rest, CallingPartyP - 2, CallingPartyL),
 	LongData = binary:part(Rest, LongDataP - 1, LongDataL),
-	OB = binary:part(Rest, OptionalP + 1, OptL),
-	Opts = optional_part(OB),
+	Opts = optional_part(OptionalP, Rest),
 	#sccp_long_unitdata_service{return_cause = Return, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB), 
@@ -514,6 +496,7 @@ routing_indicator(true) -> 1.
 		Options :: [{K, V}],
 		V :: term().
 %% @doc Get option `O' from SCCP optional parameters.
+%% @private
 get_option(K, Options) when is_integer(K) ->
 	case lists:keyfind(K, 1, Options) of
 		false ->
@@ -522,15 +505,22 @@ get_option(K, Options) when is_integer(K) ->
 			V
 	end.
 
--spec optional_part(P) -> Q
+-spec optional_part(OptionalP, Rest) -> Q
 	when
-		P :: binary(),
+		OptionalP :: byte(),
+		Rest :: binary(),
 		Q :: [{K, V}],
 		K :: byte(),
 		V :: term().
 %% @doc Extract optional part from a SCCP message.
-optional_part(Part) ->
-	optional_part1(Part, []).
+%% @private
+optional_part(OptionalP, Rest) when OptionalP > 0 ->
+	Pos = OptionalP - 1,
+	Len = size(Rest) - Pos,
+	OptionalPart = binary:part(Rest, Pos, Len),
+	optional_part1(OptionalPart, []);
+optional_part(0, _Rest) ->
+	[].
 
 %% @hidden
 optional_part1(<<?DestinationLocalRef, Len, Rest/binary>>, Acc) ->
@@ -589,7 +579,7 @@ optional_part1(<<?Segmentation, Len, Rest/binary>>, Acc) ->
 	V = binary:part(Rest, 0, Len),
 	<<V:Len/binary, Rest1/binary>> = Rest,
 	optional_part1(Rest1, [{?Segmentation, segmentation(V)} | Acc]);
-optional_part1(<<>>, Acc) ->
+optional_part1(<<0>>, Acc) ->
 	Acc;
 optional_part1(<<Name, Len, Rest/binary>>, Acc) ->
 	V = binary:part(Rest, 0, Len),
