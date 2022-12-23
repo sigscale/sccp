@@ -157,7 +157,7 @@ sccp(<<?ExtendedUnitData, Class, Hops, CalledPartyP, CallingPartyP, DataP, Optio
 	CalledPartyB = binary:part(Rest, CalledPartyP - 3, CalledPartyL),
 	CallingPartyB = binary:part(Rest, CallingPartyP - 2, CallingPartyL),
 	Data = binary:part(Rest, DataP - 1, DataL),
-	Opts = optional_part(OptionalP, Rest), 
+	Opts = optional_part(OptionalP, Rest),
 	#sccp_extended_unitdata{class = Class, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB), data = Data,
@@ -189,11 +189,11 @@ sccp(<<?LongUnitData, Class, Hops, CalledPartyP, CallingPartyP, LongDataP, Optio
 	Opts = optional_part(OptionalP, Rest),
 	#sccp_long_unitdata{class = Class, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
-			calling_party = party_address(CallingPartyB), 
+			calling_party = party_address(CallingPartyB),
 			long_data = LongData,
 			segmentation = get_option(?Segmentation, Opts),
 			importance = get_option(?Importance, Opts)};
-sccp(<<?LongUnitDataService, RC, Hops, CalledPartyP, CallingPartyP, LongDataP, OptionalP, 
+sccp(<<?LongUnitDataService, RC, Hops, CalledPartyP, CallingPartyP, LongDataP, OptionalP,
 		Rest/binary>>) ->
 	Return = return_cause(RC),
 	CalledPartyL = binary:at(Rest, CalledPartyP - 4),
@@ -205,7 +205,7 @@ sccp(<<?LongUnitDataService, RC, Hops, CalledPartyP, CallingPartyP, LongDataP, O
 	Opts = optional_part(OptionalP, Rest),
 	#sccp_long_unitdata_service{return_cause = Return, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
-			calling_party = party_address(CallingPartyB), 
+			calling_party = party_address(CallingPartyB),
 			long_data = LongData,
 			segmentation = get_option(?Segmentation, Opts),
 			importance = get_option(?Importance, Opts)};
@@ -213,7 +213,7 @@ sccp(#sccp_connection_req{} = S) ->
 	sccp_connection_req(S);
 sccp(#sccp_connection_confirm{} = S) ->
 	sccp_connection_confirm(S);
-sccp(#sccp_connection_refused{} = S) -> 
+sccp(#sccp_connection_refused{} = S) ->
 	sccp_connection_refused(S);
 sccp(#sccp_released{} = S) ->
 	sccp_released(S);
@@ -423,7 +423,7 @@ nai(127) -> reserved;
 nai(unknown) -> 0;
 nai(subscriber) -> 1;
 nai(reserved_for_national) -> 2;
-nai(national) -> 3; 
+nai(national) -> 3;
 nai(international) -> 4;
 nai(spare) -> 5;
 nai(reserved) -> 127.
@@ -446,16 +446,16 @@ numbering_plan(7) -> isdn_mobile;
 numbering_plan(N) when (is_integer(N)) andalso
 		(N >= 8 andalso N =< 13) -> spare;
 numbering_plan(14) -> private_net;
-numbering_plan(15) -> reserved; 
+numbering_plan(15) -> reserved;
 numbering_plan(unknown) -> 0;
-numbering_plan(isdn_tele) -> 1; 
-numbering_plan(generic) -> 2; 
-numbering_plan(data) -> 3; 
-numbering_plan(telex) -> 4; 
-numbering_plan(maritime) -> 5; 
-numbering_plan(land_mobile) -> 6; 
+numbering_plan(isdn_tele) -> 1;
+numbering_plan(generic) -> 2;
+numbering_plan(data) -> 3;
+numbering_plan(telex) -> 4;
+numbering_plan(maritime) -> 5;
+numbering_plan(land_mobile) -> 6;
 numbering_plan(isdn_mobile) -> 7;
-numbering_plan(private_net) -> 14; 
+numbering_plan(private_net) -> 14;
 numbering_plan(reserved) -> 15;
 numbering_plan(_) -> 13.
 
@@ -475,7 +475,7 @@ encoding_scheme(15) -> reserved;
 encoding_scheme(unknown) -> 0;
 encoding_scheme(bcd_odd) -> 1;
 encoding_scheme(bcd_even) -> 2;
-encoding_scheme(national) -> 3; 
+encoding_scheme(national) -> 3;
 encoding_scheme(reserved) -> 15;
 encoding_scheme(_) -> 14.
 
@@ -643,7 +643,7 @@ refusal_cause(access_congestion) -> 9;
 refusal_cause(subsystem_failure) -> 10;
 refusal_cause(subsystem_congestion) -> 11;
 refusal_cause(connection_expire) -> 12;
-refusal_cause(incomp_userdata) -> 13; 
+refusal_cause(incomp_userdata) -> 13;
 refusal_cause(unqualified) -> 15;
 refusal_cause(hcounter_violation) -> 16;
 refusal_cause(sccp_failure) -> 17;
@@ -884,7 +884,7 @@ sccp_connection_req(#sccp_connection_req{src_local_ref = Src, class = Class,
 connection_req1(#sccp_connection_req{credit = undefined} = S, B) ->
 	connection_req2(S, B, <<>>);
 connection_req1(#sccp_connection_req{credit = C} = S, B) ->
-	CL = size(C), 
+	CL = size(C),
 	connection_req2(S, B, <<?Credit, CL, C/binary>>).
 
 %% @hidden
