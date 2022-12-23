@@ -404,7 +404,7 @@ sccp_connection_req() ->
 	[{userdata, [{doc, "encode and decode SCCP connection request message"}]}].
 
 sccp_connection_req(_Config) ->
-	SrcLocalRef = rand:uniform(256) - 1,
+	SrcLocalRef = rand:uniform(16777216) - 1,
 	Class = rand:uniform(5) - 1,
 	CalledParty = gen_party_address(),
 	Credit = <<123>>,
@@ -423,8 +423,8 @@ sccp_connection_confirm() ->
 	[{userdata, [{doc, "encode and decode SCCP connection confirm message"}]}].
 
 sccp_connection_confirm(_Config) ->
-	SrcLocalRef = rand:uniform(256) - 1,
-	DestLocalRef = rand:uniform(256) - 1,
+	SrcLocalRef = rand:uniform(16777216) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
 	Class = rand:uniform(5) - 1,
 	Credit = <<123>>,
 	CalledParty = gen_party_address(),
@@ -441,7 +441,7 @@ sccp_connection_refused() ->
 	[{userdata, [{doc, "encode and decode SCCP connection refused message"}]}].
 
 sccp_connection_refused(_Config) ->
-	DestLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
 	Cause = sccp_codec:refusal_cause(rand:uniform(256) - 1),
 	CalledParty = gen_party_address(),
 	Data = <<123:24>>,
@@ -456,8 +456,8 @@ sccp_released() ->
 	[{userdata, [{doc, "encode and decode SCCP released message"}]}].
 
 sccp_released(_Config) ->
-	SrcLocalRef = rand:uniform(256) - 1,
-	DestLocalRef = rand:uniform(256) - 1,
+	SrcLocalRef = rand:uniform(16777216) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
 	Cause = sccp_codec:release_cause(rand:uniform(256) - 1),
 	Data = <<123:24>>,
 	Importance = rand:uniform(5) - 1,
@@ -471,8 +471,8 @@ sccp_release_complete() ->
 	[{userdata, [{doc, "encode and decode SCCP release complete  message"}]}].
 
 sccp_release_complete(_Config) ->
-	SrcLocalRef = rand:uniform(256) - 1,
-	DestLocalRef = rand:uniform(256) - 1,
+	SrcLocalRef = rand:uniform(16777216) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
 	Rec = #sccp_release_complete{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
@@ -482,7 +482,7 @@ sccp_data_form1() ->
 	[{userdata, [{doc, "encode and decode SCCP data form1 message"}]}].
 
 sccp_data_form1(_Config) ->
-	DestLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
 	Seg = case rand:uniform(2) of
 		2 ->
 			true;
@@ -499,7 +499,7 @@ sccp_data_form2() ->
 	[{userdata, [{doc, "encode and decode SCCP data form2 message"}]}].
 
 sccp_data_form2(_Config) ->
-	DestLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
 	Seg = case rand:uniform(2) of
 		2 ->
 			true;
@@ -516,7 +516,7 @@ sccp_data_ack() ->
 	[{userdata, [{doc, "encode and decode SCCP data ack message"}]}].
 
 sccp_data_ack(_Config) ->
-	DestLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
 	Num = rand:uniform(128) - 1,
 	Seq = <<Num:7, 0:1>>,
 	Credit = <<123>>,
@@ -557,7 +557,7 @@ sccp_expedited_data() ->
 	[{userdata, [{doc, "encode and decode SCCP expedited data message"}]}].
 
 sccp_expedited_data(_Config) ->
-	DestLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
 	Data = <<123:24>>,
 	Rec = #sccp_expedited_data{dest_local_ref = DestLocalRef, data = Data},
 	Bin = sccp_codec:sccp(Rec),
@@ -568,7 +568,7 @@ sccp_expedited_ack() ->
 	[{userdata, [{doc, "encode and decode SCCP expedited ack message"}]}].
 
 sccp_expedited_ack(_Config) ->
-	DestLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
 	Rec = #sccp_expedited_ack{dest_local_ref = DestLocalRef},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
@@ -578,8 +578,8 @@ sccp_reset_request() ->
 	[{userdata, [{doc, "encode and decode SCCP reset request message"}]}].
 
 sccp_reset_request(_Config) ->
-	DestLocalRef = rand:uniform(256) - 1,
-	SrcLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
+	SrcLocalRef = rand:uniform(16777216) - 1,
 	Cause = sccp_codec:reset_cause(rand:uniform(256) - 1),
 	Rec = #sccp_reset_request{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef,
 			reset_cause = Cause},
@@ -591,8 +591,8 @@ sccp_reset_confirmation() ->
 	[{userdata, [{doc, "encode and decode SCCP reset confirmation message"}]}].
 
 sccp_reset_confirmation(_Config) ->
-	DestLocalRef = rand:uniform(256) - 1,
-	SrcLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
+	SrcLocalRef = rand:uniform(16777216) - 1,
 	Rec = #sccp_reset_confirmation{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
@@ -602,7 +602,7 @@ sccp_protocol_data_unit_error() ->
 	[{userdata, [{doc, "encode and decode SCCP protocol data unit error message"}]}].
 
 sccp_protocol_data_unit_error(_Config) ->
-	DestLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
 	Error = rand:uniform(256) - 1,
 	Rec = #sccp_protocol_data_unit_error{dest_local_ref = DestLocalRef, error_cause = Error},
 	Bin = sccp_codec:sccp(Rec),
@@ -613,8 +613,8 @@ sccp_inactivity_test() ->
 	[{userdata, [{doc, "encode and decode SCCP inactivity test message"}]}].
 
 sccp_inactivity_test(_Config) ->
-	DestLocalRef = rand:uniform(256) - 1,
-	SrcLocalRef = rand:uniform(256) - 1,
+	DestLocalRef = rand:uniform(16777216) - 1,
+	SrcLocalRef = rand:uniform(16777216) - 1,
 	Class = rand:uniform(5) - 1,
 	Seq = case rand:uniform(2) of
 		2 ->
