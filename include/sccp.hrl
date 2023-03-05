@@ -79,7 +79,8 @@
 -record(segmentation,
 		{first :: undefined | boolean(),
 		class :: undefined | 0..1,
-		remaining_seg :: undefined | 0..15}).
+		remaining_seg :: undefined | 0..15,
+		seg_local_ref ::  0..16777215}).
 
 %% SCCP messages - ITU-T Recommendation Q.713, section 4
 -record(sccp_connection_req,
