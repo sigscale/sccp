@@ -118,10 +118,10 @@
 		{dest_local_ref :: undefined | 0..16777215,
 		src_local_ref :: undefined | 0..16777215,
 		release_cause :: undefined | enduser_orig | enduser_congestion | enduser_failure
-				| sccp_user_orig | rpc_error | inconsistant_data | access_failure
+				| sccp_user_originated | rpc_error | inconsistant_data | access_failure
 				| access_congestion | subsystem_failure | subsystem_congestion
-				| mtp_failure | network_congestion | timer_expire | reserved
-				| unqualified | sccp_failure,
+				| mtp_failure | network_congestion | reset_timer_expire
+				| inactivity_timer_expire | unqualified | sccp_failure,
 		data :: undefined | binary(),
 		importance :: undefined | 0..7}).
 
