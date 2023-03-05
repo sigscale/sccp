@@ -812,14 +812,20 @@ return_cause(_) -> 255.
 %% @doc Values for segmentation.
 %%
 %% ITU-T Recommendation Q.713, section 3.17.
-segmentation(<<0:1, C:1, _:2, RemSeg:4, _Rest/binary>> = _Segmenting) ->
-	#segmentation{first = false, class = C, remaning_seg = RemSeg};
-segmentation(<<1:1, C:1, _:2, RemSeg:4, _Rest/binary>>) ->
-	#segmentation{first = true, class = C, remaning_seg = RemSeg};
-segmentation(#segmentation{first = false, class = C, remaning_seg = R}) ->
-	<<0:1, C:1, 0:2, R:4, 0:24>>;
-segmentation(#segmentation{first = true, class = C, remaning_seg = R}) ->
-	<<1:1, C:1, 0:2, R:4, 0:24>>.
+segmentation(<<0:1, C:1, _:2, RemSeg:4,
+		SegLocalRef:24/little>> = _Segmenting) ->
+	#segmentation{first = false, class = C,
+			remaining_seg = RemSeg, seg_local_ref = SegLocalRef};
+segmentation(<<1:1, C:1, _:2, RemSeg:4,
+		SegLocalRef:24/little>>) ->
+	#segmentation{first = true, class = C,
+			remaining_seg = RemSeg, seg_local_ref = SegLocalRef};
+segmentation(#segmentation{first = false, class = C,
+		remaining_seg = R, seg_local_ref = SegLocalRef}) ->
+	<<0:1, C:1, 0:2, R:4, SegLocalRef:24/little>>;
+segmentation(#segmentation{first = true, class = C,
+		remaining_seg = R, seg_local_ref = SegLocalRef}) ->
+	<<1:1, C:1, 0:2, R:4, SegLocalRef:24/little>>.
 
 -spec point_code(Code) -> Code
 	when
