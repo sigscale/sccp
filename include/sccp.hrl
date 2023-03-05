@@ -83,26 +83,26 @@
 
 %% SCCP messages - ITU-T Recommendation Q.713, section 4
 -record(sccp_connection_req,
-		{src_local_ref :: undefined | pos_integer(),
+		{src_local_ref :: undefined | 0..16777215,
 		class :: undefined | 2..3,
 		called_party :: undefined | #party_address{},
 		credit :: undefined | binary(),
 		calling_party :: undefined | #party_address{},
 		data :: undefined | binary(),
-		hop_counter :: undefined | pos_integer(),
-		importance :: undefined | pos_integer()}).
+		hop_counter :: undefined | 1..15,
+		importance :: undefined | 0..7,
 
 -record(sccp_connection_confirm,
-		{dest_local_ref :: undefined | pos_integer(),
-		src_local_ref :: undefined | pos_integer(),
+		{dest_local_ref :: undefined | 0..16777215,
+		src_local_ref :: undefined | 0..16777215,
 		class :: undefined | 2..3,
 		credit :: undefined | binary(),
 		called_party :: undefined | #party_address{},
 		data :: undefined | binary(),
-		importance :: undefined | pos_integer()}).
+		importance :: undefined | 0..7}).
 
 -record(sccp_connection_refused,
-		{dest_local_ref :: undefined | pos_integer(),
+		{dest_local_ref :: undefined | 0..16777215,
 		refusal_cause :: undefined | enduser_orig | enduser_congestion | enduser_failure
 				| sccp_user_oirg | dest_unknown | dest_inaccessible | network_resource
 				| access_failure | access_congestion | subsystem_failure
@@ -111,35 +111,35 @@
 				| no_translation_addr | unequipped_error,
 		called_party :: undefined | #party_address{},
 		data :: undefined | binary(),
-		importance :: undefined | pos_integer()}).
+		importance :: undefined | 0..7}).
 
 -record(sccp_released,
-		{dest_local_ref :: undefined | pos_integer(),
-		src_local_ref :: undefined | pos_integer(),
+		{dest_local_ref :: undefined | 0..16777215,
+		src_local_ref :: undefined | 0..16777215,
 		release_cause :: undefined | enduser_orig | enduser_congestion | enduser_failure
 				| sccp_user_orig | rpc_error | inconsistant_data | access_failure
 				| access_congestion | subsystem_failure | subsystem_congestion
 				| mtp_failure | network_congestion | timer_expire | reserved
 				| unqualified | sccp_failure,
 		data :: undefined | binary(),
-		importance :: undefined | pos_integer()}).
+		importance :: undefined | 0..7}).
 
 -record(sccp_release_complete,
-		{dest_local_ref :: undefined | pos_integer(),
-		src_local_ref :: undefined | pos_integer()}).
+		{dest_local_ref :: undefined | 0..16777215,
+		src_local_ref :: undefined | 0..16777215,
 
 -record(sccp_data_form1,
-		{dest_local_ref :: undefined | pos_integer(),
+		{dest_local_ref :: undefined | 0..16777215,
 		segmenting :: undefined | boolean(),
 		data :: undefined | binary()}).
 
 -record(sccp_data_form2,
-		{dest_local_ref :: undefined | pos_integer(),
+		{dest_local_ref :: undefined | 0..16777215,
 		sequencing :: undefined | boolean(),
 		data :: undefined | binary()}).
 
 -record(sccp_data_ack,
-		{dest_local_ref :: undefined | pos_integer(),
+		{dest_local_ref :: undefined | 0..16777215,
 		receive_seq_num :: undefined | binary(),
 		credit :: undefined | binary()}).
 
@@ -159,74 +159,74 @@
 		data :: undefined | binary()}).
 
 -record(sccp_expedited_data,
-		{dest_local_ref :: undefined | pos_integer(),
+		{dest_local_ref :: undefined | 0..16777215,
 		data :: undefined | binary()}).
 
 -record(sccp_expedited_ack,
-		 {dest_local_ref :: undefined | pos_integer()}).
+		 {dest_local_ref :: undefined | 0..16777215,
 
 -record(sccp_reset_request,
-		{dest_local_ref :: undefined | pos_integer(),
-		src_local_ref :: undefined | pos_integer(),
+		{dest_local_ref :: undefined | 0..16777215,
+		src_local_ref :: undefined | 0..16777215,
 		reset_cause :: undefined | enduser_orig, sccp_user_oirg, incorrect_ps,
 				incorrect_pr, rpc_error, remote_end_user_operational,
 				network_operational, access_opertional, network_congestion,
 				reserved, unqualified}).
 
 -record(sccp_reset_confirmation,
-		{dest_local_ref :: undefined | pos_integer(),
-		src_local_ref :: undefined | pos_integer()}).
+		{dest_local_ref :: undefined | 0..16777215,
+		src_local_ref :: undefined | 0..16777215,
 
 -record(sccp_protocol_data_unit_error,
-		{dest_local_ref :: undefined | pos_integer(),
+		{dest_local_ref :: undefined | 0..16777215,
 		error_cause :: undefined | integer()}).
 		
 -record(sccp_inactivity_test,
-		{dest_local_ref :: undefined | pos_integer(),
-		src_local_ref :: undefined | pos_integer(),
+		{dest_local_ref :: undefined 0..16777215,
+		src_local_ref :: undefined | 0..16777215,
 		class :: undefined | 2..3,
 		sequencing :: undefined | boolean(),
 		credit :: undefined | binary()}).
 
 -record(sccp_extended_unitdata,
 		{class :: undefined | 0..1 | 128..129,
-		hop_counter :: undefined | pos_integer(),
+		hop_counter :: undefined | 1..15,
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
 		data :: undefined | binary(),
 		segmentation :: undefined | #segmentation{},
-		importance :: undefined | pos_integer()}).
+		importance :: undefined | 0..7}).
 
 -record(sccp_extended_unitdata_service,
 		{return_cause :: undefined | no_translation | subsystem_congestion | subsystem_failure
 				| unequipped_user | mtp_failure | network_congestion | unqualified
 				| transport_error | processing_error | reassembly_fail | sccp_failure
 				| hcounter_violation | seg_not_supported | seg_failure | reserved,
-		hop_counter :: undefined | pos_integer(),
+		hop_counter :: undefined | 1..15,
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
 		data :: undefined | binary(),
 		segmentation :: undefined | #segmentation{},
-		importance :: undefined | pos_integer()}).
+		importance :: undefined | 0..7}).
 
 -record(sccp_long_unitdata,
 		{class :: undefined | 0..1 | 128..129,
-		hop_counter :: undefined | pos_integer(),
+		hop_counter :: undefined | 1..15,
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
 		long_data :: undefined | binary(),
 		segmentation :: undefined | #segmentation{},
-		importance :: undefined | pos_integer()}).
+		importance :: undefined | 0..7}).
 
 -record(sccp_long_unitdata_service,
 		{return_cause :: undefined | no_translation | subsystem_congestion | subsystem_failure
 				| unequipped_user | mtp_failure | network_congestion | unqualified
 				| transport_error | processing_error | reassembly_fail | sccp_failure
 				| hcounter_violation | seg_not_supported | seg_failure | reserved,
-		hop_counter :: undefined | pos_integer(),
+		hop_counter :: undefined | 1..15,
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
 		long_data :: undefined | binary(),
 		segmentation :: undefined | #segmentation{},
-		importance :: undefined | pos_integer()}).
+		importance :: undefined | 0..7}).
 
