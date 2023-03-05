@@ -91,7 +91,7 @@
 		calling_party :: undefined | #party_address{},
 		data :: undefined | binary(),
 		hop_counter :: undefined | 1..15,
-		importance :: undefined | 0..7,
+		importance :: undefined | 0..7}).
 
 -record(sccp_connection_confirm,
 		{dest_local_ref :: undefined | 0..16777215,
@@ -127,7 +127,7 @@
 
 -record(sccp_release_complete,
 		{dest_local_ref :: undefined | 0..16777215,
-		src_local_ref :: undefined | 0..16777215,
+		src_local_ref :: undefined | 0..16777215}).
 
 -record(sccp_data_form1,
 		{dest_local_ref :: undefined | 0..16777215,
@@ -164,7 +164,7 @@
 		data :: undefined | binary()}).
 
 -record(sccp_expedited_ack,
-		 {dest_local_ref :: undefined | 0..16777215,
+		 {dest_local_ref :: undefined | 0..16777215}).
 
 -record(sccp_reset_request,
 		{dest_local_ref :: undefined | 0..16777215,
@@ -176,14 +176,14 @@
 
 -record(sccp_reset_confirmation,
 		{dest_local_ref :: undefined | 0..16777215,
-		src_local_ref :: undefined | 0..16777215,
+		src_local_ref :: undefined | 0..16777215}).
 
 -record(sccp_protocol_data_unit_error,
 		{dest_local_ref :: undefined | 0..16777215,
 		error_cause :: undefined | integer()}).
 		
 -record(sccp_inactivity_test,
-		{dest_local_ref :: undefined 0..16777215,
+		{dest_local_ref :: undefined | 0..16777215,
 		src_local_ref :: undefined | 0..16777215,
 		class :: undefined | 2..3,
 		sequencing :: undefined | boolean(),
