@@ -1,7 +1,7 @@
 %%% sccp_codec_SUITE.erl
 %%% vim: ts=3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @copyright 2018 - 2021 SigScale Global Inc.
+%%% @copyright 2018-2023 SigScale Global Inc.
 %%% @author Vance Shipley <vances@sigscale.org> [http://www.sigscale.org]
 %%% @end
 %%% Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@
 %%%  @doc Test suite for public API of the {@link //ocs. ocs} application.
 %%%
 -module(sccp_codec_SUITE).
--copyright('Copyright (c) 2018-2021 SigScale Global Inc.').
+-copyright('Copyright (c) 2018-2023 SigScale Global Inc.').
 -author('vances@sigscale.org').
 
 %% common_test required callbacks

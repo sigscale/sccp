@@ -1,7 +1,7 @@
 %%% sccp_api_SUITE.erl
 %%% vim: ts=3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @copyright 2022 SigScale Global Inc.
+%%% @copyright 2022-2023 SigScale Global Inc.
 %%% @end
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 %%%  @doc Test suite for public API of the {@link //sccp. sccp} application.
 %%%
 -module(sccp_api_SUITE).
--copyright('Copyright 2022 SigScale Global Inc.').
+-copyright('Copyright 2022-2023 SigScale Global Inc.').
 -author('vances@sigscale.org').
 
 %% common_test required callbacks

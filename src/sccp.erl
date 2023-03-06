@@ -1,6 +1,6 @@
 %%% sccp.erl
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @copyright 2021 SigScale Global Inc.
+%%% @copyright 2021-2023 SigScale Global Inc.
 %%% @author Vance Shipley <vances@sigscale.org> [http://www.sigscale.org]
 %%% @end
 %%% Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@
 %%% 	{@link //sccp. sccp} application.
 %%%
 -module(sccp).
--copyright('Copyright (c) 2021 SigScale Global Inc.').
+-copyright('Copyright (c) 2021-2-23 SigScale Global Inc.').
 -author('vances@sigscale.org').
 
 -export([point_code/1, point_code/2]).
