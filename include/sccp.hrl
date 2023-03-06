@@ -75,6 +75,12 @@
 		nai :: undefined | unknown | subscriber | national | international | spare | reserved,
 		gt :: undefined | [byte()]}).
 
+%% SCCP Parameters - ITU-T Recommendation Q.713, section 3.9
+-record(sequencing,
+		{send_seq_num :: 0..127,
+		receive_seq_num :: 0..127,
+		more_data :: boolean()}).
+
 %% SCCP Parameters - ITU-T Recommendation Q.713, section 3.17
 -record(segmentation,
 		{first :: undefined | boolean(),
@@ -136,12 +142,12 @@
 
 -record(sccp_data_form2,
 		{dest_local_ref :: undefined | 0..16777215,
-		sequencing :: undefined | boolean(),
+		sequencing :: undefined | #sequencing{},
 		data :: undefined | binary()}).
 
 -record(sccp_data_ack,
 		{dest_local_ref :: undefined | 0..16777215,
-		receive_seq_num :: undefined | binary(),
+		sequencing :: undefined | #sequencing{},
 		credit :: undefined | byte()}).
 
 -record(sccp_unitdata,
@@ -186,7 +192,7 @@
 		{dest_local_ref :: undefined | 0..16777215,
 		src_local_ref :: undefined | 0..16777215,
 		class :: undefined | 2..3,
-		sequencing :: undefined | boolean(),
+		sequencing :: undefined | #sequencing{},
 		credit :: undefined | byte()}).
 
 -record(sccp_extended_unitdata,
@@ -215,7 +221,7 @@
 		hop_counter :: undefined | 1..15,
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
-		long_data :: undefined | binary(),
+		data :: undefined | binary(),
 		segmentation :: undefined | #segmentation{},
 		importance :: undefined | 0..7}).
 
@@ -227,7 +233,7 @@
 		hop_counter :: undefined | 1..15,
 		called_party :: undefined | #party_address{},
 		calling_party :: undefined | #party_address{},
-		long_data :: undefined | binary(),
+		data :: undefined | binary(),
 		segmentation :: undefined | #segmentation{},
 		importance :: undefined | 0..7}).
 

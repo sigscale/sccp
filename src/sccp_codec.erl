@@ -1,4 +1,4 @@
-%%% sccp.erl
+%%% sccp_codec.erl
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% @copyright 2015-2021 SigScale Global Inc.
 %%% @author Vance Shipley <vances@sigscale.org> [http://www.sigscale.org]
@@ -105,15 +105,16 @@ sccp(<<?DataForm1, DestLocalRef:24/little,
 	#sccp_data_form1{dest_local_ref = DestLocalRef,
 			segmenting = segmenting(Seg), data = Data};
 sccp(<<?DataForm2, DestLocalRef:24/little,
-		_:7, Seq:1, DataP, Rest/binary>>) ->
+		Sequencing:2/binary, DataP, Rest/binary>>) ->
 	DataL = binary:at(Rest, DataP - 1),
 	Data = binary:part(Rest, DataP, DataL),
 	#sccp_data_form2{dest_local_ref = DestLocalRef,
-			sequencing = segmenting(Seq), data = Data};
+			sequencing = sequencing(Sequencing), data = Data};
 sccp(<<?DataAck, DestLocalRef:24/little,
-		RecvSeq:1/binary, Credit:8>>) ->
+		SequencingB:2/binary, Credit>>) ->
+	Sequencing = sequencing(SequencingB),
 	#sccp_data_ack{dest_local_ref = DestLocalRef,
-			receive_seq_num = RecvSeq, credit = Credit};
+			sequencing = Sequencing, credit = Credit};
 sccp(<<?UnitData, Class, CalledPartyP, CallingPartyP,
 		DataP, Rest/binary>>) ->
 	CalledPartyL = binary:at(Rest, CalledPartyP - 3),
@@ -145,7 +146,7 @@ sccp(<<?ExpeditedData, DestLocalRef:24/little, DataP, Rest/binary>>) ->
 sccp(<<?ExpeditedDataAck, DestLocalRef:24/little>>) ->
 	#sccp_expedited_ack{dest_local_ref = DestLocalRef};
 sccp(<<?ResetRequest,
-		DestLocalRef:24/little, SrcLocalRef:24/little, Reset/integer>>) ->
+		DestLocalRef:24/little, SrcLocalRef:24/little, Reset/integer, _/binary>>) ->
 	Cause = reset_cause(Reset),
 	#sccp_reset_request{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef, reset_cause = Cause};
@@ -153,14 +154,14 @@ sccp(<<?ResetConfirmation,
 		DestLocalRef:24/little, SrcLocalRef:24/little>>) ->
 	#sccp_reset_confirmation{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef};
-sccp(<<?ProtocolDataUnitError, DestLocalRef:24/little, Error>>) ->
+sccp(<<?ProtocolDataUnitError, DestLocalRef:24/little, Error, _/binary>>) ->
 	#sccp_protocol_data_unit_error{dest_local_ref = DestLocalRef,
 			error_cause =  Error};
 sccp(<<?InactivityTest, DestLocalRef:24/little, SrcLocalRef:24/little,
-		Class, _:15, Seq:1, Credit:8>>) ->
+		Class, Sequencing:2/binary, Credit>>) ->
 	#sccp_inactivity_test{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef, class = Class,
-			sequencing = segmenting(Seq), credit = Credit};
+			sequencing = sequencing(Sequencing), credit = Credit};
 sccp(<<?ExtendedUnitData, Class, Hops, CalledPartyP, CallingPartyP,
 		DataP, OptionalP, Rest/binary>>) ->
 	CalledPartyL = binary:at(Rest, CalledPartyP - 4),
@@ -190,35 +191,43 @@ sccp(<<?ExtendedUnitDataService, RC, Hops, CalledPartyP, CallingPartyP,
 			calling_party = party_address(CallingPartyB), data = Data,
 			segmentation = get_option(?Segmentation, Opts),
 			importance = get_option(?Importance, Opts)};
-sccp(<<?LongUnitData, Class, Hops, CalledPartyP, CallingPartyP,
-		LongDataP, OptionalP, Rest/binary>>) ->
-	CalledPartyL = binary:at(Rest, CalledPartyP - 4),
-	CallingPartyL = binary:at(Rest, CallingPartyP - 3),
-	LongDataL = binary:at(Rest, LongDataP - 2),
-	CalledPartyB = binary:part(Rest, CalledPartyP - 3, CalledPartyL),
-	CallingPartyB = binary:part(Rest, CallingPartyP - 2, CallingPartyL),
-	LongData = binary:part(Rest, LongDataP - 1, LongDataL),
-	Opts = optional_part(OptionalP, Rest),
+sccp(<<?LongUnitData, Class, Hops, CalledPartyP:16/little,
+		CallingPartyP:16/little, DataP:16/little, OptionalP:16/little,
+		Rest/binary>>) ->
+	CalledPartyL = binary:decode_unsigned(binary:part(Rest,
+			CalledPartyP - 8, 2), little),
+	CallingPartyL = binary:decode_unsigned(binary:part(Rest,
+			CallingPartyP - 6, 2), little),
+	DataL = binary:decode_unsigned(binary:part(Rest,
+			DataP - 4, 2), little),
+	CalledPartyB = binary:part(Rest, CalledPartyP - 6, CalledPartyL),
+	CallingPartyB = binary:part(Rest, CallingPartyP - 4, CallingPartyL),
+	Data = binary:part(Rest, DataP - 2, DataL),
+	Opts = optional_part_long(OptionalP, Rest),
 	#sccp_long_unitdata{class = Class, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB),
-			long_data = LongData,
+			data = Data,
 			segmentation = get_option(?Segmentation, Opts),
 			importance = get_option(?Importance, Opts)};
-sccp(<<?LongUnitDataService, RC, Hops, CalledPartyP, CallingPartyP,
-		LongDataP, OptionalP, Rest/binary>>) ->
+sccp(<<?LongUnitDataService, RC, Hops, CalledPartyP:16/little,
+		CallingPartyP:16/little, DataP:16/little, OptionalP:16/little,
+		Rest/binary>>) ->
 	Return = return_cause(RC),
-	CalledPartyL = binary:at(Rest, CalledPartyP - 4),
-	CallingPartyL = binary:at(Rest, CallingPartyP - 3),
-	LongDataL = binary:at(Rest, LongDataP - 2),
-	CalledPartyB = binary:part(Rest, CalledPartyP - 3, CalledPartyL),
-	CallingPartyB = binary:part(Rest, CallingPartyP - 2, CallingPartyL),
-	LongData = binary:part(Rest, LongDataP - 1, LongDataL),
-	Opts = optional_part(OptionalP, Rest),
+	CalledPartyL = binary:decode_unsigned(binary:part(Rest,
+			CalledPartyP - 8, 2), little),
+	CallingPartyL = binary:decode_unsigned(binary:part(Rest,
+			CallingPartyP - 6, 2), little),
+	DataL = binary:decode_unsigned(binary:part(Rest,
+			DataP - 4, 2), little),
+	CalledPartyB = binary:part(Rest, CalledPartyP - 6, CalledPartyL),
+	CallingPartyB = binary:part(Rest, CallingPartyP - 4, CallingPartyL),
+	Data = binary:part(Rest, DataP - 2, DataL),
+	Opts = optional_part_long(OptionalP, Rest),
 	#sccp_long_unitdata_service{return_cause = Return, hop_counter = Hops,
 			called_party = party_address(CalledPartyB),
 			calling_party = party_address(CallingPartyB),
-			long_data = LongData,
+			data = Data,
 			segmentation = get_option(?Segmentation, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(#sccp_connection_req{} = S) ->
@@ -230,32 +239,40 @@ sccp(#sccp_connection_refused{} = S) ->
 sccp(#sccp_released{} = S) ->
 	sccp_released(S);
 sccp(#sccp_release_complete{dest_local_ref = Dest,
-		src_local_ref = Src} = _S) ->
+		src_local_ref = Src} = _S) when is_integer(Dest),
+		is_integer(Src) ->
 	<<?ReleaseComplete, Dest:24/little, Src:24/little>>;
 sccp(#sccp_data_form1{dest_local_ref = Dest,
-		segmenting = S, data = Data}) ->
+		segmenting = S, data = Data}) when is_integer(Dest),
+		is_boolean(S), is_binary(Data) ->
 	Seg = segmenting(S),
-	DataL = size(Data),
+	DataL = byte_size(Data),
 	DataP = 1,
 	<<?DataForm1, Dest:24/little, Seg, DataP, DataL, Data/binary>>;
 sccp(#sccp_data_form2{dest_local_ref = Dest,
-		sequencing = S, data = Data}) ->
-	Seq = segmenting(S),
-	DataL = size(Data),
+		sequencing = Sequencing, data = Data}) when is_integer(Dest),
+		is_record(Sequencing, sequencing), is_binary(Data) ->
+	SequencingB = sequencing(Sequencing),
+	DataL = byte_size(Data),
 	DataP = 1,
-	<<?DataForm2, Dest:24/little, Seq, DataP, DataL, Data/binary>>;
+	<<?DataForm2, Dest:24/little,
+			SequencingB/binary, DataP, DataL, Data/binary>>;
 sccp(#sccp_data_ack{dest_local_ref = Dest,
-		receive_seq_num = Seq, credit = Credit}) ->
-	<<?DataAck, Dest:24/little, Seq/binary, Credit>>;
+		sequencing = Sequencing, credit = Credit})
+		when is_integer(Dest), is_record(Sequencing, sequencing),
+		is_integer(Credit) ->
+		SequencingB = sequencing(Sequencing),
+	<<?DataAck, Dest:24/little, SequencingB/binary, Credit>>;
 sccp(#sccp_unitdata{class = Class, data = Data,
-		called_party = #party_address{} = CalledParty,
-		calling_party = #party_address{} = CallingParty})
-		when is_integer(Class), is_binary(Data) ->
+		called_party = CalledParty, calling_party = CallingParty})
+		when is_integer(Class), is_binary(Data),
+		is_record(CalledParty, party_address),
+		is_record(CallingParty, party_address) ->
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
-	CalledPartyL = size(CalledPartyB),
-	CallingPartyL = size(CallingPartyB),
-	DataL = size(Data),
+	CalledPartyL = byte_size(CalledPartyB),
+	CallingPartyL = byte_size(CallingPartyB),
+	DataL = byte_size(Data),
 	CalledPartyP = 3,
 	CallingPartyP = CalledPartyP + CalledPartyL,
 	DataP = CallingPartyP + CallingPartyL,
@@ -264,41 +281,52 @@ sccp(#sccp_unitdata{class = Class, data = Data,
 			CallingPartyB/binary, DataL, Data/binary>>;
 sccp(#sccp_unitdata_service{return_cause = RC,
 		called_party = CalledParty, calling_party = CallingParty,
-		data = Data}) ->
+		data = Data}) when is_record(CalledParty, party_address),
+		is_record(CallingParty, party_address),
+		is_binary(Data) ->
 	Return = return_cause(RC),
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
-	CalledPartyL = size(CalledPartyB),
-	CallingPartyL = size(CallingPartyB),
-	DataL = size(Data),
+	CalledPartyL = byte_size(CalledPartyB),
+	CallingPartyL = byte_size(CallingPartyB),
+	DataL = byte_size(Data),
 	CalledPartyP = 3,
 	CallingPartyP = CalledPartyP + CalledPartyL,
 	DataP = CallingPartyP + CallingPartyL,
 	<<?UnitDataService, Return, CalledPartyP, CallingPartyP,
 			DataP, CalledPartyL, CalledPartyB/binary, CallingPartyL,
 			CallingPartyB/binary, DataL, Data/binary>>;
-sccp(#sccp_expedited_data{dest_local_ref  = Dest, data = Data}) ->
-	DataL = size(Data),
+sccp(#sccp_expedited_data{dest_local_ref = Dest, data = Data})
+		when is_integer(Dest), is_binary(Data) ->
+	DataL = byte_size(Data),
 	DataP = 1,
 	<<?ExpeditedData, Dest:24/little, DataP, DataL, Data/binary>>;
-sccp(#sccp_expedited_ack{dest_local_ref = Dest}) ->
+sccp(#sccp_expedited_ack{dest_local_ref = Dest})
+		when is_integer(Dest) ->
 	<<?ExpeditedDataAck, Dest:24/little>>;
 sccp(#sccp_reset_request{dest_local_ref = Dest,
-		src_local_ref = Src, reset_cause = Cause}) ->
+		src_local_ref = Src, reset_cause = Cause})
+		when is_integer(Dest), is_integer(Src) ->
 	Reset = reset_cause(Cause),
-	<<?ResetRequest, Dest:24/little, Src:24/little, Reset>>;
+	OptionalP = 1,
+	<<?ResetRequest, Dest:24/little, Src:24/little, Reset, OptionalP>>;
 sccp(#sccp_reset_confirmation{dest_local_ref = Dest,
-		src_local_ref = Src}) ->
+		src_local_ref = Src}) when is_integer(Dest),
+		is_integer(Src) ->
 	<<?ResetConfirmation, Dest:24/little, Src:24/little>>;
 sccp(#sccp_protocol_data_unit_error{dest_local_ref = Dest,
-		error_cause = Error}) ->
-	<<?ProtocolDataUnitError, Dest:24/little, Error>>;
+		error_cause = Error}) when is_integer(Dest),
+		is_integer(Error) ->
+	OptionalP = 1,
+	<<?ProtocolDataUnitError, Dest:24/little, Error, OptionalP>>;
 sccp(#sccp_inactivity_test{dest_local_ref = Dest,
 		src_local_ref = Src, class = Class,
-		sequencing = S, credit = Credit}) ->
-	Seq = segmenting(S),
+		sequencing = Sequencing, credit = Credit})
+		when is_integer(Dest), is_integer(Src), is_integer(Class),
+		is_record(Sequencing, sequencing), is_integer(Credit) ->
+	SequencingB = sequencing(Sequencing),
 	<<?InactivityTest, Dest:24/little, Src:24/little,
-			Class, 0:15, Seq:1, Credit>>;
+			Class, SequencingB/binary, Credit>>;
 sccp(#sccp_extended_unitdata{} = S) ->
 	sccp_extended_unitdata(S);
 sccp(#sccp_extended_unitdata_service{} = S) ->
@@ -514,97 +542,106 @@ routing_indicator(1) -> true;
 routing_indicator(false) -> 0;
 routing_indicator(true) -> 1.
 
--spec get_option(K, Options) -> V
+-spec get_option(Key, Options) -> Result
 	when
-		K :: integer(),
-		Options :: [{K, V}],
-		V :: term().
-%% @doc Get option `O' from SCCP optional parameters.
+		Key :: byte(),
+		Options :: [{Key, Value}],
+		Value :: term(),
+		Result :: undefined | Value.
+%% @doc Get option from SCCP optional parameters.
 %% @private
-get_option(K, Options) when is_integer(K) ->
-	case lists:keyfind(K, 1, Options) of
+get_option(Key, Options) ->
+	case lists:keyfind(Key, 1, Options) of
+		{_Key, Value} ->
+			Value;
 		false ->
-			undefined;
-		{_, V} ->
-			V
+			undefined
 	end.
 
--spec optional_part(OptionalP, Rest) -> Q
+-spec optional_part(OptionalP, Rest) -> Options
 	when
 		OptionalP :: byte(),
 		Rest :: binary(),
-		Q :: [{K, V}],
-		K :: byte(),
-		V :: term().
+		Options :: [{Key, Value}],
+		Key :: byte(),
+		Value :: term().
 %% @doc Extract optional part from an SCCP message.
 %% @private
 optional_part(OptionalP, Rest) when OptionalP > 0 ->
 	Pos = OptionalP - 1,
-	Len = size(Rest) - Pos,
+	Len = byte_size(Rest) - Pos,
 	OptionalPart = binary:part(Rest, Pos, Len),
 	optional_part1(OptionalPart, []);
-optional_part(0, _Rest) ->
+optional_part(OptionalP, _Rest) when OptionalP == 0 ->
 	[].
 
 %% @hidden
 %% @todo avoid creating new binaries
-optional_part1(<<?DestinationLocalRef, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?DestinationLocalRef, V} | Acc]);
-optional_part1(<<?SourceLocalRef, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?SourceLocalRef, V} | Acc]);
-optional_part1(<<?ProtocolClass, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?ProtocolClass, V} | Acc]);
-optional_part1(<<?ReceiveSequenceNum, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?ReceiveSequenceNum, V} | Acc]);
-optional_part1(<<?ReleaseCause, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?ReleaseCause, V} | Acc]);
-optional_part1(<<?ReturnCause, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?ReturnCause, V} | Acc]);
-optional_part1(<<?ResetCause, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?ResetCause, V} | Acc]);
-optional_part1(<<?ErrorCause, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?ErrorCause, V} | Acc]);
-optional_part1(<<?RefusalCause, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?RefusalCause, V} | Acc]);
-optional_part1(<<?HopCounter, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?HopCounter, V} | Acc]);
-optional_part1(<<?Importance, Len, Rest/binary>>, Acc) ->
-	L = Len * 8,
-	<<V:L/integer, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?Importance, V} | Acc]);
-optional_part1(<<?CallingPartyAddress, Len, Rest/binary>>, Acc) ->
-	<<V:Len/binary, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{?CallingPartyAddress, party_address(V)} | Acc]);
 optional_part1(<<?CalledPartyAddress, Len, Rest/binary>>, Acc) ->
 	<<V:Len/binary, Rest1/binary>> = Rest,
 	optional_part1(Rest1, [{?CalledPartyAddress, party_address(V)} | Acc]);
-optional_part1(<<?Segmentation, Len, Rest/binary>>, Acc) ->
+optional_part1(<<?CallingPartyAddress, Len, Rest/binary>>, Acc) ->
 	<<V:Len/binary, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?CallingPartyAddress, party_address(V)} | Acc]);
+optional_part1(<<?Credit, 1, Rest/binary>>, Acc) ->
+	<<V:8, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?Credit, V} | Acc]);
+optional_part1(<<?Data, L, Rest/binary>>, Acc) ->
+	<<V:L/binary, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?Data, V} | Acc]);
+optional_part1(<<?Segmentation, 4, Rest/binary>>, Acc) ->
+	<<V:4/binary, Rest1/binary>> = Rest,
 	optional_part1(Rest1, [{?Segmentation, segmentation(V)} | Acc]);
-optional_part1(<<Name, Len, Rest/binary>>, Acc) ->
+optional_part1(<<?HopCounter, 1, Rest/binary>>, Acc) ->
+	<<V:8, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?HopCounter, V} | Acc]);
+optional_part1(<<?Importance, 1, Rest/binary>>, Acc) ->
+	<<_:4, V:4, Rest1/binary>> = Rest,
+	optional_part1(Rest1, [{?Importance, V} | Acc]);
+optional_part1(<<?EndOfOptionalParameters, _Rest/binary>>, Acc) ->
+	Acc.
+
+-spec optional_part_long(OptionalP, Rest) -> Options
+	when
+		OptionalP :: integer(),
+		Rest :: binary(),
+		Options :: [{Key, Value}],
+		Key :: byte(),
+		Value :: term().
+%% @doc Extract optional part from an LUDT/LUDT SSCCP message.
+%% @private
+optional_part_long(OptionalP, Rest) when OptionalP > 0 ->
+	Pos = OptionalP - 2,
+	Len = byte_size(Rest) - Pos,
+	OptionalPart = binary:part(Rest, Pos, Len),
+	optional_part_long1(OptionalPart, []);
+optional_part_long(OptionalP, _Rest) when OptionalP == 0 ->
+	[].
+
+%% @hidden
+%% @todo avoid creating new binaries
+optional_part_long1(<<?CalledPartyAddress, Len:16/little, Rest/binary>>, Acc) ->
 	<<V:Len/binary, Rest1/binary>> = Rest,
-	optional_part1(Rest1, [{Name, V} | Acc]);
-optional_part1(<<0>>, Acc) ->
+	optional_part_long1(Rest1, [{?CalledPartyAddress, party_address(V)} | Acc]);
+optional_part_long1(<<?CallingPartyAddress, Len:16/little, Rest/binary>>, Acc) ->
+	<<V:Len/binary, Rest1/binary>> = Rest,
+	optional_part_long1(Rest1, [{?CallingPartyAddress, party_address(V)} | Acc]);
+optional_part_long1(<<?Credit, 2:16/little, Rest/binary>>, Acc) ->
+	<<V:8, Rest1/binary>> = Rest,
+	optional_part_long1(Rest1, [{?Credit, V} | Acc]);
+optional_part_long1(<<?Data, L:16/little, Rest/binary>>, Acc) ->
+	<<V:L/binary, Rest1/binary>> = Rest,
+	optional_part_long1(Rest1, [{?Data, V} | Acc]);
+optional_part_long1(<<?Segmentation, 4:16/little, Rest/binary>>, Acc) ->
+	<<V:4/binary, Rest1/binary>> = Rest,
+	optional_part_long1(Rest1, [{?Segmentation, segmentation(V)} | Acc]);
+optional_part_long1(<<?HopCounter, 1:16/little, Rest/binary>>, Acc) ->
+	<<V:8, Rest1/binary>> = Rest,
+	optional_part_long1(Rest1, [{?HopCounter, V} | Acc]);
+optional_part_long1(<<?Importance, 1:16/little, Rest/binary>>, Acc) ->
+	<<_:4, V:4, Rest1/binary>> = Rest,
+	optional_part_long1(Rest1, [{?Importance, V} | Acc]);
+optional_part_long1(<<?EndOfOptionalParameters, _Rest/binary>>, Acc) ->
 	Acc.
 
 -spec importance(Importance) -> Importance
@@ -613,10 +650,10 @@ optional_part1(<<0>>, Acc) ->
 %% @doc Values for importance.
 %%
 %% ITU-T Recommendation Q.713, section 3.19.
-importance(<<_:5, I/integer>> = _Importance) ->
+importance(<<_:5, I:3>> = _Importance) ->
 	I;
 importance(I) when I >= 0; I =< 7 ->
-	integer_to_binary(I).
+	<<0:5, I:3>>.
 
 -spec refusal_cause(Cause) -> Cause
 	when
@@ -765,6 +802,27 @@ segmenting(1) -> true;
 segmenting(false) -> 0;
 segmenting(true) -> 1.
 
+-spec sequencing(Sequencing) -> Sequencing
+	when
+		Sequencing :: binary() | #sequencing{}.
+%% @doc Values for sequencing/segmenting.
+%%
+%% ITU-T Recommendation Q.713, section 3.9.
+sequencing(<<SendSeqNum:7, _:1, ReceiveSeqNum:7, 0:1>>) ->
+	#sequencing{send_seq_num = SendSeqNum,
+			receive_seq_num = ReceiveSeqNum, more_data = false};
+sequencing(<<SendSeqNum:7, _:1, ReceiveSeqNum:7, 1:1>>) ->
+	#sequencing{send_seq_num = SendSeqNum,
+			receive_seq_num = ReceiveSeqNum, more_data = true};
+sequencing(#sequencing{send_seq_num = SendSeqNum,
+		receive_seq_num = ReceiveSeqNum, more_data = false})
+		when is_integer(ReceiveSeqNum), is_integer(ReceiveSeqNum) ->
+	<<SendSeqNum:7, 0:1, ReceiveSeqNum:7, 0:1>>;
+sequencing(#sequencing{send_seq_num = SendSeqNum,
+		receive_seq_num = ReceiveSeqNum, more_data = true})
+		when is_integer(ReceiveSeqNum), is_integer(ReceiveSeqNum) ->
+	<<SendSeqNum:7, 0:1, ReceiveSeqNum:7, 1:1>>.
+
 -spec return_cause(Cause) -> Cause
 	when
 		Cause :: no_translation | subsystem_congestion | subsystem_failure
@@ -821,10 +879,12 @@ segmentation(<<1:1, C:1, _:2, RemSeg:4,
 	#segmentation{first = true, class = C,
 			remaining_seg = RemSeg, seg_local_ref = SegLocalRef};
 segmentation(#segmentation{first = false, class = C,
-		remaining_seg = R, seg_local_ref = SegLocalRef}) ->
+		remaining_seg = R, seg_local_ref = SegLocalRef})
+		when is_integer(R), is_integer(SegLocalRef) ->
 	<<0:1, C:1, 0:2, R:4, SegLocalRef:24/little>>;
 segmentation(#segmentation{first = true, class = C,
-		remaining_seg = R, seg_local_ref = SegLocalRef}) ->
+		remaining_seg = R, seg_local_ref = SegLocalRef})
+		when is_integer(R), is_integer(SegLocalRef) ->
 	<<1:1, C:1, 0:2, R:4, SegLocalRef:24/little>>.
 
 -spec point_code(Code) -> Code
@@ -899,327 +959,296 @@ bcd2([], Acc) ->
 
 %% @hidden
 sccp_connection_req(#sccp_connection_req{src_local_ref = Src,
-		class = Class, called_party = CalledParty} = S) ->
+		class = Class, called_party = CalledParty} = R)
+		when is_integer(Class), is_integer(Src),
+		is_record(CalledParty, party_address) ->
 	CalledPartyB = party_address(CalledParty),
 	CalledPartyP = 2,
-	CalledPartyL = size(CalledPartyB),
+	CalledPartyL = byte_size(CalledPartyB),
 	OptionalP = CalledPartyP + CalledPartyL,
 	B = <<?ConnectRequest, Src:24/little, Class, CalledPartyP,
 			OptionalP, CalledPartyL, CalledPartyB/binary>>,
-	connection_req1(S, B).
+	connection_req1(R, B).
 
 %% @hidden
-connection_req1(#sccp_connection_req{credit = undefined} = S, B) ->
-	connection_req2(S, B, <<>>);
-connection_req1(#sccp_connection_req{credit = Credit} = S, B) ->
-	connection_req2(S, B, <<?Credit, 1, Credit>>).
+connection_req1(#sccp_connection_req{credit = undefined} = R, B) ->
+	connection_req2(R, B);
+connection_req1(#sccp_connection_req{credit = Credit} = R, B)
+		when is_integer(Credit) ->
+	connection_req2(R, <<B/binary, ?Credit, 1, Credit>>).
 
 %% @hidden
-connection_req2(#sccp_connection_req{calling_party = undefined} = S, B, O) ->
-	connection_req3(S, B, O);
-connection_req2(#sccp_connection_req{calling_party = CP} = S, B, O) ->
+connection_req2(#sccp_connection_req{calling_party = undefined} = R, B) ->
+	connection_req3(R, B);
+connection_req2(#sccp_connection_req{calling_party = CP} = R, B)
+		when is_record(CP, party_address) ->
 	CPB = party_address(CP),
-	CPL = size(CPB),
-	connection_req3(S, B, <<O/binary, ?CallingPartyAddress, CPL, CPB/binary>>).
+	CPL = byte_size(CPB),
+	connection_req3(R, <<B/binary, ?CallingPartyAddress, CPL, CPB/binary>>).
 
 %% @hidden
-connection_req3(#sccp_connection_req{data = undefined} = S, B, O) ->
-	connection_req4(S, B, O);
-connection_req3(#sccp_connection_req{data = D} = S, B, O) ->
-	DL = size(D),
-	connection_req4(S, B, <<O/binary, ?Data, DL, D/binary>>).
+connection_req3(#sccp_connection_req{data = undefined} = R, B) ->
+	connection_req4(R, B);
+connection_req3(#sccp_connection_req{data = D} = R, B)
+		when is_binary(D) ->
+	DL = byte_size(D),
+	connection_req4(R, <<B/binary, ?Data, DL, D/binary>>).
 
 %% @hidden
-connection_req4(#sccp_connection_req{hop_counter= undefined} = S, B, O) ->
-	connection_req5(S, B, O);
-connection_req4(#sccp_connection_req{hop_counter= H} = S, B, O) ->
-	connection_req5(S, B, <<O/binary, ?HopCounter, 1, H/integer>>).
+connection_req4(#sccp_connection_req{hop_counter = undefined} = R, B) ->
+	connection_req5(R, B);
+connection_req4(#sccp_connection_req{hop_counter = H} = R, B)
+		when is_integer(H) ->
+	connection_req5(R, <<B/binary, ?HopCounter, 1, H>>).
 
 %% @hidden
-connection_req5(#sccp_connection_req{importance= undefined} = _S, B, O) ->
-	OL = size(O),
-	connection_req6(<<B/binary, OL, O/binary>>, OL);
-connection_req5(#sccp_connection_req{importance= I} = _S, B, O) ->
-	Opt = <<O/binary, ?Importance, 1, I/integer>>,
-	OptL = size(Opt),
-	connection_req6(<<B/binary, OptL, Opt/binary>>, OptL).
-
-%% @hidden
-connection_req6(B, 0) ->
-	B;
-connection_req6(B, _) ->
-	<<B/binary, 0>>.
+connection_req5(#sccp_connection_req{importance = undefined}, B) ->
+	<<B/binary, 0>>;
+connection_req5(#sccp_connection_req{importance = I}, B)
+		when is_integer(I) ->
+	<<B/binary, ?Importance, 1, I, 0>>.
 
 %% @hidden
 sccp_connection_confirm(#sccp_connection_confirm{dest_local_ref = Dest,
-		src_local_ref = Src, class = Class} = S) ->
+		src_local_ref = Src, class = Class} = R)
+		when is_integer(Dest), is_integer(Src), is_integer(Class) ->
 	OptionalP = 1,
 	B = <<?ConnectionConfirm, Dest:24/little, Src:24/little, Class/integer, OptionalP>>,
-	connection_confirm1(S, B).
+	connection_confirm1(R, B).
 
 %% @hidden
-connection_confirm1(#sccp_connection_confirm{credit = undefined} = S, B) ->
-	connection_confirm2(S,B, <<>>);
-connection_confirm1(#sccp_connection_confirm{credit = C} = S, B) ->
-	connection_confirm2(S, B, <<?Credit, 1, Credit>).
+connection_confirm1(#sccp_connection_confirm{credit = undefined} = R, B) ->
+	connection_confirm2(R, B);
+connection_confirm1(#sccp_connection_confirm{credit = Credit} = R, B) ->
+	connection_confirm2(R, <<B/binary, ?Credit, 1, Credit>>).
 
 %% @hidden
-connection_confirm2(#sccp_connection_confirm{called_party = undefined} = S, B, O) ->
-	connection_confirm3(S,B, O);
-connection_confirm2(#sccp_connection_confirm{called_party= CP} = S, B, O) ->
+connection_confirm2(#sccp_connection_confirm{called_party = undefined} = R, B) ->
+	connection_confirm3(R, B);
+connection_confirm2(#sccp_connection_confirm{called_party= CP} = R, B) ->
 	CPB = party_address(CP),
-	CPL = size(CPB),
-	connection_confirm3(S, B, <<O/binary, ?CalledPartyAddress, CPL, CPB/binary>>).
+	CPL = byte_size(CPB),
+	connection_confirm3(R, <<B/binary, ?CalledPartyAddress, CPL, CPB/binary>>).
 
 %% @hidden
-connection_confirm3(#sccp_connection_confirm{data= undefined} = S, B, O) ->
-	connection_confirm4(S,B, O);
-connection_confirm3(#sccp_connection_confirm{data = D} = S, B, O) ->
-	DL = size(D),
-	connection_confirm4(S, B, <<O/binary, ?Data, DL, D/binary>>).
+connection_confirm3(#sccp_connection_confirm{data= undefined} = R, B) ->
+	connection_confirm4(R, B);
+connection_confirm3(#sccp_connection_confirm{data = D} = R, B) ->
+	DL = byte_size(D),
+	connection_confirm4(R, <<B/binary, ?Data, DL, D/binary>>).
 
 %% @hidden
-connection_confirm4(#sccp_connection_confirm{importance = undefined} = _S, B, O) ->
-	OL = size(O),
-	connection_confirm5(<<B/binary, OL, O/binary>>, OL);
-connection_confirm4(#sccp_connection_confirm{importance = I} = _S, B, O) ->
-	Opt = <<O/binary, ?Importance, 1, I/integer>>,
-	OptL = size(Opt),
-	connection_confirm5(<<B/binary, OptL, Opt/binary>>, OptL).
+connection_confirm4(#sccp_connection_confirm{importance = undefined}, B) ->
+	<<B/binary, 0>>;
+connection_confirm4(#sccp_connection_confirm{importance = I}, B) ->
+	<<B/binary, ?Importance, 1, I, 0>>.
 
 %% @hidden
-connection_confirm5(B, 0) ->
-	B;
-connection_confirm5(B, _) ->
-	<<B/binary, 0>>.
-
-%% @hidden
-sccp_connection_refused(#sccp_connection_refused{dest_local_ref = Dest, refusal_cause = RC} = S) ->
-	Refuse = refusal_cause(RC),
+sccp_connection_refused(#sccp_connection_refused{dest_local_ref = Dest,
+		refusal_cause = RC} = R) when is_integer(Dest) ->
+	Cause = refusal_cause(RC),
 	OptionalP = 1,
-	B = <<?ConnectionRefused, Dest:24/little, Refuse, OptionalP>>,
-	connection_refused1(S, B).
+	B = <<?ConnectionRefused, Dest:24/little, Cause, OptionalP>>,
+	connection_refused1(R, B).
 
 %% @hidden
-connection_refused1(#sccp_connection_refused{called_party = undefined} = S, B) ->
-	connection_refused2(S, B, <<>>);
-connection_refused1(#sccp_connection_refused{called_party = CP} = S, B) ->
+connection_refused1(#sccp_connection_refused{called_party = undefined} = R, B) ->
+	connection_refused2(R, B);
+connection_refused1(#sccp_connection_refused{called_party = CP} = R, B)
+		when is_record(CP, party_address) ->
 	CPB = party_address(CP),
-	CPL = size(CPB),
-	connection_refused2(S, B, <<?CalledPartyAddress, CPL, CPB/binary>>).
+	CPL = byte_size(CPB),
+	connection_refused2(R, <<B/binary, ?CalledPartyAddress, CPL, CPB/binary>>).
 
 %% @hidden
-connection_refused2(#sccp_connection_refused{data = undefined} = S, B, O) ->
-	connection_refused3(S, B, O);
-connection_refused2(#sccp_connection_refused{data = D} = S, B, O) ->
-	DL = size(D),
-	connection_refused3(S, B, <<O/binary, ?Data, DL, D/binary>>).
+connection_refused2(#sccp_connection_refused{data = undefined} = R, B) ->
+	connection_refused3(R, B);
+connection_refused2(#sccp_connection_refused{data = D} = R, B)
+		when is_binary(D) ->
+	DL = byte_size(D),
+	connection_refused3(R, <<B/binary, ?Data, DL, D/binary>>).
 
 %% @hidden
-connection_refused3(#sccp_connection_refused{importance = undefined} = _S, B, O) ->
-	OL = size(O),
-	connection_refused4(<<B/binary, OL, O/binary>>, OL);
-connection_refused3(#sccp_connection_refused{importance= I} = _S, B, O) ->
-	Opt = <<O/binary, ?Importance, 1, I/integer>>,
-	OptL = size(Opt),
-	connection_refused4(<<B/binary, OptL, Opt/binary>>, OptL).
-
-%% @hidden
-connection_refused4(B, 0) ->
-	B;
-connection_refused4(B, _) ->
-	<<B/binary, 0>>.
+connection_refused3(#sccp_connection_refused{importance = undefined}, B) ->
+	<<B/binary, 0>>;
+connection_refused3(#sccp_connection_refused{importance= I}, B)
+		when is_integer(I) ->
+	<<B/binary, ?Importance, 1, I, 0>>.
 
 %% @hidden
 sccp_released(#sccp_released{dest_local_ref = Dest, src_local_ref = Src,
-		release_cause = RC} = S) ->
-	Release = release_cause(RC),
+		release_cause = RC} = R) when is_integer(Dest), is_integer(Src) ->
+	Cause = release_cause(RC),
 	OptionalP = 1,
-	B = <<?Released, Dest:24/little, Src:24/little, Release, OptionalP>>,
-	released1(S, B).
+	B = <<?Released, Dest:24/little, Src:24/little, Cause, OptionalP>>,
+	released1(R, B).
 
 %% @hidden
-released1(#sccp_released{data = undefined} = S, B) ->
-	released2(S, B, <<>>);
-released1(#sccp_released{data = D} = S, B) ->
-	DL = size(D),
-	released2(S, B, <<?Data, DL, D/binary>>).
+released1(#sccp_released{data = undefined} = R, B) ->
+	released2(R, B);
+released1(#sccp_released{data = D} = R, B) when is_binary(D) ->
+	DL = byte_size(D),
+	released2(R, <<B/binary, ?Data, DL, D/binary>>).
 
 %% @hidden
-released2(#sccp_released{importance = undefined} = _S, B, O) ->
-	OL = size(O),
-	released3(<<B/binary, OL, O/binary>>, OL);
-released2(#sccp_released{importance = I} = _S, B, O) ->
-	Opt = <<O/binary, ?Importance, 1, I/integer>>,
-	OptL = size(Opt),
-	released3(<<B/binary, OptL, Opt/binary>>, OptL ).
+released2(#sccp_released{importance = undefined}, B) ->
+	<<B/binary, 0>>;
+released2(#sccp_released{importance = I}, B) when is_integer(I) ->
+	<<B/binary, ?Importance, 1, I, 0>>.
 
 %% @hidden
-released3(B, 0) ->
-	B;
-released3(B, _) ->
-	<<B/binary, 0>>.
-
-%% @hidden
-sccp_extended_unitdata(#sccp_extended_unitdata{class = Class, hop_counter = Hops,
-		called_party = CalledParty, calling_party = CallingParty, data = Data} = S) ->
+sccp_extended_unitdata(#sccp_extended_unitdata{class = Class,
+		hop_counter = Hops, called_party = CalledParty,
+		calling_party = CallingParty, data = Data} = R)
+		when is_integer(Class), is_integer(Hops),
+		is_record(CalledParty, party_address),
+		is_record(CallingParty, party_address),
+		is_binary(Data) ->
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
-	CalledPartyL = size(CalledPartyB),
-	CallingPartyL = size(CallingPartyB),
-	DataL = size(Data),
+	CalledPartyL = byte_size(CalledPartyB),
+	CallingPartyL = byte_size(CallingPartyB),
+	DataL = byte_size(Data),
 	CalledPartyP = 4,
 	CallingPartyP = CalledPartyP + CalledPartyL,
 	DataP = CallingPartyP + CallingPartyL,
-	OptionalP = DataP + DataL - 1,
+	OptionalP = DataP + DataL,
 	B = <<?ExtendedUnitData, Class, Hops, CalledPartyP, CallingPartyP, DataP, OptionalP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			DataL, Data/binary>>,
-	extended_unitdata1(S, B).
+	extended_unitdata1(R, B).
 
 %% @hidden
-extended_unitdata1(#sccp_extended_unitdata{segmentation = undefined} = S, B) ->
-	extended_unitdata2(S, B, <<>>);
-extended_unitdata1(#sccp_extended_unitdata{segmentation = Seg} = S, B) ->
+extended_unitdata1(#sccp_extended_unitdata{segmentation = undefined} = R, B) ->
+	extended_unitdata2(R, B);
+extended_unitdata1(#sccp_extended_unitdata{segmentation = Seg} = R, B)
+		when is_record(Seg, segmentation) ->
 	SegB = segmentation(Seg),
-	SegL = size(SegB),
-	extended_unitdata2(S, B, <<?Segmentation, SegL, SegB/binary>>).
+	SegL = byte_size(SegB),
+	extended_unitdata2(R, <<B/binary, ?Segmentation, SegL, SegB/binary>>).
 
 %% @hidden
-extended_unitdata2(#sccp_extended_unitdata{importance = undefined} = _S, B, O) ->
-	OL = size(O),
-	extended_unitdata3(<<B/binary, OL, O/binary>>, OL);
-extended_unitdata2(#sccp_extended_unitdata{importance = I} = _S, B, O) ->
-	Opt = <<O/binary, ?Importance, 1, I/integer>>,
-	OptL = size(Opt),
-	extended_unitdata3(<<B/binary, OptL, Opt/binary>>, OptL).
-
-%% @hidden
-extended_unitdata3(B, 0) ->
-	B;
-extended_unitdata3(B, _) ->
-	<<B/binary, 0>>.
+extended_unitdata2(#sccp_extended_unitdata{importance = undefined}, B) ->
+	<<B/binary, 0>>;
+extended_unitdata2(#sccp_extended_unitdata{importance = I}, B)
+		when is_integer(I) ->
+	<<B/binary, ?Importance, 1, I, 0>>.
 
 %% @hidden
 sccp_extended_unitdata_service(#sccp_extended_unitdata_service{return_cause = RC,
 		hop_counter = Hops, called_party = CalledParty, calling_party = CallingParty,
-		data = Data} = S) ->
+		data = Data} = R) when is_integer(Hops), is_record(CalledParty, party_address),
+		is_record(CallingParty, party_address), is_binary(Data) ->
 	Cause = return_cause(RC),
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
-	CalledPartyL = size(CalledPartyB),
-	CallingPartyL = size(CallingPartyB),
-	DataL = size(Data),
+	CalledPartyL = byte_size(CalledPartyB),
+	CallingPartyL = byte_size(CallingPartyB),
+	DataL = byte_size(Data),
 	CalledPartyP = 4,
 	CallingPartyP = CalledPartyP + CalledPartyL,
 	DataP = CallingPartyP + CallingPartyL,
-	OptionalP = DataP + DataL - 1,
+	OptionalP = DataP + DataL,
 	B = <<?ExtendedUnitDataService, Cause, Hops, CalledPartyP, CallingPartyP, DataP, OptionalP,
 			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
 			DataL, Data/binary>>,
-	extended_unitdata_service1(S, B).
+	extended_unitdata_service1(R, B).
 
 %% @hidden
-extended_unitdata_service1(#sccp_extended_unitdata_service{segmentation = undefined} = S, B) ->
-	extended_unitdata_service2(S, B, <<>>);
-extended_unitdata_service1(#sccp_extended_unitdata_service{segmentation = Seg} = S, B) ->
+extended_unitdata_service1(#sccp_extended_unitdata_service{segmentation = undefined} = R, B)->
+	extended_unitdata_service2(R, B);
+extended_unitdata_service1(#sccp_extended_unitdata_service{segmentation = Seg} = R, B)
+		when is_record(Seg, segmentation) ->
 	SegB = segmentation(Seg),
-	SegL = size(SegB),
-	extended_unitdata_service2(S, B, <<?Segmentation, SegL, SegB/binary>>).
+	SegL = byte_size(SegB),
+	extended_unitdata_service2(R, <<B/binary, ?Segmentation, SegL, SegB/binary>>).
 
 %% @hidden
-extended_unitdata_service2(#sccp_extended_unitdata_service{importance = undefined} = _S, B, O) ->
-	OL = size(O),
-	extended_unitdata_service3(<<B/binary, OL, O/binary>>, OL);
-extended_unitdata_service2(#sccp_extended_unitdata_service{importance = I} = _S, B, O) ->
-	Opt = <<O/binary, ?Importance, 1, I/integer>>,
-	OptL = size(Opt),
-	extended_unitdata_service3(<<B/binary, OptL, Opt/binary>>, OptL).
+extended_unitdata_service2(#sccp_extended_unitdata_service{importance = undefined}, B) ->
+	<<B/binary, 0>>;
+extended_unitdata_service2(#sccp_extended_unitdata_service{importance = I}, B)
+		when is_integer(I) ->
+	<<B/binary, ?Importance, 1, I, 0>>.
 
 %% @hidden
-extended_unitdata_service3(B, 0) ->
-	B;
-extended_unitdata_service3(B, _) ->
-	<<B/binary, 0>>.
-
-%% @hidden
-sccp_long_unitdata(#sccp_long_unitdata{class = Class, hop_counter = Hops, called_party = CalledParty,
-		calling_party = CallingParty, long_data = LongData} = S) ->
+sccp_long_unitdata(#sccp_long_unitdata{class = Class,
+		hop_counter = Hops, called_party = CalledParty,
+		calling_party = CallingParty, data = Data} = R)
+		when is_integer(Class), is_integer(Hops),
+		is_record(CalledParty, party_address),
+		is_record(CallingParty, party_address), is_binary(Data) ->
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
-	CalledPartyL = size(CalledPartyB),
-	CallingPartyL = size(CallingPartyB),
-	LongDataL = size(LongData),
-	CalledPartyP = 4,
+	CalledPartyL = byte_size(CalledPartyB),
+	CallingPartyL = byte_size(CallingPartyB),
+	DataL = byte_size(Data),
+	CalledPartyP = 8,
 	CallingPartyP = CalledPartyP + CalledPartyL,
-	LongDataP = CallingPartyP + CallingPartyL,
-	OptionalP = LongDataP + LongDataL - 1,
-	B = <<?LongUnitData, Class, Hops, CalledPartyP, CallingPartyP, LongDataP, OptionalP,
-			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
-			LongDataL, LongData/binary>>,
-	long_unitdata1(S, B).
+	DataP = CallingPartyP + CallingPartyL,
+	OptionalP = DataP + DataL,
+	B = <<?LongUnitData, Class, Hops,
+			CalledPartyP:16/little, CallingPartyP:16/little,
+			DataP:16/little, OptionalP:16/little,
+			CalledPartyL:16/little, CalledPartyB/binary,
+			CallingPartyL:16/little, CallingPartyB/binary,
+			DataL:16/little, Data/binary>>,
+	long_unitdata1(R, B).
 
 %% @hidden
-long_unitdata1(#sccp_long_unitdata{segmentation = undefined} = S, B) ->
-	long_unitdata2(S, B, <<>>);
-long_unitdata1(#sccp_long_unitdata{segmentation = Seg} = S, B) ->
+long_unitdata1(#sccp_long_unitdata{segmentation = undefined} = R, B) ->
+	long_unitdata2(R, B);
+long_unitdata1(#sccp_long_unitdata{segmentation = Seg} = R, B)
+		when is_record(Seg, segmentation) ->
 	SegB = segmentation(Seg),
-	SegL = size(SegB),
-	long_unitdata2(S, B, <<?Segmentation, SegL, SegB/binary>>).
+	SegL = byte_size(SegB),
+	long_unitdata2(R, <<B/binary, ?Segmentation,
+			SegL:16/little, SegB/binary>>).
 
 %% @hidden
-long_unitdata2(#sccp_long_unitdata{importance = undefined} = _S, B, O) ->
-	OL = size(O),
-	long_unitdata3(<<B/binary, OL, O/binary>>, OL);
-long_unitdata2(#sccp_long_unitdata{importance = I} = _S, B, O) ->
-	Opt = <<O/binary, ?Importance, 1, I/integer>>,
-	OptL = size(Opt),
-	long_unitdata3(<<B/binary, OptL, Opt/binary>>, OptL).
+long_unitdata2(#sccp_long_unitdata{importance = undefined}, B) ->
+	<<B/binary, 0:16/little>>;
+long_unitdata2(#sccp_long_unitdata{importance = I}, B)
+		when is_integer(I) ->
+	<<B/binary, ?Importance, 1:16/little, I, 0:16/little>>.
 
 %% @hidden
-long_unitdata3(B, 0) ->
-	B;
-long_unitdata3(B, _) ->
-	<<B/binary, 0>>.
-
-%% @hidden
-sccp_long_unitdata_service(#sccp_long_unitdata_service{return_cause = RC, hop_counter = Hops,
-		called_party = CalledParty, calling_party = CallingParty, long_data = LongData} = S) ->
+sccp_long_unitdata_service(#sccp_long_unitdata_service{return_cause = RC,
+		hop_counter = Hops, called_party = CalledParty,
+		calling_party = CallingParty, data = Data} = R)
+		when is_integer(Hops), is_record(CalledParty, party_address),
+		is_record(CallingParty, party_address), is_binary(Data) ->
 	Cause = return_cause(RC),
 	CalledPartyB = party_address(CalledParty),
 	CallingPartyB = party_address(CallingParty),
-	CalledPartyL = size(CalledPartyB),
-	CallingPartyL = size(CallingPartyB),
-	LongDataL = size(LongData),
-	CalledPartyP = 4,
+	CalledPartyL = byte_size(CalledPartyB),
+	CallingPartyL = byte_size(CallingPartyB),
+	DataL = byte_size(Data),
+	CalledPartyP = 8,
 	CallingPartyP = CalledPartyP + CalledPartyL,
-	LongDataP = CallingPartyP + CallingPartyL,
-	OptionalP = LongDataP + LongDataL - 1,
-	B = <<?LongUnitDataService, Cause/integer, Hops, CalledPartyP, CallingPartyP, LongDataP, OptionalP,
-			CalledPartyL, CalledPartyB/binary, CallingPartyL, CallingPartyB/binary,
-			LongDataL, LongData/binary>>,
-	long_unitdata_service1(S, B).
+	DataP = CallingPartyP + CallingPartyL,
+	OptionalP = DataP + DataL,
+	B = <<?LongUnitDataService, Cause, Hops,
+			CalledPartyP:16/little, CallingPartyP:16/little,
+			DataP:16/little, OptionalP:16/little,
+			CalledPartyL:16/little, CalledPartyB/binary,
+			CallingPartyL:16/little, CallingPartyB/binary,
+			DataL:16/little, Data/binary>>,
+	long_unitdata_service1(R, B).
 
 %% @hidden
-long_unitdata_service1(#sccp_long_unitdata_service{segmentation = undefined} = S, B) ->
-	long_unitdata_service2(S, B, <<>>);
-long_unitdata_service1(#sccp_long_unitdata_service{segmentation = Seg} = S, B) ->
+long_unitdata_service1(#sccp_long_unitdata_service{segmentation = undefined} = R, B) ->
+	long_unitdata_service2(R, B);
+long_unitdata_service1(#sccp_long_unitdata_service{segmentation = Seg} = R, B)
+		when is_record(Seg, segmentation) ->
 	SegB = segmentation(Seg),
-	SegL = size(SegB),
-	long_unitdata_service2(S, B, <<?Segmentation, SegL, SegB/binary>>).
+	SegL = byte_size(SegB),
+	long_unitdata_service2(R, <<B/binary, ?Segmentation,
+			SegL:16/little, SegB/binary>>).
 
 %% @hidden
-long_unitdata_service2(#sccp_long_unitdata_service{importance = undefined} = _S, B, O) ->
-	OL = size(O),
-	long_unitdata_service3(<<B/binary, OL, O/binary>>, OL);
-long_unitdata_service2(#sccp_long_unitdata_service{importance = I} = _S, B, O) ->
-	Opt = <<O/binary, ?Importance, 1, I/integer>>,
-	OptL = size(Opt),
-	long_unitdata_service3(<<B/binary, OptL, Opt/binary>>, OptL).
-
-%% @hidden
-long_unitdata_service3(B, 0) ->
-	B;
-long_unitdata_service3(B, _) ->
-	<<B/binary, 0>>.
+long_unitdata_service2(#sccp_long_unitdata_service{importance = undefined}, B) ->
+	<<B/binary, 0:16/little>>;
+long_unitdata_service2(#sccp_long_unitdata_service{importance = I}, B)
+		when is_integer(I) ->
+	<<B/binary, ?Importance, 1:16/little, I, 0:16/little>>.
 

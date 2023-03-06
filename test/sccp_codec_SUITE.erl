@@ -347,10 +347,12 @@ segmentation(_Config) ->
 	end,
 	C = rand:uniform(2) - 1,
 	RemSeg = rand:uniform(16) - 1,
-	S1 = #segmentation{first = First, class = C, remaining_seg = RemSeg},
-	S2 = sccp_codec:segmentation(S1),
-	true = is_binary(S2),
-	S2 = sccp_codec:segmentation(S1).
+	SegLocalRef = rand:uniform(16777216) - 1,
+	R = #segmentation{first = First, class = C,
+			remaining_seg = RemSeg, seg_local_ref = SegLocalRef},
+	B = sccp_codec:segmentation(R),
+	true = is_binary(B),
+	R = sccp_codec:segmentation(B).
 
 point_code() ->
 	[{userdata, [{doc, "encode and decode signalling point code"}]}].
@@ -406,19 +408,17 @@ sccp_connection_req() ->
 
 sccp_connection_req(_Config) ->
 	SrcLocalRef = rand:uniform(16777216) - 1,
-	Class = rand:uniform(5) - 1,
+	Class = rand:uniform(4) - 1,
 	CalledParty = gen_party_address(),
-	Credit = <<123>>,
+	Credit = rand:uniform(256) - 1,
 	CallingParty = gen_party_address(),
-	Data = <<123:24>>,
+	Data = crypto:strong_rand_bytes(rand:uniform(128) + 2),
 	Hops = rand:uniform(15),
 	Importance = rand:uniform(5) - 1,
 	Rec = #sccp_connection_req{src_local_ref = SrcLocalRef, class = Class,
 			called_party = CalledParty, credit = Credit, calling_party = CallingParty,
 			data = Data, hop_counter = Hops, importance = Importance},
-erlang:display({?MODULE, ?LINE, Rec}),
 	Bin = sccp_codec:sccp(Rec),
-erlang:display({?MODULE, ?LINE, Bin}),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
 
@@ -428,10 +428,10 @@ sccp_connection_confirm() ->
 sccp_connection_confirm(_Config) ->
 	SrcLocalRef = rand:uniform(16777216) - 1,
 	DestLocalRef = rand:uniform(16777216) - 1,
-	Class = rand:uniform(5) - 1,
-	Credit = <<123>>,
+	Class = rand:uniform(4) - 1,
+	Credit = rand:uniform(256) - 1,
 	CalledParty = gen_party_address(),
-	Data = <<123:24>>,
+	Data = crypto:strong_rand_bytes(rand:uniform(128) + 2),
 	Importance = rand:uniform(5) - 1,
 	Rec = #sccp_connection_confirm{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef,
 			class = Class, called_party = CalledParty, credit = Credit, data = Data,
@@ -447,7 +447,7 @@ sccp_connection_refused(_Config) ->
 	DestLocalRef = rand:uniform(16777216) - 1,
 	Cause = sccp_codec:refusal_cause(rand:uniform(256) - 1),
 	CalledParty = gen_party_address(),
-	Data = <<123:24>>,
+	Data = crypto:strong_rand_bytes(rand:uniform(128) + 2),
 	Importance = rand:uniform(5) - 1,
 	Rec = #sccp_connection_refused{dest_local_ref = DestLocalRef, refusal_cause = Cause,
 			called_party = CalledParty, data = Data, importance = Importance},
@@ -462,7 +462,7 @@ sccp_released(_Config) ->
 	SrcLocalRef = rand:uniform(16777216) - 1,
 	DestLocalRef = rand:uniform(16777216) - 1,
 	Cause = sccp_codec:release_cause(rand:uniform(256) - 1),
-	Data = <<123:24>>,
+	Data = crypto:strong_rand_bytes(rand:uniform(128) + 2),
 	Importance = rand:uniform(5) - 1,
 	Rec = #sccp_released{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef,
 			release_cause = Cause, data = Data, importance = Importance},
@@ -487,12 +487,12 @@ sccp_data_form1() ->
 sccp_data_form1(_Config) ->
 	DestLocalRef = rand:uniform(16777216) - 1,
 	Seg = case rand:uniform(2) of
-		2 ->
-			true;
 		1 ->
-			false
+			false;
+		2 ->
+			true
 	end,
-	Data = <<123:24>>,
+	Data = crypto:strong_rand_bytes(rand:uniform(255) + 1),
 	Rec = #sccp_data_form1{dest_local_ref = DestLocalRef, segmenting = Seg, data = Data},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
@@ -503,14 +503,17 @@ sccp_data_form2() ->
 
 sccp_data_form2(_Config) ->
 	DestLocalRef = rand:uniform(16777216) - 1,
-	Seg = case rand:uniform(2) of
-		2 ->
-			true;
-		1 ->
-			false
-	end,
-	Data = <<123:24>>,
-	Rec = #sccp_data_form2{dest_local_ref = DestLocalRef, sequencing = Seg, data = Data},
+	Sequencing = #sequencing{send_seq_num = rand:uniform(128) - 1,
+			receive_seq_num = rand:uniform(128) - 1,
+			more_data = case rand:uniform(2) of
+						1 ->
+							false;
+						2 ->
+							true
+					end},
+	Data = crypto:strong_rand_bytes(rand:uniform(255) + 1),
+	Rec = #sccp_data_form2{dest_local_ref = DestLocalRef,
+			sequencing = Sequencing, data = Data},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
@@ -520,10 +523,17 @@ sccp_data_ack() ->
 
 sccp_data_ack(_Config) ->
 	DestLocalRef = rand:uniform(16777216) - 1,
-	Num = rand:uniform(128) - 1,
-	Seq = <<Num:7, 0:1>>,
-	Credit = <<123>>,
-	Rec = #sccp_data_ack{dest_local_ref = DestLocalRef, receive_seq_num = Seq, credit = Credit},
+	Sequencing = #sequencing{send_seq_num = rand:uniform(128) - 1,
+			receive_seq_num = rand:uniform(128) - 1,
+			more_data = case rand:uniform(2) of
+						1 ->
+							false;
+						2 ->
+							true
+					end},
+	Credit = rand:uniform(256) - 1,
+	Rec = #sccp_data_ack{dest_local_ref = DestLocalRef,
+			sequencing = Sequencing, credit = Credit},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
@@ -532,12 +542,12 @@ sccp_unitdata() ->
 	[{userdata, [{doc, "encode and decode SCCP unit data message"}]}].
 
 sccp_unitdata(_Config) ->
-	Class = rand:uniform(5) - 1,
+	Class = rand:uniform(4) - 1,
 	CalledParty = gen_party_address(),
 	CallingParty = gen_party_address(),
-	Data = <<123:24>>,
-	Rec = #sccp_unitdata{class = Class, called_party = CalledParty, calling_party = CallingParty,
-			data = Data},
+	Data = crypto:strong_rand_bytes(rand:uniform(254) + 1),
+	Rec = #sccp_unitdata{class = Class, called_party = CalledParty,
+			calling_party = CallingParty, data = Data},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
@@ -549,7 +559,7 @@ sccp_unitdata_service(_Config) ->
 	Cause = sccp_codec:return_cause(rand:uniform(256) - 1),
 	CalledParty = gen_party_address(),
 	CallingParty = gen_party_address(),
-	Data = <<123:24>>,
+	Data = crypto:strong_rand_bytes(rand:uniform(254) + 1),
 	Rec = #sccp_unitdata_service{return_cause = Cause, called_party = CalledParty,
 			calling_party = CallingParty, data = Data},
 	Bin = sccp_codec:sccp(Rec),
@@ -561,7 +571,7 @@ sccp_expedited_data() ->
 
 sccp_expedited_data(_Config) ->
 	DestLocalRef = rand:uniform(16777216) - 1,
-	Data = <<123:24>>,
+	Data = crypto:strong_rand_bytes(rand:uniform(32) + 1),
 	Rec = #sccp_expedited_data{dest_local_ref = DestLocalRef, data = Data},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
@@ -618,16 +628,19 @@ sccp_inactivity_test() ->
 sccp_inactivity_test(_Config) ->
 	DestLocalRef = rand:uniform(16777216) - 1,
 	SrcLocalRef = rand:uniform(16777216) - 1,
-	Class = rand:uniform(5) - 1,
-	Seq = case rand:uniform(2) of
-		2 ->
-			true;
-		1 ->
-			false
-	end,
-	Credit = <<123>>,
-	Rec = #sccp_inactivity_test{dest_local_ref = DestLocalRef, src_local_ref = SrcLocalRef,
-			class = Class, sequencing = Seq, credit = Credit},
+	Class = rand:uniform(4) - 1,
+	Sequencing = #sequencing{send_seq_num = rand:uniform(128) - 1,
+			receive_seq_num = rand:uniform(128) - 1,
+			more_data = case rand:uniform(2) of
+						1 ->
+							false;
+						2 ->
+							true
+					end},
+	Credit = rand:uniform(256) - 1,
+	Rec = #sccp_inactivity_test{dest_local_ref = DestLocalRef,
+			src_local_ref = SrcLocalRef, class = Class,
+			sequencing = Sequencing, credit = Credit},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
@@ -636,16 +649,24 @@ sccp_extended_unitdata() ->
 	[{userdata, [{doc, "encode and decode SCCP extended unit data message"}]}].
 
 sccp_extended_unitdata(_Config) ->
-	Class = rand:uniform(5) - 1,
+	Class = rand:uniform(4) - 1,
 	Hops = rand:uniform(15),
 	CalledParty = gen_party_address(),
 	CallingParty = gen_party_address(),
-	Data = <<123:24>>,
-	Seg = #segmentation{first = true, class = 0, remaining_seg = 4},
+	Data = crypto:strong_rand_bytes(rand:uniform(159) + 1),
+	Segmentation = #segmentation{first = case rand:uniform(2) of
+						1 ->
+							false;
+						2 ->
+							true
+					end,
+			class = rand:uniform(2) - 1,
+			remaining_seg = rand:uniform(16) - 1,
+			seg_local_ref = rand:uniform(16777216) - 1},
 	Importance = rand:uniform(5) - 1,
 	Rec = #sccp_extended_unitdata{class = Class, hop_counter = Hops,
 			called_party = CalledParty, calling_party = CallingParty, data = Data,
-			segmentation = Seg, importance = Importance},
+			segmentation = Segmentation, importance = Importance},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
@@ -658,12 +679,20 @@ sccp_extended_unitdata_service(_Config) ->
 	Hops = rand:uniform(15),
 	CalledParty = gen_party_address(),
 	CallingParty = gen_party_address(),
-	Data = <<123:24>>,
-	Seg = #segmentation{first = true, class = 0, remaining_seg = 4},
+	Data = crypto:strong_rand_bytes(rand:uniform(159) + 1),
+	Segmentation = #segmentation{first = case rand:uniform(2) of
+						1 ->
+							false;
+						2 ->
+							true
+					end,
+			class = rand:uniform(2) - 1,
+			remaining_seg = rand:uniform(16) - 1,
+			seg_local_ref = rand:uniform(16777216) - 1},
 	Importance = rand:uniform(5) - 1,
 	Rec = #sccp_extended_unitdata_service{return_cause = Cause, hop_counter = Hops,
 			called_party = CalledParty, calling_party = CallingParty, data = Data,
-			segmentation = Seg, importance = Importance},
+			segmentation = Segmentation, importance = Importance},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
@@ -672,16 +701,24 @@ sccp_long_unitdata() ->
 	[{userdata, [{doc, "encode and decode SCCP long unit data service message"}]}].
 
 sccp_long_unitdata(_Config) ->
-	Class = rand:uniform(5) - 1,
+	Class = rand:uniform(4) - 1,
 	Hops = rand:uniform(15),
 	CalledParty = gen_party_address(),
 	CallingParty = gen_party_address(),
-	LongData = <<123:24>>,
-	Seg = #segmentation{first = true, class = 0, remaining_seg = 4},
+	Data = crypto:strong_rand_bytes(rand:uniform(3952) + 2),
+	Segmentation = #segmentation{first = case rand:uniform(2) of
+						1 ->
+							false;
+						2 ->
+							true
+					end,
+			class = rand:uniform(2) - 1,
+			remaining_seg = rand:uniform(16) - 1,
+			seg_local_ref = rand:uniform(16777216) - 1},
 	Importance = rand:uniform(5) - 1,
 	Rec = #sccp_long_unitdata{class = Class, hop_counter = Hops,
-			called_party = CalledParty, calling_party = CallingParty, long_data = LongData,
-			segmentation = Seg, importance = Importance},
+			called_party = CalledParty, calling_party = CallingParty, data = Data,
+			segmentation = Segmentation, importance = Importance},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
@@ -694,12 +731,20 @@ sccp_long_unitdata_service(_Config) ->
 	Hops = rand:uniform(15),
 	CalledParty = gen_party_address(),
 	CallingParty = gen_party_address(),
-	LongData = <<123:24>>,
-	Seg = #segmentation{first = true, class = 0, remaining_seg = 4},
+	Data = crypto:strong_rand_bytes(rand:uniform(3952) + 2),
+	Segmentation = #segmentation{first = case rand:uniform(2) of
+						1 ->
+							false;
+						2 ->
+							true
+					end,
+			class = rand:uniform(2) - 1,
+			remaining_seg = rand:uniform(16) - 1,
+			seg_local_ref = rand:uniform(16777216) - 1},
 	Importance = rand:uniform(5) - 1,
 	Rec = #sccp_long_unitdata_service{return_cause = Cause, hop_counter = Hops,
-			called_party = CalledParty, calling_party = CallingParty, long_data = LongData,
-			segmentation = Seg, importance = Importance},
+			called_party = CalledParty, calling_party = CallingParty, data = Data,
+			segmentation = Segmentation, importance = Importance},
 	Bin = sccp_codec:sccp(Rec),
 	true = is_binary(Bin),
 	Rec = sccp_codec:sccp(Bin).
