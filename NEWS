@@ -1,8 +1,14 @@
+March 7, 2023
+-------------
+	- CODEC now correctly handles all message types
+	- Test cases for all message types
+	- Test cases with sample data from Wireshark published PCAP files
+
 March 14, 2022
 --------------
-	- show SCCP party addreses in using common representation
+	- Show SCCP party addreses in using common representation
 
 February 23, 2021
 ---------------
-	- breaking API change to party address translation type
+	- Breaking API change to party address translation type
 

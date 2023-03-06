@@ -1,3 +1,23 @@
+2023-03-07  Vance Shipley <vances@sigscale.org>
+
+	* refactor and correct all message types
+	* credit is an integer window size
+	* rename macro for data portion
+	* test cases with data from wireshark examples
+	* align release cause enumerations
+	* segmentation local reference in codec
+	* little endian coding of local references
+	* local reference in segmentation record
+	* replace pos_integer() with specific ranges
+	* remove redundant message type field
+	* refactor and correct optional part handling
+	* generate random local refs using all 24 bits in codec test suite
+	* decode optional parts directly
+	* segmentation is optional in xudt/ludt
+	* assume even party address for gti=2
+	* build and run api test suite
+	* test cases bugs fixed
+
 2022-03-14  Vance Shipley <vances@sigscale.org>
 
 	* pretty print party address type validation
