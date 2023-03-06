@@ -55,7 +55,7 @@
 -define(ResetCause,                12).
 -define(ErrorCause,                13).
 -define(RefusalCause,              14).
--define(DATA,                      15).
+-define(Data,                      15).
 -define(Segmentation,              16).
 -define(HopCounter,                17).
 -define(Importance,                18).

@@ -66,7 +66,7 @@ sccp(<<?ConnectRequest, SrcLocalRef:24/little, Class,
 			class = Class, called_party = Address,
 			credit = get_option(?Credit, Opts),
 			calling_party = get_option(?CallingPartyAddress, Opts),
-			data = get_option(?DATA, Opts),
+			data = get_option(?Data, Opts),
 			hop_counter = get_option(?HopCounter, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?ConnectionConfirm, DestLocalRef:24/little, SrcLocalRef:24/little,
@@ -76,7 +76,7 @@ sccp(<<?ConnectionConfirm, DestLocalRef:24/little, SrcLocalRef:24/little,
 			src_local_ref = SrcLocalRef, class = Class,
 			credit = get_option(?Credit, Opts),
 			called_party = get_option(?CalledPartyAddress, Opts),
-			data = get_option(?DATA, Opts),
+			data = get_option(?Data, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?ConnectionRefused, DestLocalRef:24/little,
 		Refuse, OptionalP, Rest/binary>>) ->
@@ -84,7 +84,7 @@ sccp(<<?ConnectionRefused, DestLocalRef:24/little,
 	#sccp_connection_refused{dest_local_ref = DestLocalRef,
 			refusal_cause = refusal_cause(Refuse),
 			called_party = get_option(?CalledPartyAddress, Opts),
-			data = get_option(?DATA, Opts),
+			data = get_option(?Data, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?Released, DestLocalRef:24/little, SrcLocalRef:24/little,
 		Release, OptionalP, Rest/binary>>) ->
@@ -92,7 +92,7 @@ sccp(<<?Released, DestLocalRef:24/little, SrcLocalRef:24/little,
 	#sccp_released{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef,
 			release_cause = release_cause(Release),
-			data = get_option(?DATA, Opts),
+			data = get_option(?Data, Opts),
 			importance = get_option(?Importance, Opts)};
 sccp(<<?ReleaseComplete,
 		DestLocalRef:24/little, SrcLocalRef:24/little>>) ->
@@ -928,7 +928,7 @@ connection_req3(#sccp_connection_req{data = undefined} = S, B, O) ->
 	connection_req4(S, B, O);
 connection_req3(#sccp_connection_req{data = D} = S, B, O) ->
 	DL = size(D),
-	connection_req4(S, B, <<O/binary, ?DATA, DL, D/binary>>).
+	connection_req4(S, B, <<O/binary, ?Data, DL, D/binary>>).
 
 %% @hidden
 connection_req4(#sccp_connection_req{hop_counter= undefined} = S, B, O) ->
@@ -978,7 +978,7 @@ connection_confirm3(#sccp_connection_confirm{data= undefined} = S, B, O) ->
 	connection_confirm4(S,B, O);
 connection_confirm3(#sccp_connection_confirm{data = D} = S, B, O) ->
 	DL = size(D),
-	connection_confirm4(S, B, <<O/binary, ?DATA, DL, D/binary>>).
+	connection_confirm4(S, B, <<O/binary, ?Data, DL, D/binary>>).
 
 %% @hidden
 connection_confirm4(#sccp_connection_confirm{importance = undefined} = _S, B, O) ->
@@ -1015,7 +1015,7 @@ connection_refused2(#sccp_connection_refused{data = undefined} = S, B, O) ->
 	connection_refused3(S, B, O);
 connection_refused2(#sccp_connection_refused{data = D} = S, B, O) ->
 	DL = size(D),
-	connection_refused3(S, B, <<O/binary, ?DATA, DL, D/binary>>).
+	connection_refused3(S, B, <<O/binary, ?Data, DL, D/binary>>).
 
 %% @hidden
 connection_refused3(#sccp_connection_refused{importance = undefined} = _S, B, O) ->
@@ -1045,7 +1045,7 @@ released1(#sccp_released{data = undefined} = S, B) ->
 	released2(S, B, <<>>);
 released1(#sccp_released{data = D} = S, B) ->
 	DL = size(D),
-	released2(S, B, <<?DATA, DL, D/binary>>).
+	released2(S, B, <<?Data, DL, D/binary>>).
 
 %% @hidden
 released2(#sccp_released{importance = undefined} = _S, B, O) ->
