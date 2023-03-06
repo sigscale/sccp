@@ -87,7 +87,7 @@
 		{src_local_ref :: undefined | 0..16777215,
 		class :: undefined | 2..3,
 		called_party :: undefined | #party_address{},
-		credit :: undefined | binary(),
+		credit :: undefined | byte(),
 		calling_party :: undefined | #party_address{},
 		data :: undefined | binary(),
 		hop_counter :: undefined | 1..15,
@@ -97,7 +97,7 @@
 		{dest_local_ref :: undefined | 0..16777215,
 		src_local_ref :: undefined | 0..16777215,
 		class :: undefined | 2..3,
-		credit :: undefined | binary(),
+		credit :: undefined | byte(),
 		called_party :: undefined | #party_address{},
 		data :: undefined | binary(),
 		importance :: undefined | 0..7}).
@@ -142,7 +142,7 @@
 -record(sccp_data_ack,
 		{dest_local_ref :: undefined | 0..16777215,
 		receive_seq_num :: undefined | binary(),
-		credit :: undefined | binary()}).
+		credit :: undefined | byte()}).
 
 -record(sccp_unitdata,
 		{class :: undefined | 0..1 | 128..129,
@@ -187,7 +187,7 @@
 		src_local_ref :: undefined | 0..16777215,
 		class :: undefined | 2..3,
 		sequencing :: undefined | boolean(),
-		credit :: undefined | binary()}).
+		credit :: undefined | byte()}).
 
 -record(sccp_extended_unitdata,
 		{class :: undefined | 0..1 | 128..129,

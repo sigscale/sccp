@@ -111,7 +111,7 @@ sccp(<<?DataForm2, DestLocalRef:24/little,
 	#sccp_data_form2{dest_local_ref = DestLocalRef,
 			sequencing = segmenting(Seq), data = Data};
 sccp(<<?DataAck, DestLocalRef:24/little,
-		RecvSeq:1/binary, Credit:1/binary>>) ->
+		RecvSeq:1/binary, Credit:8>>) ->
 	#sccp_data_ack{dest_local_ref = DestLocalRef,
 			receive_seq_num = RecvSeq, credit = Credit};
 sccp(<<?UnitData, Class, CalledPartyP, CallingPartyP,
@@ -157,7 +157,7 @@ sccp(<<?ProtocolDataUnitError, DestLocalRef:24/little, Error>>) ->
 	#sccp_protocol_data_unit_error{dest_local_ref = DestLocalRef,
 			error_cause =  Error};
 sccp(<<?InactivityTest, DestLocalRef:24/little, SrcLocalRef:24/little,
-		Class, _:15, Seq:1, Credit/binary>>) ->
+		Class, _:15, Seq:1, Credit:8>>) ->
 	#sccp_inactivity_test{dest_local_ref = DestLocalRef,
 			src_local_ref = SrcLocalRef, class = Class,
 			sequencing = segmenting(Seq), credit = Credit};
@@ -246,7 +246,7 @@ sccp(#sccp_data_form2{dest_local_ref = Dest,
 	<<?DataForm2, Dest:24/little, Seq, DataP, DataL, Data/binary>>;
 sccp(#sccp_data_ack{dest_local_ref = Dest,
 		receive_seq_num = Seq, credit = Credit}) ->
-	<<?DataAck, Dest:24/little, Seq/binary, Credit/binary>>;
+	<<?DataAck, Dest:24/little, Seq/binary, Credit>>;
 sccp(#sccp_unitdata{class = Class, data = Data,
 		called_party = #party_address{} = CalledParty,
 		calling_party = #party_address{} = CallingParty})
@@ -298,7 +298,7 @@ sccp(#sccp_inactivity_test{dest_local_ref = Dest,
 		sequencing = S, credit = Credit}) ->
 	Seq = segmenting(S),
 	<<?InactivityTest, Dest:24/little, Src:24/little,
-			Class, 0:15, Seq:1, Credit/binary>>;
+			Class, 0:15, Seq:1, Credit>>;
 sccp(#sccp_extended_unitdata{} = S) ->
 	sccp_extended_unitdata(S);
 sccp(#sccp_extended_unitdata_service{} = S) ->
@@ -911,9 +911,8 @@ sccp_connection_req(#sccp_connection_req{src_local_ref = Src,
 %% @hidden
 connection_req1(#sccp_connection_req{credit = undefined} = S, B) ->
 	connection_req2(S, B, <<>>);
-connection_req1(#sccp_connection_req{credit = C} = S, B) ->
-	CL = size(C),
-	connection_req2(S, B, <<?Credit, CL, C/binary>>).
+connection_req1(#sccp_connection_req{credit = Credit} = S, B) ->
+	connection_req2(S, B, <<?Credit, 1, Credit>>).
 
 %% @hidden
 connection_req2(#sccp_connection_req{calling_party = undefined} = S, B, O) ->
@@ -962,8 +961,7 @@ sccp_connection_confirm(#sccp_connection_confirm{dest_local_ref = Dest,
 connection_confirm1(#sccp_connection_confirm{credit = undefined} = S, B) ->
 	connection_confirm2(S,B, <<>>);
 connection_confirm1(#sccp_connection_confirm{credit = C} = S, B) ->
-	CL = size(C),
-	connection_confirm2(S, B, <<?Credit, CL, C/binary>>).
+	connection_confirm2(S, B, <<?Credit, 1, Credit>).
 
 %% @hidden
 connection_confirm2(#sccp_connection_confirm{called_party = undefined} = S, B, O) ->
