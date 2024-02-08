@@ -41,15 +41,19 @@ AC_PROG_MKDIR_P
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_ERLANG_SUBST_INSTALL_LIB_DIR
+otpdir=$ERLANG_INSTALL_LIB_DIR/..
 appdir=$ERLANG_INSTALL_LIB_DIR/$PACKAGE_NAME-$PACKAGE_VERSION
 erldir=$ERLANG_INSTALL_LIB_DIR/$PACKAGE_NAME-$PACKAGE_VERSION/src
 beamdir=$ERLANG_INSTALL_LIB_DIR/$PACKAGE_NAME-$PACKAGE_VERSION/ebin
 eincludedir=$ERLANG_INSTALL_LIB_DIR/$PACKAGE_NAME-$PACKAGE_VERSION/include
 docdir=$ERLANG_INSTALL_LIB_DIR/$PACKAGE_NAME-$PACKAGE_VERSION/doc
+reldir=$ERLANG_INSTALL_LIB_DIR/../releases
+AC_SUBST(otpdir)
 AC_SUBST(appdir)
 AC_SUBST(erldir)
 AC_SUBST(beamdir)
 AC_SUBST(eincludedir)
+AC_SUBST(reldir)
 
 
 ##
@@ -58,6 +62,7 @@ AC_SUBST(eincludedir)
 AC_ERLANG_SUBST_ERTS_VER
 AC_ERLANG_CHECK_LIB([kernel], [], [AC_MSG_ERROR([kernel was not found!])])
 AC_ERLANG_CHECK_LIB([stdlib], [], [AC_MSG_ERROR([stdlib was not found!])])
+AC_ERLANG_CHECK_LIB([sasl], [], [AC_MSG_ERROR([saslwas not found!])])
 
 
 ##
@@ -80,5 +85,6 @@ AC_ERLANG_CHECK_LIB([stdlib], [], [AC_MSG_ERROR([stdlib was not found!])])
 ## Output:  create output files
 ## 
 
-AC_OUTPUT([Makefile include/Makefile ebin/Makefile doc/Makefile test/Makefile])
+AC_OUTPUT([Makefile include/Makefile ebin/Makefile doc/Makefile
+		test/Makefile $PACKAGE_NAME.rel sys.config])
 
