@@ -1,3 +1,7 @@
+2024-09-03  Vance Shipley <vances@sigscale.org>
+
+	* allow enumerations from party address in bcd codec
+
 2024-02-12  Vance Shipley <vances@sigscale.org>
 
 	* remove gitlab ci config
