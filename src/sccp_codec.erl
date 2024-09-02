@@ -930,7 +930,9 @@ bcd(Address) when is_list(Address) ->
 -spec bcd(Data, OE) -> Address
 	when
 		Data :: binary(),
-		OE :: 0..1,
+		OE :: Odd | Even,
+		Odd :: 1 | bcd_odd,
+		Even :: 0 | bcd_even,
 		Address :: [byte()].
 %% @doc Decode binary coded decimal value to a list of digits.
 %%
@@ -938,6 +940,10 @@ bcd(Address) when is_list(Address) ->
 %%%     signals present in a global address information.
 %%
 %% ITU-T Recommendation Q.713, section 3.4.2.3.1.
+bcd(Data, bcd_odd) ->
+	bcd(Data, 1);
+bcd(Data, bcd_even) ->
+	bcd(Data, 0);
 bcd(Data, OE) when is_binary(Data) ->
 	bcd1(Data, OE, []).
 
