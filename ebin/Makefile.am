@@ -4,8 +4,8 @@
 ## Process this file with automake to produce Makefile.in
 
 appdir = $(beamdir)
-app_DATA = sccp.app
-EXTRA_DIST = sccp.app
+app_DATA = sccp.app sccp.appup
+EXTRA_DIST = sccp.app sccp.appup
 
 beam_DATA = sccp.beam sccp_codec.beam
 

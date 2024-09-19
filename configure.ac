@@ -85,6 +85,7 @@ AC_ERLANG_CHECK_LIB([sasl], [], [AC_MSG_ERROR([saslwas not found!])])
 ## Output:  create output files
 ## 
 
-AC_OUTPUT([Makefile include/Makefile ebin/Makefile doc/Makefile
-		test/Makefile $PACKAGE_NAME.rel sys.config])
+AC_OUTPUT([Makefile include/Makefile ebin/Makefile
+		doc/Makefile test/Makefile
+		$PACKAGE_NAME.rel $PACKAGE_NAME.appup sys.config])
 
