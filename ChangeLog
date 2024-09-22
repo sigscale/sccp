@@ -1,3 +1,8 @@
+2024-09-22  Vance Shipley <vances@sigscale.org>
+
+	* include all application upgrade files in release package
+	* include application upgrade specification
+
 2024-09-03  Vance Shipley <vances@sigscale.org>
 
 	* allow enumerations from party address in bcd codec
