@@ -14,6 +14,7 @@ $(RELEASE_NAME).rel: $(PACKAGE_NAME).rel
 
 ERLTMP := $(shell mktemp -d)
 
+if MAKE_TAR_EXTRA_FILES
 $(RELEASE_NAME).tar.gz: $(RELEASE_NAME).rel ebin/$(PACKAGE_NAME).appup sys.config
 	mkdir -p $(ERLTMP)/lib/$(RELEASE_NAME)
 	cp -r $(DESTDIR)/$(ERLANG_INSTALL_LIB_DIR)/$(RELEASE_NAME)/* $(ERLTMP)/lib/$(RELEASE_NAME)
@@ -31,6 +32,18 @@ $(RELEASE_NAME).tar.gz: $(RELEASE_NAME).rel ebin/$(PACKAGE_NAME).appup sys.confi
 							[{dirs, [include,doc]}, {extra_files, ExtraFiles}])" \
 			-s init stop
 	rm -rf $(ERLTMP)
+else
+$(RELEASE_NAME).tar.gz: $(RELEASE_NAME).rel ebin/$(PACKAGE_NAME).appup sys.config
+	mkdir -p $(ERLTMP)/lib/$(RELEASE_NAME)
+	cp -r $(DESTDIR)/$(ERLANG_INSTALL_LIB_DIR)/$(RELEASE_NAME)/* $(ERLTMP)/lib/$(RELEASE_NAME)
+	ERL_LIBS=$(ERLTMP)/lib:$(ERL_LIBS) RELDIR=releases $(ERL) \
+			-noinput -boot_var OTPHOME lib \
+			-eval "systools:make_script(\"$(RELEASE_NAME)\", \
+					[{variables, [{\"OTPHOME\", \"$(ERLTMP)\"}]}])" \
+			-eval "systools:make_tar(\"$(RELEASE_NAME)\", [{dirs, [include,doc]}])" \
+			-s init stop
+	rm -rf $(ERLTMP)
+endif
 
 install-data-hook: $(RELEASE_NAME).tar.gz
 	$(MKDIR_P) $(DESTDIR)/$(reldir)
