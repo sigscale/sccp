@@ -14,7 +14,7 @@ $(RELEASE_NAME).rel: $(PACKAGE_NAME).rel
 
 ERLTMP := $(shell mktemp -d)
 
-$(RELEASE_NAME).tar.gz: $(RELEASE_NAME).rel $(top_srcdir)/ebin/$(PACKAGE_NAME).appup sys.config
+$(RELEASE_NAME).tar.gz: $(RELEASE_NAME).rel ebin/$(PACKAGE_NAME).appup sys.config
 	mkdir -p $(ERLTMP)/lib/$(RELEASE_NAME)
 	cp -r $(DESTDIR)/$(ERLANG_INSTALL_LIB_DIR)/$(RELEASE_NAME)/* $(ERLTMP)/lib/$(RELEASE_NAME)
 	ERL_LIBS=$(ERLTMP)/lib:$(ERL_LIBS) RELDIR=releases $(ERL) \
