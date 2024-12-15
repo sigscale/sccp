@@ -3,12 +3,16 @@
 ##
 ## Process this file with automake to produce Makefile.in
 
-modhtml = sccp.html sccp_codec.html
+modhtml = sccp.html \
+		sccp_app.html \
+		sccp_sup.html \
+		sccp_codec.html
 
 doc_DATA = overview.edoc $(modhtml) \
 		modules-frame.html overview-summary.html \
 		index.html stylesheet.css edoc-info \
-		sigscale-logo.png
+		sigscale-logo.png \
+		supervision.svg
 
 overview.edoc: overview.edoc-in
 	sed -e 's!%VERSION%!$(VERSION)!' \
@@ -25,6 +29,7 @@ overview.edoc: overview.edoc-in
 			mv $$i.tmp $$i; \
 	done
 	-cp -n $(top_srcdir)/doc/sigscale-logo.png .
+	-cp -n $(top_srcdir)/doc/supervision.svg .
 
 CLEANFILES = $(doc_DATA) \
 		edoc-info \
