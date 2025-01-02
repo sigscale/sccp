@@ -6,7 +6,54 @@
 	of the Signaling System No. 7 (SS7) protocol suite.
 
 ==Introduction==
-Currently only encoding and decoding (CODEC) from binary to Erlang terms
-is supported. None of the connection oriented procedures are implemented
-and as such is a library application.
+This protocol stack implementation does not introduce new processes
+for SCCP SAPs but instead provides supporting libraries for CODEC,
+routing, translation and management.
+
+Currently none of the connection oriented procedures are implemented.
+
+==Primitives==
+The communication between layers is defined in ITU-T recommendations
+using "primitives" where the information content is specified but not
+a specific encoding.  ITU-T Q.711 provides the primitives for SCCP.
+In the {@link //sccp. sccp} application tuples of the form provided
+below are sent as messages between processes. The `Parameters' are 
+represented using primitive specific records defined in
+`sccp_primitive.hrl'.
+
+===Connectionless Services===
+TCAP uses exclusively connectionless services.
+<tt>{'N', 'N-UNITDATA', request, Parameters}</tt><br />
+<tt>{'N', 'N-UNITDATA', indication, Parameters}</tt><br />
+<tt>{'N', 'N-NOTICE', indication, Parameters}</tt><br />
+
+===Connection-oriented Services===
+Currently none of the connection-oriented serices are implemented.
+<tt>{'N', 'N-CONNECT', request, Parameters}</tt><br />
+<tt>{'N', 'N-CONNECT', indication, Parameters}</tt><br />
+<tt>{'N', 'N-CONNECT', response, Parameters}</tt><br />
+<tt>{'N', 'N-CONNECT', confirm, Parameters}</tt><br />
+<tt>{'N', 'N-DATA', request, Parameters}</tt><br />
+<tt>{'N', 'N-DATA', indication, Parameters}</tt><br />
+<tt>{'N', 'N-EXPEDITED-DATA', request, Parameters}</tt><br />
+<tt>{'N', 'N-EXPEDITED-DATA', indication, Parameters}</tt><br />
+<tt>{'N', 'N-DISCONNECT', request, Parameters}</tt><br />
+<tt>{'N', 'N-DISCONNECT', indication, Parameters}</tt><br />
+<tt>{'N', 'N-RESET', request, Parameters}</tt><br />
+<tt>{'N', 'N-RESET', indication, Parameters}</tt><br />
+<tt>{'N', 'N-RESET', response, Parameters}</tt><br />
+<tt>{'N', 'N-RESET', confirm, Parameters}</tt><br />
+<tt>{'N', 'N-INFORM', request, Parameters}</tt><br />
+<tt>{'N', 'N-INFORM', indication, Parameters}</tt><br />
+
+===SCCP Management===
+SCCP management procedures are used for rerouting or throttling
+traffic in the event of failure or congestion in the network.
+<tt>{'N', 'N-COORD', request, Parameters}</tt><br />
+<tt>{'N', 'N-COORD', indication, Parameters}</tt><br />
+<tt>{'N', 'N-COORD', response, Parameters}</tt><br />
+<tt>{'N', 'N-COORD', confirm, Parameters}</tt><br />
+<tt>{'N', 'N-STATE', request, Parameters}</tt><br />
+<tt>{'N', 'N-STATE', indication, Parameters}</tt><br />
+<tt>{'N', 'N-PCSTATE', indication, Parameters}</tt><br />
 
