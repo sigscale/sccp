@@ -921,7 +921,7 @@ ssn(N) when is_integer(N) ->
 
 -spec bcd(Address) -> Data
 	when
-		Address :: [byte()],
+		Address :: [0..15].
 		Data :: binary().
 %% @doc Encode list of digits to a binary coded decimal value.
 bcd(Address) when is_list(Address) ->
@@ -933,7 +933,7 @@ bcd(Address) when is_list(Address) ->
 		OE :: Odd | Even,
 		Odd :: 1 | bcd_odd,
 		Even :: 0 | bcd_even,
-		Address :: [byte()].
+		Address :: [0..15].
 %% @doc Decode binary coded decimal value to a list of digits.
 %%
 %% `OE' indicates odd (1) or even (0) number of address
