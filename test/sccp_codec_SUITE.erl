@@ -77,15 +77,19 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() ->
-	[party_address_gti_0, party_address_gti_1, party_address_gti_2, party_address_gti_3,
-		party_address_gti_4, nai, numbering_plan, encoding_scheme, importance,
-		refusal_cause, release_cause, return_cause, segmentation, point_code, ssn, bcd_even, bcd_odd,
-		sccp_connection_req, sccp_connection_confirm, sccp_connection_refused, sccp_released,
-		sccp_release_complete, sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
-		sccp_unitdata_service, sccp_expedited_data, sccp_expedited_ack, sccp_reset_request,
-		sccp_reset_confirmation, sccp_protocol_data_unit_error, sccp_inactivity_test,
-		sccp_extended_unitdata, sccp_extended_unitdata_service, sccp_long_unitdata,
-		sccp_long_unitdata_service, ws_cr, ws_cc, ws_df1, ws_ud, ws_rlsd, ws_rlc,
+	[party_address_gti_0, party_address_gti_1, party_address_gti_2,
+		party_address_gti_3, party_address_gti_4, nai, numbering_plan,
+		encoding_scheme, importance, refusal_cause, release_cause,
+		return_cause, segmentation, point_code, global_title, ssn,
+		bcd_even, bcd_odd, sccp_connection_req, sccp_connection_confirm,
+		sccp_connection_refused, sccp_released, sccp_release_complete,
+		sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
+		sccp_unitdata_service, sccp_expedited_data, sccp_expedited_ack,
+		sccp_reset_request, sccp_reset_confirmation,
+		sccp_protocol_data_unit_error, sccp_inactivity_test,
+		sccp_extended_unitdata, sccp_extended_unitdata_service,
+		sccp_long_unitdata, sccp_long_unitdata_service,
+		ws_cr, ws_cc, ws_df1, ws_ud, ws_rlsd, ws_rlc,
 		ws_xudt1, ws_xudt2, ws_xudts1, ws_xudts2, ws_xudts3].
 
 %%---------------------------------------------------------------------
@@ -383,6 +387,15 @@ ssn(_Config) ->
 			F(F, N+1)
 	end,
 	ok = F(F, 0).
+
+global_title() ->
+	[{userdata, [{doc, "Global title address signals CODEC"}]}].
+
+global_title(_Config) ->
+	Digits = [0, 1, 2, 3, 4,5 ,6 ,7, 8, 9],
+	NumChars = "0123456789",
+	NumChars = sccp_codec:global_title(Digits),
+	Digits = sccp_codec:global_title(NumChars).
 
 bcd_even() ->
 	[{userdata, [{doc, "encode and decode binary coded decimals"}]}].

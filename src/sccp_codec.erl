@@ -32,7 +32,7 @@
 -export([party_address/1, nai/1, numbering_plan/1, encoding_scheme/1,
 		routing_indicator/1, importance/1, refusal_cause/1, release_cause/1,
 		segmenting/1, return_cause/1, reset_cause/1, segmentation/1, point_code/1,
-		bcd/1, bcd/2, ssn/1]).
+		global_title/1, bcd/1, bcd/2, ssn/1]).
 
 -export_type([sccp_message/0, party_address/0]).
 
@@ -49,10 +49,14 @@
 			| #sccp_long_unitdata_service{}.
 -type party_address() :: #party_address{}.
 
+%%
+%% public api functionas
+%%
+
 -spec sccp(Message) -> Message
 	when
 		Message :: binary() | sccp_message().
-%% @doc CODEC for SCCP messages.
+%% @doc SCCP message CODEC.
 %%
 %% ITU-T Recommendation Q.713, SCCP formats and codes.
 %%
@@ -339,11 +343,12 @@ sccp(#sccp_long_unitdata_service{} = S) ->
 -spec party_address(Address) -> Address
 	when
 		Address :: binary() | party_address().
-%% @doc CODEC for called party address.
+%% @doc Called/calling party address CODEC.
 %%
 %% ITU-T Recommendation Q.713, section 3.4.
+%%
 party_address(<<_:1, RI:1, GTI:4, SSNI:1, PCI:1,
-		Address/binary>>) ->
+		Address/binary>> = _Address) ->
 	party_address1(PCI, SSNI, RI, GTI, Address);
 party_address(#party_address{ri = RoutingIndicator,
 		pc = undefined, ssn = SubSystemNumber} = P)
@@ -454,15 +459,16 @@ party_address4(PCI, SSNI, RI, Address,
 	<<0:1, RI:1, 4:4, SSNI:1, PCI:1, Address/binary,
 			TT, NP:4, ES:4, 0:1, NAI:7, GT/binary>>.
 
--spec nai(Indicator) -> Indicator
+-spec nai(NAI) -> NAI
 	when
-		Indicator :: unknown | subscriber | reserved_for_national | national
+		NAI :: unknown | subscriber | reserved_for_national | national
 				| international | spare | reserved_for_national
 				| reserved | 0..127.
-%% @doc Values for network address indicator.
+%% @doc Network address indicator CODEC.
 %%
 %% ITU-T Recommendation Q.713, section 3.4.2.3.1.
-nai(0 = _Indicator) -> unknown;
+%%
+nai(0 = _NAI) -> unknown;
 nai(1) -> subscriber;
 nai(2) -> reserved_for_national;
 nai(3) -> national;
@@ -480,14 +486,15 @@ nai(international) -> 4;
 nai(spare) -> 5;
 nai(reserved) -> 127.
 
--spec numbering_plan(Plan) -> Plan
+-spec numbering_plan(NP) -> NP
 	when
-		Plan :: unknown | isdn_tele | generic | data | telex | maritime
+		NP :: unknown | isdn_tele | generic | data | telex | maritime
 				| land_mobile | isdn_mobile | private_net | reserved | 0..15.
-%% @doc Values for numbering plan.
+%% @doc Numbering plan CODEC.
 %%
 %% ITU-T Recommendation Q.713, section 3.4.2.3.3.
-numbering_plan(0 = _Plan) -> unknown;
+%%
+numbering_plan(0 = _NP) -> unknown;
 numbering_plan(1) -> isdn_tele;
 numbering_plan(2) -> generic;
 numbering_plan(3) -> data;
@@ -511,13 +518,14 @@ numbering_plan(private_net) -> 14;
 numbering_plan(reserved) -> 15;
 numbering_plan(_) -> 13.
 
--spec encoding_scheme(Scheme) -> Scheme
+-spec encoding_scheme(ES) -> ES
 	when
-		Scheme :: unknown | bcd_odd | bcd_even | national | reserved | 0..15.
-%% @doc Values for encoding scheme.
+		ES :: unknown | bcd_odd | bcd_even | national | reserved | 0..15.
+%% @doc Encoding scheme CODEC.
 %%
 %% ITU-T Recommendation Q.713, section 3.4.2.3.3.
-encoding_scheme(0 = _Scheme) -> unknown;
+%%
+encoding_scheme(0 = _ES) -> unknown;
 encoding_scheme(1) -> bcd_odd;
 encoding_scheme(2) -> bcd_even;
 encoding_scheme(3) -> national;
@@ -531,16 +539,400 @@ encoding_scheme(national) -> 3;
 encoding_scheme(reserved) -> 15;
 encoding_scheme(_) -> 14.
 
--spec routing_indicator(Indicator) -> Indicator
+-spec routing_indicator(RI) -> RI
 	when
-		Indicator  :: false | true | 0..1.
-%% @doc Values for routing indicator.
+		RI:: false | true | 0..1.
+%% @doc Routing indicator CODEC.
 %%
 %% ITU-T Recommendation Q.713, section 3.4.1.
-routing_indicator(0) -> false;
+routing_indicator(0 = _RI) -> false;
 routing_indicator(1) -> true;
 routing_indicator(false) -> 0;
 routing_indicator(true) -> 1.
+
+-spec importance(Importance) -> Importance
+	when
+		Importance :: binary() | 0..7.
+%% @doc Importance CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.19.
+%%
+importance(<<_:5, I:3>> = _Importance) ->
+	I;
+importance(I) when I >= 0; I =< 7 ->
+	<<0:5, I:3>>.
+
+-spec refusal_cause(Cause) -> Cause
+	when
+		Cause :: enduser_orig | enduser_congestion | enduser_failure
+				| sccp_user_oirg | dest_unknown | dest_inaccessible
+				| qos_not_avail_non_transient | qos_not_avail_transient
+				| access_failure | access_congestion | subsystem_failure
+				| subsystem_congestion | connection_expire | incomp_userdata
+				| unqualified | hcounter_violation | sccp_failure
+				| no_translation_addr | unequipped_error | 0..255.
+%% @doc Refusal cause CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.15.
+%%
+refusal_cause(0 = _Cause) -> enduser_orig;
+refusal_cause(1) -> enduser_congestion;
+refusal_cause(2) -> enduser_failure;
+refusal_cause(3) -> sccp_user_oirg;
+refusal_cause(4) -> dest_unknown;
+refusal_cause(5) -> dest_inaccessible;
+refusal_cause(6) -> qos_not_avail_non_transient;
+refusal_cause(7) -> qos_not_avail_transient;
+refusal_cause(8) -> access_failure;
+refusal_cause(9) -> access_congestion;
+refusal_cause(10) -> subsystem_failure;
+refusal_cause(11) -> subsystem_congestion;
+refusal_cause(12) -> connection_expire;
+refusal_cause(13) -> incomp_userdata;
+refusal_cause(C) when (is_integer(C)) andalso
+		(C == 14 orelse (C > 19 andalso C =< 255))-> reserved;
+refusal_cause(15) -> unqualified;
+refusal_cause(16) -> hcounter_violation;
+refusal_cause(17) -> sccp_failure;
+refusal_cause(18) -> no_translation_addr;
+refusal_cause(19) -> unequipped_error;
+refusal_cause(enduser_orig) -> 0;
+refusal_cause(enduser_congestion) -> 1;
+refusal_cause(enduser_failure) -> 2;
+refusal_cause(sccp_user_oirg) -> 3;
+refusal_cause(dest_unknown) -> 4;
+refusal_cause(dest_inaccessible) -> 5;
+refusal_cause(qos_not_avail_non_transient) -> 6;
+refusal_cause(qos_not_avail_transient) -> 7;
+refusal_cause(access_failure) -> 8;
+refusal_cause(access_congestion) -> 9;
+refusal_cause(subsystem_failure) -> 10;
+refusal_cause(subsystem_congestion) -> 11;
+refusal_cause(connection_expire) -> 12;
+refusal_cause(incomp_userdata) -> 13;
+refusal_cause(unqualified) -> 15;
+refusal_cause(hcounter_violation) -> 16;
+refusal_cause(sccp_failure) -> 17;
+refusal_cause(no_translation_addr) -> 18;
+refusal_cause(unequipped_error) -> 19;
+refusal_cause(_) -> 255.
+
+-spec release_cause(Cause) -> Cause
+	when
+		Cause :: enduser_orig | enduser_congestion | enduser_failure
+				| sccp_user_originated | rpc_error | inconsistant_data
+				| access_failure | access_congestion | subsystem_failure
+				| subsystem_congestion | mtp_failure | network_congestion
+				| reset_timer_expire | inactivity_timer_expire
+				| unqualified | sccp_failure | 0..255.
+%% @doc Release cause CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.11.
+%%
+release_cause(0 = _Cause) -> enduser_orig;
+release_cause(1) -> enduser_congestion;
+release_cause(2) -> enduser_failure;
+release_cause(3) -> sccp_user_originated;
+release_cause(4) -> rpc_error;
+release_cause(5) -> inconsistant_data;
+release_cause(6) -> access_failure;
+release_cause(7) -> access_congestion;
+release_cause(8) -> subsystem_failure;
+release_cause(9) -> subsystem_congestion;
+release_cause(10) -> mtp_failure;
+release_cause(11) -> network_congestion;
+release_cause(12) -> reset_timer_expire;
+release_cause(13) -> inactivity_timer_expire;
+release_cause(C) when (is_integer(C)) andalso
+		(C == 14 orelse (C > 16 andalso C =< 255)) -> reserved;
+release_cause(15) -> unqualified;
+release_cause(16) -> sccp_failure;
+release_cause(enduser_orig) -> 0;
+release_cause(enduser_congestion) -> 1;
+release_cause(enduser_failure) -> 2;
+release_cause(sccp_user_originated) -> 3;
+release_cause(rpc_error) -> 4;
+release_cause(inconsistant_data) -> 5;
+release_cause(access_failure) -> 6;
+release_cause(access_congestion) -> 7;
+release_cause(subsystem_failure) -> 8;
+release_cause(subsystem_congestion) -> 9;
+release_cause(mtp_failure) -> 10;
+release_cause(network_congestion) -> 11;
+release_cause(reset_timer_expire) -> 12;
+release_cause(inactivity_timer_expire) -> 13;
+release_cause(unqualified) -> 15;
+release_cause(sccp_failure) -> 16;
+release_cause(_) -> 255.
+
+-spec reset_cause(Cause) -> Cause
+	when
+		Cause :: enduser_orig | sccp_user_oirg | incorrect_ps
+				| incorrect_pr | rpc_error | remote_end_user_operational
+				| network_operational | access_opertional | network_congestion
+				| unqualified | 0..255.
+%% @doc Reset cause CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.13.
+%%
+reset_cause(0 = _Cause) -> enduser_orig;
+reset_cause(1) -> sccp_user_oirg;
+reset_cause(2) -> incorrect_ps;
+reset_cause(3) -> incorrect_pr;
+reset_cause(4) -> rpc_error;
+reset_cause(5) -> rpc_error;
+reset_cause(6) -> rpc_error;
+reset_cause(7) -> remote_end_user_operational;
+reset_cause(8) -> network_operational;
+reset_cause(9) -> access_opertional;
+reset_cause(10) -> network_congestion;
+reset_cause(12) -> unqualified;
+reset_cause(C) when (is_integer(C)) andalso
+		(C == 11 orelse (C > 12 andalso C =< 255)) -> reserved;
+reset_cause(enduser_orig) -> 0;
+reset_cause(sccp_user_oirg) -> 1;
+reset_cause(incorrect_ps) -> 2;
+reset_cause(incorrect_pr) -> 3;
+reset_cause(rpc_error) -> 4;
+reset_cause(remote_end_user_operational) -> 7;
+reset_cause(network_operational) -> 8;
+reset_cause(access_opertional) -> 9;
+reset_cause(network_congestion) -> 10;
+reset_cause(unqualified) -> 12;
+reset_cause(_) -> 255.
+
+-spec segmenting(Segmenting) -> Segmenting
+	when
+		Segmenting:: false | true | 0..1.
+%% @doc Segmenting/reassembling CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.7.
+%%
+segmenting(0 = _Segmenting) -> false;
+segmenting(1) -> true;
+segmenting(false) -> 0;
+segmenting(true) -> 1.
+
+-spec sequencing(Sequencing) -> Sequencing
+	when
+		Sequencing :: binary() | #sequencing{}.
+%% @doc Sequencing/segmenting CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.9.
+%%
+sequencing(<<SendSeqNum:7, _:1, ReceiveSeqNum:7,
+		0:1>> = _Sequencing) ->
+	#sequencing{send_seq_num = SendSeqNum,
+			receive_seq_num = ReceiveSeqNum, more_data = false};
+sequencing(<<SendSeqNum:7, _:1, ReceiveSeqNum:7, 1:1>>) ->
+	#sequencing{send_seq_num = SendSeqNum,
+			receive_seq_num = ReceiveSeqNum, more_data = true};
+sequencing(#sequencing{send_seq_num = SendSeqNum,
+		receive_seq_num = ReceiveSeqNum, more_data = false})
+		when is_integer(ReceiveSeqNum), is_integer(ReceiveSeqNum) ->
+	<<SendSeqNum:7, 0:1, ReceiveSeqNum:7, 0:1>>;
+sequencing(#sequencing{send_seq_num = SendSeqNum,
+		receive_seq_num = ReceiveSeqNum, more_data = true})
+		when is_integer(ReceiveSeqNum), is_integer(ReceiveSeqNum) ->
+	<<SendSeqNum:7, 0:1, ReceiveSeqNum:7, 1:1>>.
+
+-spec return_cause(Cause) -> Cause
+	when
+		Cause :: no_translation | subsystem_congestion | subsystem_failure
+				| unequipped_error | mtp_failure | network_congestion
+				| unqualified | transport_error | processing_error
+				| reassembly_fail | sccp_failure | hcounter_violation
+				| seg_not_supported | seg_failure | 0..255.
+%% @doc Return cause CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.12.
+%%
+return_cause(N = _Cause) when N == 0; N == 1 -> no_translation;
+return_cause(2) -> subsystem_congestion;
+return_cause(3) -> subsystem_failure;
+return_cause(4) -> unequipped_error;
+return_cause(5) -> mtp_failure;
+return_cause(6) -> network_congestion;
+return_cause(7) -> unqualified;
+return_cause(8) -> transport_error;
+return_cause(9) -> processing_error;
+return_cause(10) -> reassembly_fail;
+return_cause(11) -> sccp_failure;
+return_cause(12) -> hcounter_violation;
+return_cause(13) -> seg_not_supported;
+return_cause(14) -> seg_failure;
+return_cause(C) when is_integer(C), C >= 15, C =< 255 -> reserved;
+return_cause(no_translation) -> 0;
+return_cause(subsystem_congestion) -> 2;
+return_cause(subsystem_failure) -> 3;
+return_cause(unequipped_error) -> 4;
+return_cause(mtp_failure) -> 5;
+return_cause(network_congestion) -> 6;
+return_cause(unqualified) -> 7;
+return_cause(transport_error) -> 8;
+return_cause(processing_error) -> 9;
+return_cause(reassembly_fail) -> 10;
+return_cause(sccp_failure) -> 11;
+return_cause(hcounter_violation) -> 12;
+return_cause(seg_not_supported) -> 13;
+return_cause(seg_failure) -> 14;
+return_cause(_) -> 255.
+
+-spec segmentation(Segmenting) -> Segmenting
+	when
+		Segmenting :: #segmentation{} | binary().
+%% @doc Segmentation CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.17.
+%%
+segmentation(<<0:1, C:1, _:2, RemSeg:4,
+		SegLocalRef:24/little>> = _Segmenting) ->
+	#segmentation{first = false, class = C,
+			remaining_seg = RemSeg, seg_local_ref = SegLocalRef};
+segmentation(<<1:1, C:1, _:2, RemSeg:4,
+		SegLocalRef:24/little>>) ->
+	#segmentation{first = true, class = C,
+			remaining_seg = RemSeg, seg_local_ref = SegLocalRef};
+segmentation(#segmentation{first = false, class = C,
+		remaining_seg = R, seg_local_ref = SegLocalRef})
+		when is_integer(R), is_integer(SegLocalRef) ->
+	<<0:1, C:1, 0:2, R:4, SegLocalRef:24/little>>;
+segmentation(#segmentation{first = true, class = C,
+		remaining_seg = R, seg_local_ref = SegLocalRef})
+		when is_integer(R), is_integer(SegLocalRef) ->
+	<<1:1, C:1, 0:2, R:4, SegLocalRef:24/little>>.
+
+-spec point_code(PC) -> PC
+	when
+		PC :: undefined | 0..16383 | binary().
+%% @doc Signalling point code (PC) CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.1.
+%%
+point_code(undefined = _PC) ->
+	<<>>;
+point_code(<<>>) ->
+	undefined;
+point_code(<<LSB, 0:2, MSB:6>>) ->
+	(MSB bsl 8) + LSB;
+point_code(Code) when is_integer(Code) ->
+	LSB = Code band 255,
+	MSB = Code bsr 8,
+	<<LSB, 0:2, MSB:6>>.
+
+-spec ssn(SSN) -> SSN
+	when
+		SSN :: undefined | 0..255 | binary().
+%% @doc Subsystem number (SSN) CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.2.
+%%
+ssn(undefined = _SSN) ->
+	<<>>;
+ssn(<<>>) ->
+	undefined;
+ssn(<<N:8/integer>>) ->
+	N;
+ssn(N) when is_integer(N) ->
+	<<N:8>>.
+
+-spec global_title(GT) -> GT
+	when
+		GT :: [Digit] | [NumChar],
+		Digit :: 0..15,
+		NumChar :: $0..$9.
+%% @doc Global title address signal CODEC.
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.3.1
+%%
+global_title(GT) ->
+	global_title1(GT, []).
+%% @hidden
+global_title1([$0 | T], Acc) ->
+	global_title1(T, [0 | Acc]);
+global_title1([$1 | T], Acc) ->
+	global_title1(T, [1 | Acc]);
+global_title1([$2 | T], Acc) ->
+	global_title1(T, [2 | Acc]);
+global_title1([$3 | T], Acc) ->
+	global_title1(T, [3 | Acc]);
+global_title1([$4 | T], Acc) ->
+	global_title1(T, [4 | Acc]);
+global_title1([$5 | T], Acc) ->
+	global_title1(T, [5 | Acc]);
+global_title1([$6 | T], Acc) ->
+	global_title1(T, [6 | Acc]);
+global_title1([$7 | T], Acc) ->
+	global_title1(T, [7 | Acc]);
+global_title1([$8 | T], Acc) ->
+	global_title1(T, [8 | Acc]);
+global_title1([$9 | T], Acc) ->
+	global_title1(T, [9 | Acc]);
+global_title1([0 | T], Acc) ->
+	global_title1(T, [$0 | Acc]);
+global_title1([1 | T], Acc) ->
+	global_title1(T, [$1 | Acc]);
+global_title1([2 | T], Acc) ->
+	global_title1(T, [$2 | Acc]);
+global_title1([3 | T], Acc) ->
+	global_title1(T, [$3 | Acc]);
+global_title1([4 | T], Acc) ->
+	global_title1(T, [$4 | Acc]);
+global_title1([5 | T], Acc) ->
+	global_title1(T, [$5 | Acc]);
+global_title1([6 | T], Acc) ->
+	global_title1(T, [$6 | Acc]);
+global_title1([7 | T], Acc) ->
+	global_title1(T, [$7 | Acc]);
+global_title1([8 | T], Acc) ->
+	global_title1(T, [$8 | Acc]);
+global_title1([9 | T], Acc) ->
+	global_title1(T, [$9 | Acc]);
+global_title1([], Acc) ->
+	lists:reverse(Acc).
+
+-spec bcd(Digits) -> BCD
+	when
+		Digits :: [0..15],
+		BCD :: binary().
+%% @doc Encode as binary coded decimal (BCD).
+bcd(Digits) when is_list(Digits) ->
+	bcd2(Digits, <<>>).
+
+-spec bcd(BCD, OE) -> Digits
+	when
+		BCD :: binary(),
+		OE :: Odd | Even,
+		Odd :: 1 | bcd_odd,
+		Even :: 0 | bcd_even,
+		Digits :: [0..15].
+%% @doc Decode binary coded decimal (BCD).
+%%
+%% `OE' indicates odd (1) or even (0) number of address
+%%     signals present in a global address information.
+%%
+%% ITU-T Recommendation Q.713, section 3.4.2.3.1.
+%%
+bcd(BCD, bcd_odd = _OE) ->
+	bcd(BCD, 1);
+bcd(BCD, bcd_even) ->
+	bcd(BCD, 0);
+bcd(BCD, OE) when is_binary(BCD) ->
+	bcd1(BCD, OE, []).
+%% @hidden
+bcd1(<<0:4/integer, Y:4/integer>>, 1, Acc) ->
+	lists:reverse([Y | Acc]);
+bcd1(<<X:4/integer, Y:4/integer>>, 0, Acc) ->
+	lists:reverse([X, Y | Acc]);
+bcd1(<<X:4/integer, Y:4/integer, Rest/binary>>, OE, Acc) ->
+	bcd1(Rest, OE, [X, Y | Acc]).
+%% @hidden
+bcd2([X, Y | T], Acc) ->
+	bcd2(T, <<Acc/binary, Y:4, X:4>>);
+bcd2([X], Acc) ->
+	<<Acc/binary, 0:4, X:4>>;
+bcd2([], Acc) ->
+	Acc.
 
 -spec get_option(Key, Options) -> Result
 	when
@@ -574,9 +966,7 @@ optional_part(OptionalP, Rest) when OptionalP > 0 ->
 	optional_part1(OptionalPart, []);
 optional_part(OptionalP, _Rest) when OptionalP == 0 ->
 	[].
-
 %% @hidden
-%% @todo avoid creating new binaries
 optional_part1(<<?CalledPartyAddress, Len, Rest/binary>>, Acc) ->
 	<<V:Len/binary, Rest1/binary>> = Rest,
 	optional_part1(Rest1, [{?CalledPartyAddress, party_address(V)} | Acc]);
@@ -644,324 +1034,9 @@ optional_part_long1(<<?Importance, 1:16/little, Rest/binary>>, Acc) ->
 optional_part_long1(<<?EndOfOptionalParameters, _Rest/binary>>, Acc) ->
 	Acc.
 
--spec importance(Importance) -> Importance
-	when
-		Importance :: binary() | 0..7.
-%% @doc Values for importance.
 %%
-%% ITU-T Recommendation Q.713, section 3.19.
-importance(<<_:5, I:3>> = _Importance) ->
-	I;
-importance(I) when I >= 0; I =< 7 ->
-	<<0:5, I:3>>.
-
--spec refusal_cause(Cause) -> Cause
-	when
-		Cause :: enduser_orig | enduser_congestion | enduser_failure
-				| sccp_user_oirg | dest_unknown | dest_inaccessible
-				| qos_not_avail_non_transient | qos_not_avail_transient
-				| access_failure | access_congestion | subsystem_failure
-				| subsystem_congestion | connection_expire | incomp_userdata
-				| unqualified | hcounter_violation | sccp_failure
-				| no_translation_addr | unequipped_error | 0..255.
-%% @doc Values for refusal cause.
+%% internal functionas
 %%
-%% ITU-T Recommendation Q.713, section 3.15.
-refusal_cause(0 = _Cause) -> enduser_orig;
-refusal_cause(1) -> enduser_congestion;
-refusal_cause(2) -> enduser_failure;
-refusal_cause(3) -> sccp_user_oirg;
-refusal_cause(4) -> dest_unknown;
-refusal_cause(5) -> dest_inaccessible;
-refusal_cause(6) -> qos_not_avail_non_transient;
-refusal_cause(7) -> qos_not_avail_transient;
-refusal_cause(8) -> access_failure;
-refusal_cause(9) -> access_congestion;
-refusal_cause(10) -> subsystem_failure;
-refusal_cause(11) -> subsystem_congestion;
-refusal_cause(12) -> connection_expire;
-refusal_cause(13) -> incomp_userdata;
-refusal_cause(C) when (is_integer(C)) andalso
-		(C == 14 orelse (C > 19 andalso C =< 255))-> reserved;
-refusal_cause(15) -> unqualified;
-refusal_cause(16) -> hcounter_violation;
-refusal_cause(17) -> sccp_failure;
-refusal_cause(18) -> no_translation_addr;
-refusal_cause(19) -> unequipped_error;
-refusal_cause(enduser_orig) -> 0;
-refusal_cause(enduser_congestion) -> 1;
-refusal_cause(enduser_failure) -> 2;
-refusal_cause(sccp_user_oirg) -> 3;
-refusal_cause(dest_unknown) -> 4;
-refusal_cause(dest_inaccessible) -> 5;
-refusal_cause(qos_not_avail_non_transient) -> 6;
-refusal_cause(qos_not_avail_transient) -> 7;
-refusal_cause(access_failure) -> 8;
-refusal_cause(access_congestion) -> 9;
-refusal_cause(subsystem_failure) -> 10;
-refusal_cause(subsystem_congestion) -> 11;
-refusal_cause(connection_expire) -> 12;
-refusal_cause(incomp_userdata) -> 13;
-refusal_cause(unqualified) -> 15;
-refusal_cause(hcounter_violation) -> 16;
-refusal_cause(sccp_failure) -> 17;
-refusal_cause(no_translation_addr) -> 18;
-refusal_cause(unequipped_error) -> 19;
-refusal_cause(_) -> 255.
-
--spec release_cause(Cause) -> Cause
-	when
-		Cause :: enduser_orig | enduser_congestion | enduser_failure
-				| sccp_user_originated | rpc_error | inconsistant_data
-				| access_failure | access_congestion | subsystem_failure
-				| subsystem_congestion | mtp_failure | network_congestion
-				| reset_timer_expire | inactivity_timer_expire
-				| unqualified | sccp_failure | 0..255.
-%% @doc Values for release cause.
-%%
-%% ITU-T Recommendation Q.713, section 3.11.
-release_cause(0 = _Cause) -> enduser_orig;
-release_cause(1) -> enduser_congestion;
-release_cause(2) -> enduser_failure;
-release_cause(3) -> sccp_user_originated;
-release_cause(4) -> rpc_error;
-release_cause(5) -> inconsistant_data;
-release_cause(6) -> access_failure;
-release_cause(7) -> access_congestion;
-release_cause(8) -> subsystem_failure;
-release_cause(9) -> subsystem_congestion;
-release_cause(10) -> mtp_failure;
-release_cause(11) -> network_congestion;
-release_cause(12) -> reset_timer_expire;
-release_cause(13) -> inactivity_timer_expire;
-release_cause(C) when (is_integer(C)) andalso
-		(C == 14 orelse (C > 16 andalso C =< 255)) -> reserved;
-release_cause(15) -> unqualified;
-release_cause(16) -> sccp_failure;
-release_cause(enduser_orig) -> 0;
-release_cause(enduser_congestion) -> 1;
-release_cause(enduser_failure) -> 2;
-release_cause(sccp_user_originated) -> 3;
-release_cause(rpc_error) -> 4;
-release_cause(inconsistant_data) -> 5;
-release_cause(access_failure) -> 6;
-release_cause(access_congestion) -> 7;
-release_cause(subsystem_failure) -> 8;
-release_cause(subsystem_congestion) -> 9;
-release_cause(mtp_failure) -> 10;
-release_cause(network_congestion) -> 11;
-release_cause(reset_timer_expire) -> 12;
-release_cause(inactivity_timer_expire) -> 13;
-release_cause(unqualified) -> 15;
-release_cause(sccp_failure) -> 16;
-release_cause(_) -> 255.
-
--spec reset_cause(Cause) -> Cause
-	when
-		Cause :: enduser_orig | sccp_user_oirg | incorrect_ps
-				| incorrect_pr | rpc_error | remote_end_user_operational
-				| network_operational | access_opertional | network_congestion
-				| unqualified | 0..255.
-%% @doc Values for reset cause.
-%%
-%% ITU-T Recommendation Q.713, section 3.13.
-reset_cause(0 = _Cause) -> enduser_orig;
-reset_cause(1) -> sccp_user_oirg;
-reset_cause(2) -> incorrect_ps;
-reset_cause(3) -> incorrect_pr;
-reset_cause(4) -> rpc_error;
-reset_cause(5) -> rpc_error;
-reset_cause(6) -> rpc_error;
-reset_cause(7) -> remote_end_user_operational;
-reset_cause(8) -> network_operational;
-reset_cause(9) -> access_opertional;
-reset_cause(10) -> network_congestion;
-reset_cause(12) -> unqualified;
-reset_cause(C) when (is_integer(C)) andalso
-		(C == 11 orelse (C > 12 andalso C =< 255)) -> reserved;
-reset_cause(enduser_orig) -> 0;
-reset_cause(sccp_user_oirg) -> 1;
-reset_cause(incorrect_ps) -> 2;
-reset_cause(incorrect_pr) -> 3;
-reset_cause(rpc_error) -> 4;
-reset_cause(remote_end_user_operational) -> 7;
-reset_cause(network_operational) -> 8;
-reset_cause(access_opertional) -> 9;
-reset_cause(network_congestion) -> 10;
-reset_cause(unqualified) -> 12;
-reset_cause(_) -> 255.
-
--spec segmenting(Segmenting) -> Segmenting
-	when
-		Segmenting:: false | true | 0..1.
-%% @doc Values for segmenting/reassembling.
-%%
-%% ITU-T Recommendation Q.713, section 3.7.
-segmenting(0 = _Segmenting) -> false;
-segmenting(1) -> true;
-segmenting(false) -> 0;
-segmenting(true) -> 1.
-
--spec sequencing(Sequencing) -> Sequencing
-	when
-		Sequencing :: binary() | #sequencing{}.
-%% @doc Values for sequencing/segmenting.
-%%
-%% ITU-T Recommendation Q.713, section 3.9.
-sequencing(<<SendSeqNum:7, _:1, ReceiveSeqNum:7, 0:1>>) ->
-	#sequencing{send_seq_num = SendSeqNum,
-			receive_seq_num = ReceiveSeqNum, more_data = false};
-sequencing(<<SendSeqNum:7, _:1, ReceiveSeqNum:7, 1:1>>) ->
-	#sequencing{send_seq_num = SendSeqNum,
-			receive_seq_num = ReceiveSeqNum, more_data = true};
-sequencing(#sequencing{send_seq_num = SendSeqNum,
-		receive_seq_num = ReceiveSeqNum, more_data = false})
-		when is_integer(ReceiveSeqNum), is_integer(ReceiveSeqNum) ->
-	<<SendSeqNum:7, 0:1, ReceiveSeqNum:7, 0:1>>;
-sequencing(#sequencing{send_seq_num = SendSeqNum,
-		receive_seq_num = ReceiveSeqNum, more_data = true})
-		when is_integer(ReceiveSeqNum), is_integer(ReceiveSeqNum) ->
-	<<SendSeqNum:7, 0:1, ReceiveSeqNum:7, 1:1>>.
-
--spec return_cause(Cause) -> Cause
-	when
-		Cause :: no_translation | subsystem_congestion | subsystem_failure
-				| unequipped_error | mtp_failure | network_congestion
-				| unqualified | transport_error | processing_error
-				| reassembly_fail | sccp_failure | hcounter_violation
-				| seg_not_supported | seg_failure | 0..255.
-%% @doc Values for return cause.
-%%
-%% ITU-T Recommendation Q.713, section 3.12.
-return_cause(N = _Cause) when N == 0; N == 1 -> no_translation;
-return_cause(2) -> subsystem_congestion;
-return_cause(3) -> subsystem_failure;
-return_cause(4) -> unequipped_error;
-return_cause(5) -> mtp_failure;
-return_cause(6) -> network_congestion;
-return_cause(7) -> unqualified;
-return_cause(8) -> transport_error;
-return_cause(9) -> processing_error;
-return_cause(10) -> reassembly_fail;
-return_cause(11) -> sccp_failure;
-return_cause(12) -> hcounter_violation;
-return_cause(13) -> seg_not_supported;
-return_cause(14) -> seg_failure;
-return_cause(C) when is_integer(C), C >= 15, C =< 255 -> reserved;
-return_cause(no_translation) -> 0;
-return_cause(subsystem_congestion) -> 2;
-return_cause(subsystem_failure) -> 3;
-return_cause(unequipped_error) -> 4;
-return_cause(mtp_failure) -> 5;
-return_cause(network_congestion) -> 6;
-return_cause(unqualified) -> 7;
-return_cause(transport_error) -> 8;
-return_cause(processing_error) -> 9;
-return_cause(reassembly_fail) -> 10;
-return_cause(sccp_failure) -> 11;
-return_cause(hcounter_violation) -> 12;
-return_cause(seg_not_supported) -> 13;
-return_cause(seg_failure) -> 14;
-return_cause(_) -> 255.
-
--spec segmentation(Segmenting) -> Segmenting
-	when
-		Segmenting :: #segmentation{} | binary().
-%% @doc Values for segmentation.
-%%
-%% ITU-T Recommendation Q.713, section 3.17.
-segmentation(<<0:1, C:1, _:2, RemSeg:4,
-		SegLocalRef:24/little>> = _Segmenting) ->
-	#segmentation{first = false, class = C,
-			remaining_seg = RemSeg, seg_local_ref = SegLocalRef};
-segmentation(<<1:1, C:1, _:2, RemSeg:4,
-		SegLocalRef:24/little>>) ->
-	#segmentation{first = true, class = C,
-			remaining_seg = RemSeg, seg_local_ref = SegLocalRef};
-segmentation(#segmentation{first = false, class = C,
-		remaining_seg = R, seg_local_ref = SegLocalRef})
-		when is_integer(R), is_integer(SegLocalRef) ->
-	<<0:1, C:1, 0:2, R:4, SegLocalRef:24/little>>;
-segmentation(#segmentation{first = true, class = C,
-		remaining_seg = R, seg_local_ref = SegLocalRef})
-		when is_integer(R), is_integer(SegLocalRef) ->
-	<<1:1, C:1, 0:2, R:4, SegLocalRef:24/little>>.
-
--spec point_code(Code) -> Code
-	when
-		Code :: undefined | 0..16383 | binary().
-%% @doc Values for signalling point code (PC).
-%%
-%% ITU-T Recommendation Q.713, section 3.4.2.1.
-point_code(undefined = _Code) ->
-	<<>>;
-point_code(<<>>) ->
-	undefined;
-point_code(<<LSB, 0:2, MSB:6>>) ->
-	(MSB bsl 8) + LSB;
-point_code(Code) when is_integer(Code) ->
-	LSB = Code band 255,
-	MSB = Code bsr 8,
-	<<LSB, 0:2, MSB:6>>.
-
--spec ssn(SSN) -> SSN
-	when
-		SSN :: undefined | 0..255 | binary().
-%% @doc Values for subsystem number (SSN).
-%%
-%% ITU-T Recommendation Q.713, section 3.4.2.2.
-ssn(undefined = _SSN) ->
-	<<>>;
-ssn(<<>>) ->
-	undefined;
-ssn(<<N:8/integer>>) ->
-	N;
-ssn(N) when is_integer(N) ->
-	<<N:8>>.
-
--spec bcd(Address) -> Data
-	when
-		Address :: [0..15].
-		Data :: binary().
-%% @doc Encode list of digits to a binary coded decimal value.
-bcd(Address) when is_list(Address) ->
-	bcd2(Address, <<>>).
-
--spec bcd(Data, OE) -> Address
-	when
-		Data :: binary(),
-		OE :: Odd | Even,
-		Odd :: 1 | bcd_odd,
-		Even :: 0 | bcd_even,
-		Address :: [0..15].
-%% @doc Decode binary coded decimal value to a list of digits.
-%%
-%% `OE' indicates odd (1) or even (0) number of address
-%%%     signals present in a global address information.
-%%
-%% ITU-T Recommendation Q.713, section 3.4.2.3.1.
-bcd(Data, bcd_odd) ->
-	bcd(Data, 1);
-bcd(Data, bcd_even) ->
-	bcd(Data, 0);
-bcd(Data, OE) when is_binary(Data) ->
-	bcd1(Data, OE, []).
-
-%% @hidden
-bcd1(<<0:4/integer, Y:4/integer>>, 1, Acc) ->
-	lists:reverse([Y | Acc]);
-bcd1(<<X:4/integer, Y:4/integer>>, 0, Acc) ->
-	lists:reverse([X, Y | Acc]);
-bcd1(<<X:4/integer, Y:4/integer, Rest/binary>>, OE, Acc) ->
-	bcd1(Rest, OE, [X, Y | Acc]).
-
-%% @hidden
-bcd2([X, Y | T], Acc) ->
-	bcd2(T, <<Acc/binary, Y:4, X:4>>);
-bcd2([X], Acc) ->
-	<<Acc/binary, 0:4, X:4>>;
-bcd2([], Acc) ->
-	Acc.
 
 %% @hidden
 sccp_connection_req(#sccp_connection_req{src_local_ref = Src,

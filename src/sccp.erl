@@ -1,6 +1,6 @@
 %%% sccp.erl
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @copyright 2021-2023 SigScale Global Inc.
+%%% @copyright 2021-2025 SigScale Global Inc.
 %%% @author Vance Shipley <vances@sigscale.org> [http://www.sigscale.org]
 %%% @end
 %%% Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@
 %%% 	{@link //sccp. sccp} application.
 %%%
 -module(sccp).
--copyright('Copyright (c) 2021-2-23 SigScale Global Inc.').
+-copyright('Copyright (c) 2021-2025 SigScale Global Inc.').
 -author('vances@sigscale.org').
 
 -export([point_code/1, point_code/2]).
@@ -69,15 +69,6 @@ point_code(ansi, PC) when is_list(PC) ->
 	<<I:24>> = <<Network:8, Cluster:8, Member:8>>,
 	I.
 
-%% @doc parse GT to string
-gt_to_string(String) ->
-	gt_to_string1(String,[]).
-%%hidden
-gt_to_string1([H | T], Acc) ->
-	gt_to_string1(T, integer_to_list(H) ++ Acc);
-gt_to_string1([], Acc) ->
-	lists:reverse(Acc).
-
 -spec party_address(Address) -> String
   when
       Address :: sccp_codec:party_address(),
@@ -89,11 +80,11 @@ party_address(#party_address{pc = PC, ssn = SSN, gt = undefined})
 party_address(#party_address{pc = PC, ssn = SSN, gt = GT})
 		when is_integer(PC), is_integer(SSN), is_list(GT) ->
 	"PC: " ++ point_code(PC) ++ ", " ++"SSN: " ++ integer_to_list(SSN)
-		 ++ ", " ++ "GT: " ++ gt_to_string(GT);
+		 ++ ", " ++ "GT: " ++ sccp_codec:global_title(GT);
 party_address(#party_address{pc = undefined, ssn = SSN, gt = undefined})
 		when is_integer(SSN) ->
 	"SSN: " ++ integer_to_list(SSN);
 party_address(#party_address{pc = undefined, ssn = undefined, gt = GT})
 		when is_list(GT) ->
-	"GT: " ++ gt_to_string(GT).
+	"GT: " ++ sccp_codec:global_title(GT).
 
