@@ -3,5 +3,6 @@
 ##
 ## Process this file with automake to produce Makefile.in
 
-einclude_DATA = sccp.hrl
+einclude_DATA = sccp.hrl \
+	sccp_primitive.hrl
 
