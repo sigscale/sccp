@@ -79,9 +79,9 @@ sequences() ->
 all() ->
 	[party_address_gti_0, party_address_gti_1, party_address_gti_2,
 		party_address_gti_3, party_address_gti_4, nai, numbering_plan,
-		encoding_scheme, importance, refusal_cause, release_cause,
-		return_cause, segmentation, point_code, global_title, ssn,
-		bcd_even, bcd_odd, sccp_connection_req, sccp_connection_confirm,
+		importance, refusal_cause, release_cause, return_cause,
+		segmentation, point_code, global_title, ssn, bcd_even, bcd_odd,
+		sccp_connection_req, sccp_connection_confirm,
 		sccp_connection_refused, sccp_released, sccp_release_complete,
 		sccp_data_form1, sccp_data_form2, sccp_data_ack, sccp_unitdata,
 		sccp_unitdata_service, sccp_expedited_data, sccp_expedited_ack,
@@ -113,14 +113,8 @@ party_address_gti_4(_Config) ->
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
 	NAI = sccp_codec:nai(rand:uniform(5) - 1),
 	GT = gen_title(),
-	ES = case (length(GT) rem 2) of
-		0 ->
-			bcd_even;
-		1 ->
-			bcd_odd
-	end,
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT,
-			numbering_plan = NP, encoding_scheme = ES, nai = NAI, gt = GT},
+			numbering_plan = NP, nai = NAI, gt = GT},
 	P2 = sccp_codec:party_address(P1),
 	true = is_binary(P2),
 	P1 = sccp_codec:party_address(P2).
@@ -141,14 +135,8 @@ party_address_gti_3(_Config) ->
 	TT = rand:uniform(254),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
 	GT = gen_title(),
-	ES = case (length(GT) rem 2) of
-		0 ->
-			bcd_even;
-		1 ->
-			bcd_odd
-	end,
 	P1 = #party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT,
-			numbering_plan = NP, encoding_scheme = ES, gt = GT},
+			numbering_plan = NP, gt = GT},
 	P2 = sccp_codec:party_address(P1),
 	true = is_binary(P2),
 	P1 = sccp_codec:party_address(P2).
@@ -242,24 +230,6 @@ numbering_plan(_Config) ->
 			true = is_atom(NP),
 			case sccp_codec:numbering_plan(NP) of
 				M when NP == spare andalso (M >=8 andalso M =< 13) ->
-					F(F, N+1);
-				N ->
-					F(F, N+1)
-			end
-	end,
-	ok = F(F, 0).
-
-encoding_scheme() ->
-	[{userdata, [{doc, "encode and decode encoding_scheme parameter"}]}].
-
-encoding_scheme(_Config) ->
-	F = fun(_, 16) ->
-				ok;
-		(F, N) ->
-			Scheme = sccp_codec:encoding_scheme(N),
-			true = is_atom(Scheme),
-			case sccp_codec:encoding_scheme(Scheme) of
-				M when Scheme == spare andalso (M >=4 andalso M =< 14) ->
 					F(F, N+1);
 				N ->
 					F(F, N+1)
@@ -860,7 +830,6 @@ ws_xudt1(_Config) ->
 			called_party = #party_address{ri = false,
 					translation_type = 0,
 					numbering_plan = isdn_tele,
-					encoding_scheme = bcd_even,
 					nai = international,
 					gt = [9,7,2,5,4,4,3,3,2,2],
 					ssn = 6, _ = undefined},
@@ -907,7 +876,6 @@ ws_xudt2(_Config) ->
 			called_party = #party_address{ri = false,
 					translation_type = 0,
 					numbering_plan = isdn_tele,
-					encoding_scheme = bcd_even,
 					nai = international,
 					gt = [9,7,2,5,4,4,3,3,2,2],
 					ssn = 6, _ = undefined},
@@ -944,13 +912,12 @@ ws_xudt3(_Config) ->
 			3,129,1,20,48,11,128,1,15,129,1,0,162,3,128,1,2,48,11,
 			128,1,250,129,1,1,162,3,128,1,2,161,13,2,1,12,2,1,31,
 			225,5,161,3,128,1,2,161,13,2,1,13,2,1,31,225,5,161,3,
-			128,1,3,0,0,16,4,64,1,0,0,0>> ,
+			128,1,3,0,0,16,4,64,1,0,0,0>>,
 	#sccp_extended_unitdata{class = 129,
 			hop_counter = 4,
 			called_party = #party_address{ri = false,
 					translation_type = 0,
 					numbering_plan = isdn_tele,
-					encoding_scheme = bcd_even,
 					nai = international,
 					gt = [9,7,2,5,4,4,3,3,2,2],
 					ssn = 6, _ = undefined},
@@ -1114,15 +1081,9 @@ gen_party_address() ->
 	TT = rand:uniform(254),
 	NP = sccp_codec:numbering_plan(rand:uniform(16) - 1),
 	GT = gen_title(),
-	ES = case (length(GT) rem 2) of
-		0 ->
-			bcd_even;
-		1 ->
-			bcd_odd
-	end,
 	NAI = sccp_codec:nai(rand:uniform(5) - 1),
 	#party_address{ri = RI, pc = PC, ssn = SSN, translation_type = TT,
-			numbering_plan = NP, encoding_scheme = ES, nai = NAI, gt = GT}.
+			numbering_plan = NP, nai = NAI, gt = GT}.
 
 %% @hidden
 gen_title() ->

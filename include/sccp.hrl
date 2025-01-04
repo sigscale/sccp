@@ -70,8 +70,6 @@
 		numbering_plan :: undefined | unknown | isdn_tele | generic
 				| data | telex | maritime | land_mobile
 				| isdn_mobile | spare | private_net | reserved,
-		encoding_scheme :: undefined | unknown | bcd_odd | bcd_even
-				| national | spare | reserved,
 		nai :: undefined | unknown | subscriber | national | international | spare | reserved,
 		gt :: undefined | [0..15],
 		mtp_sap :: pid() | undefined}).
