@@ -352,21 +352,26 @@ party_address(<<_:1, RI:1, GTI:4, SSNI:1, PCI:1,
 	party_address1(PCI, SSNI, RI, GTI, Address);
 party_address(#party_address{ri = RoutingIndicator,
 		pc = undefined, ssn = SubSystemNumber} = P)
-		when is_boolean(RoutingIndicator),
-		is_integer(SubSystemNumber) ->
+		when is_integer(SubSystemNumber),
+		((RoutingIndicator == route_on_ssn)
+				orelse (RoutingIndicator == route_on_gt)) ->
 	RI = routing_indicator(RoutingIndicator),
 	SSN = ssn(SubSystemNumber),
 	party_address4(0, 1, RI, SSN, P);
 party_address(#party_address{ri = RoutingIndicator,
 		pc = PointCode, ssn = undefined} = P)
-		when is_integer(PointCode) ->
+		when is_integer(PointCode),
+		((RoutingIndicator == route_on_ssn)
+				orelse (RoutingIndicator == route_on_gt)) ->
 	RI = routing_indicator(RoutingIndicator),
 	PC = point_code(PointCode),
 	party_address4(1, 0, RI, PC, P);
 party_address(#party_address{ri = RoutingIndicator,
 		pc = PointCode, ssn = SubSystemNumber} = P)
-		when is_boolean(RoutingIndicator),
-		is_integer(SubSystemNumber), is_integer(PointCode) ->
+		when is_integer(SubSystemNumber),
+		is_integer(PointCode),
+		((RoutingIndicator == route_on_ssn)
+				orelse (RoutingIndicator == route_on_gt)) ->
 	RI = routing_indicator(RoutingIndicator),
 	PC = point_code(PointCode),
 	SSN = ssn(SubSystemNumber),
@@ -522,14 +527,14 @@ numbering_plan(_) -> 13.
 
 -spec routing_indicator(RI) -> RI
 	when
-		RI:: false | true | 0..1.
+		RI:: route_on_ssn | route_on_gt | 0..1.
 %% @doc Routing indicator CODEC.
 %%
 %% ITU-T Recommendation Q.713, section 3.4.1.
-routing_indicator(0 = _RI) -> false;
-routing_indicator(1) -> true;
-routing_indicator(false) -> 0;
-routing_indicator(true) -> 1.
+routing_indicator(0 = _RI) -> route_on_gt;
+routing_indicator(1) -> route_on_ssn;
+routing_indicator(route_on_gt) -> 0;
+routing_indicator(route_on_ssn) -> 1.
 
 -spec importance(Importance) -> Importance
 	when

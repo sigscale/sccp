@@ -103,9 +103,9 @@ party_address_gti_4() ->
 party_address_gti_4(_Config) ->
 	RI = case rand:uniform(2) of
 		2 ->
-			true;
+			route_on_ssn;
 		1 ->
-			false
+			route_on_gt
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
@@ -126,9 +126,9 @@ party_address_gti_3() ->
 party_address_gti_3(_Config) ->
 	RI = case rand:uniform(2) of
 		2 ->
-			true;
+			route_on_ssn;
 		1 ->
-			false
+			route_on_gt
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
@@ -148,9 +148,9 @@ party_address_gti_2() ->
 party_address_gti_2(_Config) ->
 	RI = case rand:uniform(2) of
 		2 ->
-			true;
+			route_on_ssn;
 		1 ->
-			false
+			route_on_gt
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
@@ -168,9 +168,9 @@ party_address_gti_1() ->
 party_address_gti_1(_Config) ->
 	RI = case rand:uniform(2) of
 		2 ->
-			true;
+			route_on_ssn;
 		1 ->
-			false
+			route_on_gt
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
@@ -188,9 +188,9 @@ party_address_gti_0() ->
 party_address_gti_0(_Config) ->
 	RI = case rand:uniform(2) of
 		2 ->
-			true;
+			route_on_ssn;
 		1 ->
-			false
+			route_on_gt
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
@@ -743,9 +743,9 @@ ws_cr(_Config) ->
 			16,0,1,0>>,
 	#sccp_connection_req{src_local_ref = 2098946,
 			class = 2,
-			called_party = #party_address{ri = true,
+			called_party = #party_address{ri = route_on_ssn,
 					pc = 142, ssn = 32, _ = undefined},
-			calling_party = #party_address{ri = true,
+			calling_party = #party_address{ri = route_on_ssn,
 					pc = 142, ssn = 16, _ = undefined},
 			data = <<0,19,64,67,0,0,6,0,3,64,1,0,0,15,64,6,0,98,241,16,
 					64,1,0,58,64,8,0,98,241,16,64,1,129,149,0,16,64,17,16,
@@ -761,7 +761,7 @@ ws_cc(_Config) ->
 	#sccp_connection_confirm{dest_local_ref = 3177618,
 			src_local_ref = 1583911,
 			class = 2,
-			called_party = #party_address{ri = true,
+			called_party = #party_address{ri = route_on_ssn,
 					pc = 10432, ssn = 142, _ = undefined},
 			_ = undefined} = sccp_codec:sccp(Bin).
 
@@ -782,9 +782,9 @@ ws_ud(_Config) ->
 			64,1,0,0,23,64,9,80,36,4,18,100,48,84,50,244,0,22,
 			64,1,0,0,0,0,96,64,5,4,244,17,0,2,2,66,142>>,
 	#sccp_unitdata{class = 128,
-			called_party = #party_address{ri = true,
+			called_party = #party_address{ri = route_on_ssn,
 					ssn = 142, _ = undefined},
-			calling_party = #party_address{ri = true,
+			calling_party = #party_address{ri = route_on_ssn,
 					ssn = 142, _ = undefined},
 			data = <<0,14,64,37,64,0,3,0,3,64,1,0,0,23,64,9,
 					80,36,4,18,100,48,84,50,244,0,22,64,1,0,0,
@@ -827,13 +827,13 @@ ws_xudt1(_Config) ->
 			0,130,4,0,0,0,0,131,1,0,161,3,128,16,4,194,1,0,0,0>>,
 	#sccp_extended_unitdata{class = 129,
 			hop_counter = 4,
-			called_party = #party_address{ri = false,
+			called_party = #party_address{ri = route_on_gt,
 					translation_type = 0,
 					numbering_plan = isdn_tele,
 					nai = international,
 					gt = [9,7,2,5,4,4,3,3,2,2],
 					ssn = 6, _ = undefined},
-			calling_party = #party_address{ri = true,
+			calling_party = #party_address{ri = route_on_ssn,
 					ssn = 11, _ = undefined},
 			data = <<98,130,2,115,72,3,18,0,255,107,47,40,45,6,7,0,
 					17,134,5,1,1,1,160,34,97,32,128,2,7,128,161,14,6,12,42,134,
@@ -873,13 +873,13 @@ ws_xudt2(_Config) ->
 			65,1,0,0,0>>,
 	#sccp_extended_unitdata{class = 129,
 			hop_counter = 4,
-			called_party = #party_address{ri = false,
+			called_party = #party_address{ri = route_on_gt,
 					translation_type = 0,
 					numbering_plan = isdn_tele,
 					nai = international,
 					gt = [9,7,2,5,4,4,3,3,2,2],
 					ssn = 6, _ = undefined},
-			calling_party = #party_address{ri = true,
+			calling_party = #party_address{ri = route_on_ssn,
 					ssn = 11, _ = undefined},
 			data = <<1,2,161,32,2,1,6,2,1,34,4,24,161,3,128,1,2,163,
 					17,160,3,128,1,3,164,10,4,8,1,1,16,80,68,4,0,32,161,67,2,
@@ -915,13 +915,13 @@ ws_xudt3(_Config) ->
 			128,1,3,0,0,16,4,64,1,0,0,0>>,
 	#sccp_extended_unitdata{class = 129,
 			hop_counter = 4,
-			called_party = #party_address{ri = false,
+			called_party = #party_address{ri = route_on_gt,
 					translation_type = 0,
 					numbering_plan = isdn_tele,
 					nai = international,
 					gt = [9,7,2,5,4,4,3,3,2,2],
 					ssn = 6, _ = undefined},
-			calling_party = #party_address{ri = true,
+			calling_party = #party_address{ri = route_on_ssn,
 					ssn = 11, _ = undefined},
 			data = <<48,11,128,1,15,129,1,0,162,3,128,1,3,48,11,
 					128,1,250,129,1,1,162,3,128,1,3,161,93,2,1,11,2,1,23,48,
@@ -959,9 +959,9 @@ ws_xudts1(_Config) ->
 			0,161,3,128,16,4,194,2,0,0,0>>,
 	#sccp_extended_unitdata_service{return_cause = no_translation,
 			hop_counter = 3,
-			called_party = #party_address{ri = true,
+			called_party = #party_address{ri = route_on_ssn,
 					ssn = 11, _ = undefined},
-			calling_party = #party_address{ri = true,
+			calling_party = #party_address{ri = route_on_ssn,
 					pc = 902,
 					ssn = 0, _ = undefined},
 			data = <<98,130,2,115,72,3,18,0,255,107,47,40,45,6,7,0,17,
@@ -1004,9 +1004,9 @@ ws_xudts2(_Config) ->
 			129,1,20,16,4,65,2,0,0,0>>,
 	#sccp_extended_unitdata_service{return_cause = no_translation,
 			hop_counter = 3,
-			called_party = #party_address{ri = true,
+			called_party = #party_address{ri = route_on_ssn,
 					ssn = 11, _ = undefined},
-			calling_party = #party_address{ri = true,
+			calling_party = #party_address{ri = route_on_ssn,
 					pc = 902,
 					ssn = 0, _ = undefined},
 			data = <<1,2,161,32,2,1,6,2,1,34,4,24,161,3,128,
@@ -1044,9 +1044,9 @@ ws_xudts3(_Config) ->
 			128,1,3,0,0,16,4,64,2,0,0,0>>,
 	#sccp_extended_unitdata_service{return_cause = no_translation,
 			hop_counter = 3,
-			called_party = #party_address{ri = true,
+			called_party = #party_address{ri = route_on_ssn,
 					ssn = 11, _ = undefined},
-			calling_party = #party_address{ri = true,
+			calling_party = #party_address{ri = route_on_ssn,
 					pc = 902,
 					ssn = 0, _ = undefined},
 			data = <<48,11,128,1,15,129,1,0,162,3,128,1,3,48,11,128,1,250,
@@ -1072,9 +1072,9 @@ ws_xudts3(_Config) ->
 gen_party_address() ->
 	RI = case rand:uniform(2) of
 		2 ->
-			true;
+			route_on_ssn;
 		1 ->
-			false
+			route_on_gt
 	end,
 	PC = rand:uniform(16384) - 1,
 	SSN = rand:uniform(255) - 1,
