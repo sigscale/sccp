@@ -22,8 +22,8 @@
 -copyright('Copyright (c) 2021-2025 SigScale Global Inc.').
 -author('vances@sigscale.org').
 
--export([point_code/1, point_code/2]).
--export([party_address/1]).
+-export([point_code/1, point_code/2, party_address/1]).
+-export([sequence_selection/2]).
 
 -include("sccp.hrl").
 
@@ -87,4 +87,30 @@ party_address(#party_address{pc = undefined, ssn = SSN, gt = undefined})
 party_address(#party_address{pc = undefined, ssn = undefined, gt = GT})
 		when is_list(GT) ->
 	"GT: " ++ sccp_codec:global_title(GT).
+
+-spec sequence_selection(CallingParty, CalledParty) -> SLS 
+	when
+		CallingParty :: sccp_codec:party_address(),
+		CalledParty :: sccp_codec:party_address(),
+		SLS :: byte().
+%% @doc Calculate a signaling link selection (SLS) value.
+%%
+%% 	An SLS is used in the routing label of MTP messages
+%% 	to ensure in sequence delivery of network service
+%% 	data units (NSDU) related to the same endpoints.
+%%
+sequence_selection(#party_address{pc = OPC,
+				ssn = SSN1, gt = GT1} = _CallingParty,
+		#party_address{pc = DPC,
+				ssn = SSN2, gt = GT2} = _CalledParty) ->
+	sequence_selection1([OPC, SSN1, GT1, DPC, SSN2, GT2], 0).
+%% @hidden
+sequence_selection1([H | T], Acc) when is_integer(H) ->
+	sequence_selection1(T, Acc + H);
+sequence_selection1([H | T], Acc) when is_list(H) ->
+	sequence_selection1(H ++ T, Acc);
+sequence_selection1([_ | T], Acc) ->
+	sequence_selection1(T, Acc);
+sequence_selection1([], Acc) ->
+	Acc rem 255.
 

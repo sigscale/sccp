@@ -76,7 +76,8 @@ sequences() ->
 %% Returns a list of all test cases in this test suite.
 %%
 all() -> 
-	[party_address_pc_ssn_gt, party_address_gt, party_address_pc_ssn, party_address_ssn].
+	[party_address_pc_ssn_gt, party_address_gt, party_address_pc_ssn,
+			party_address_ssn, sequence_control].
 
 
 %%---------------------------------------------------------------------
@@ -111,7 +112,36 @@ party_address_ssn(_Config) ->
 	Address = #party_address{pc = undefined, ssn = 322, gt = undefined},
 	"SSN: 322" = sccp:party_address(Address).
 
+sequence_control() ->
+	[{userdata, [{doc, "Get hash of party addresses."}]}].
+
+sequence_control(_Config) ->
+	CP1 = #party_address{ri = route_on_ssn, ssn = rand:uniform(255)},
+	CP2 = #party_address{ri = route_on_ssn, pc = rand:uniform(16383),
+			ssn = rand:uniform(255)},
+	CP3 = #party_address{ri = route_on_gt, gt = random_gt()},
+	CP4 = #party_address{ri = route_on_gt, pc = rand:uniform(16383),
+			gt = random_gt()},
+	SLS1 = sccp:sequence_selection(CP1, CP2),
+	SLS1 = sccp:sequence_selection(CP2, CP1),
+	true = SLS1 >= 0,
+	true = SLS1 =< 255,
+	SLS2 = sccp:sequence_selection(CP3, CP4),
+	SLS2 = sccp:sequence_selection(CP4, CP3),
+	true = SLS2 >= 0,
+	true = SLS2 =< 255.
+
 %%---------------------------------------------------------------------
 %%  Internal functions
 %%---------------------------------------------------------------------
+
+random_gt() ->
+	random_gt(rand:uniform(20)).
+random_gt(N) ->
+	random_gt(N, []).
+random_gt(0, Acc) ->
+	Acc;
+random_gt(N, Acc) ->
+	BCD = rand:uniform(16) - 1,
+	random_gt(N - 1, 	[BCD | Acc]).
 
