@@ -65,7 +65,7 @@
 -record(party_address,
 		{ri = route_on_ssn :: route_on_ssn | route_on_gt,
 		pc :: undefined | 1..16383,
-		ssn :: undefined | 1..254,
+		ssn :: undefined | 0..254,
 		translation_type :: undefined | 0..254,
 		numbering_plan :: undefined | unknown | isdn_tele | generic
 				| data | telex | maritime | land_mobile
