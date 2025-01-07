@@ -1,3 +1,17 @@
+2025-01-07  Vance Shipley <vances@sigscale.org>
+
+	* calculate hash of calling/called party addresses for sls
+	* ssn in party address may be zero
+	* change routing indicator in party address to enumeration
+	* remove encoding scheme from party address record
+	* global title digits string codec
+	* install sccp primitives header in includes
+	* clarify global title address digit value range
+	* include mtp sap (asp/sgp) in party address
+	* describe sccp primitives in user guide
+	* sccp primitive record definitions
+	* skip adding appup files if extra_files unsupported in sasl:make_tar/2
+
 2024-09-22  Vance Shipley <vances@sigscale.org>
 
 	* include all application upgrade files in release package

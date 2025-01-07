@@ -1,3 +1,13 @@
+January 7, 2025
+---------------
+	- API for calculating a signalink link selector (SLS)
+	- Breaking change to party pddress record:
+		- Routing Indicator (RI) as enumeration
+		- Removed encoding scheme
+		- Added MTP SAP (ASP/SGP)
+	- CODEC API for global title digits
+	- New header for sccp primitives
+
 September 22, 2024
 ------------------
 	- Support release upgrade by including application upgrade files

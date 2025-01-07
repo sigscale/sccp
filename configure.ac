@@ -5,8 +5,8 @@
 ##
 ## Boilerplate:  standard boilerplate code
 ##
-AC_INIT([sccp], [2.1.3], [issues@sigscale.org])
-AC_COPYRIGHT([Copyright (c) 2018 - 2023 SigScale Global Inc.])
+AC_INIT([sccp], [3.0.0], [issues@sigscale.org])
+AC_COPYRIGHT([Copyright (c) 2018 - 2025 SigScale Global Inc.])
 AC_PREREQ(2.63)
 AC_CONFIG_SRCDIR([src/sccp_codec.erl])
 AC_CONFIG_HEADERS([config.h])
