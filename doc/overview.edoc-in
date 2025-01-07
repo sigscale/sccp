@@ -23,37 +23,43 @@ represented using primitive specific records defined in
 
 ===Connectionless Services===
 TCAP uses exclusively connectionless services.
-<tt>{'N', 'N-UNITDATA', request, Parameters}</tt><br />
-<tt>{'N', 'N-UNITDATA', indication, Parameters}</tt><br />
-<tt>{'N', 'N-NOTICE', indication, Parameters}</tt><br />
+```
+{'N', 'N-UNITDATA', request, Parameters}
+{'N', 'N-UNITDATA', indication, Parameters}
+{'N', 'N-NOTICE', indication, Parameters}
+'''
 
 ===Connection-oriented Services===
 Currently none of the connection-oriented serices are implemented.
-<tt>{'N', 'N-CONNECT', request, Parameters}</tt><br />
-<tt>{'N', 'N-CONNECT', indication, Parameters}</tt><br />
-<tt>{'N', 'N-CONNECT', response, Parameters}</tt><br />
-<tt>{'N', 'N-CONNECT', confirm, Parameters}</tt><br />
-<tt>{'N', 'N-DATA', request, Parameters}</tt><br />
-<tt>{'N', 'N-DATA', indication, Parameters}</tt><br />
-<tt>{'N', 'N-EXPEDITED-DATA', request, Parameters}</tt><br />
-<tt>{'N', 'N-EXPEDITED-DATA', indication, Parameters}</tt><br />
-<tt>{'N', 'N-DISCONNECT', request, Parameters}</tt><br />
-<tt>{'N', 'N-DISCONNECT', indication, Parameters}</tt><br />
-<tt>{'N', 'N-RESET', request, Parameters}</tt><br />
-<tt>{'N', 'N-RESET', indication, Parameters}</tt><br />
-<tt>{'N', 'N-RESET', response, Parameters}</tt><br />
-<tt>{'N', 'N-RESET', confirm, Parameters}</tt><br />
-<tt>{'N', 'N-INFORM', request, Parameters}</tt><br />
-<tt>{'N', 'N-INFORM', indication, Parameters}</tt><br />
+```
+{'N', 'N-CONNECT', request, Parameters}
+{'N', 'N-CONNECT', indication, Parameters}
+{'N', 'N-CONNECT', response, Parameters}
+{'N', 'N-CONNECT', confirm, Parameters}
+{'N', 'N-DATA', request, Parameters}
+{'N', 'N-DATA', indication, Parameters}
+{'N', 'N-EXPEDITED-DATA', request, Parameters}
+{'N', 'N-EXPEDITED-DATA', indication, Parameters}
+{'N', 'N-DISCONNECT', request, Parameters}
+{'N', 'N-DISCONNECT', indication, Parameters}
+{'N', 'N-RESET', request, Parameters}
+{'N', 'N-RESET', indication, Parameters}
+{'N', 'N-RESET', response, Parameters}
+{'N', 'N-RESET', confirm, Parameters}
+{'N', 'N-INFORM', request, Parameters}
+{'N', 'N-INFORM', indication, Parameters}
+'''
 
 ===SCCP Management===
 SCCP management procedures are used for rerouting or throttling
 traffic in the event of failure or congestion in the network.
-<tt>{'N', 'N-COORD', request, Parameters}</tt><br />
-<tt>{'N', 'N-COORD', indication, Parameters}</tt><br />
-<tt>{'N', 'N-COORD', response, Parameters}</tt><br />
-<tt>{'N', 'N-COORD', confirm, Parameters}</tt><br />
-<tt>{'N', 'N-STATE', request, Parameters}</tt><br />
-<tt>{'N', 'N-STATE', indication, Parameters}</tt><br />
-<tt>{'N', 'N-PCSTATE', indication, Parameters}</tt><br />
+```
+{'N', 'N-COORD', request, Parameters}
+{'N', 'N-COORD', indication, Parameters}
+{'N', 'N-COORD', response, Parameters}
+{'N', 'N-COORD', confirm, Parameters}
+{'N', 'N-STATE', request, Parameters}
+{'N', 'N-STATE', indication, Parameters}
+{'N', 'N-PCSTATE', indication, Parameters}
+'''
 
