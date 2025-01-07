@@ -1,6 +1,6 @@
 %%% sccp_codec.erl
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @copyright 2015-2023 SigScale Global Inc.
+%%% @copyright 2015-2025 SigScale Global Inc.
 %%% @author Vance Shipley <vances@sigscale.org> [http://www.sigscale.org]
 %%% @end
 %%% Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@
 %%%		ITU-T Recommendation Q.713 - SCCP formats and codes</a>
 %%%
 -module(sccp_codec).
--copyright('Copyright (c) 2015-2023 SigScale Global Inc.').
+-copyright('Copyright (c) 2015-2025 SigScale Global Inc.').
 -author('vances@sigscale.org').
 
 %% SCCP message codec funcion
